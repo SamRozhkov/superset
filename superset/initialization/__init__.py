@@ -225,16 +225,16 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_view(
             AnnotationLayerModelView,
             "Annotation Layers",
-            label=__("Annotation Layers"),
+            label=_("Annotation Layers"),#"Слои аннотаций",#__("Annotation Layers"),
             icon="fa-comment",
             category="Manage",
-            category_label=__("Manage"),
+            category_label="Управление",#__("Manage"),
             category_icon="",
         )
         appbuilder.add_view(
             DashboardModelView,
             "Dashboards",
-            label=__("Dashboards"),
+            label="Дашборды",#__("Dashboards"),
             icon="fa-dashboard",
             category="",
             category_icon="",
@@ -242,11 +242,12 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_view(
             SliceModelView,
             "Charts",
-            label=__("Charts"),
+            label="Графики", #__("Charts"),
             icon="fa-bar-chart",
             category="",
             category_icon="",
         )
+
         appbuilder.add_view(
             DynamicPluginsView,
             "Plugins",
@@ -258,21 +259,22 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
                 "DYNAMIC_PLUGINS"
             ),
         )
+        print(_("Plugins"))
         appbuilder.add_view(
             CssTemplateModelView,
             "CSS Templates",
-            label=__("CSS Templates"),
+            label="Шаблоны CSS",#__("CSS Templates"),
             icon="fa-css3",
             category="Manage",
-            category_label=__("Manage"),
+            category_label="Управление",#__("Manage"),
             category_icon="",
         )
         appbuilder.add_view(
             RowLevelSecurityFiltersModelView,
             "Row Level Security",
-            label=__("Row Level Security"),
+            label="Безопасность на уровне строк",#__("Row Level Security"),
             category="Security",
-            category_label=__("Security"),
+            category_label="Безопасность",#__("Security"),
             icon="fa-lock",
         )
 
@@ -309,11 +311,11 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         #
         appbuilder.add_link(
             "Import Dashboards",
-            label=__("Import Dashboards"),
+            label="Импорт дашбордов",#__("Import Dashboards"),
             href="/superset/import_dashboards/",
             icon="fa-cloud-upload",
             category="Manage",
-            category_label=__("Manage"),
+            category_label="Управление",#__("Manage"),
             category_icon="fa-wrench",
             cond=lambda: not feature_flag_manager.is_feature_enabled(
                 "VERSIONED_EXPORT"
@@ -321,44 +323,46 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         )
         appbuilder.add_link(
             "SQL Editor",
-            label=_("SQL Editor"),
+            label="Радактор SQL",#_("SQL Editor"),
             href="/superset/sqllab/",
             category_icon="fa-flask",
             icon="fa-flask",
             category="SQL Lab",
-            category_label=__("SQL Lab"),
+            category_label="Лаборатория SQL",#__("SQL Lab"),
         )
         appbuilder.add_link(
             __("Saved Queries"),
+            label="Сохраненные запросы",  # __("Saved Queries"),
             href="/savedqueryview/list/",
             icon="fa-save",
             category="SQL Lab",
+            category_label="Сохраненные запросы",#__("SQL Lab"),
         )
         appbuilder.add_link(
             "Query Search",
-            label=_("Query History"),
+            label="История запросов",#_("Query History"),
             href="/superset/sqllab/history/",
             icon="fa-search",
             category_icon="fa-flask",
             category="SQL Lab",
-            category_label=__("SQL Lab"),
+            category_label="Сохраненные запросы",#__("SQL Lab"),
         )
         appbuilder.add_view(
             DatabaseView,
             "Databases",
-            label=__("Databases"),
+            label="Базы данных",#__("Databases"),
             icon="fa-database",
             category="Data",
-            category_label=__("Data"),
+            category_label="БД",#__("Data"),
             category_icon="fa-database",
         )
         appbuilder.add_link(
             "Datasets",
-            label=__("Datasets"),
+            label="Датасеты",#__("Datasets"),
             href="/tablemodelview/list/",
             icon="fa-table",
             category="Data",
-            category_label=__("Data"),
+            category_label="БД",#__("Data"),
             category_icon="fa-table",
         )
         appbuilder.add_separator("Data")
@@ -367,9 +371,9 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_view(
             LogModelView,
             "Action Log",
-            label=__("Action Log"),
+            label="Журнал действий",#__("Action Log"),
             category="Security",
-            category_label=__("Security"),
+            category_label="Безопасность",#__("Security"),
             icon="fa-list-ol",
             menu_cond=lambda: (
                 self.config["FAB_ADD_SECURITY_VIEWS"]
@@ -384,9 +388,9 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_view(
             AlertView,
             "Alerts & Report",
-            label=__("Alerts & Reports"),
+            label="Оповещения и Рассылка",#__("Alerts & Reports"),
             category="Manage",
-            category_label=__("Manage"),
+            category_label="Управление",#__("Manage"),
             icon="fa-exclamation-triangle",
             menu_cond=lambda: feature_flag_manager.is_feature_enabled("ALERT_REPORTS"),
         )
@@ -394,9 +398,9 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_view(
             AccessRequestsModelView,
             "Access requests",
-            label=__("Access requests"),
+            label="Запросы доступа",#__("Access requests"),
             category="Security",
-            category_label=__("Security"),
+            category_label="Безопасность",#__("Security"),
             icon="fa-table",
             menu_cond=lambda: bool(self.config["ENABLE_ACCESS_REQUEST"]),
         )
