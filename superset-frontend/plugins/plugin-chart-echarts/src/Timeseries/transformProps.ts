@@ -165,12 +165,15 @@ export default function transformProps(
   });
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
     stack,
+    onlyTotal,
+    isHorizontal,
   });
   const seriesContexts = extractForecastSeriesContexts(
     Object.values(rawSeries).map(series => series.name as string),
   );
   const isAreaExpand = stack === AreaChartExtraControlsValue.Expand;
-  const xAxisDataType = dataTypes?.[xAxisCol];
+  const xAxisDataType = dataTypes?.[xAxisCol] ?? dataTypes?.[xAxisOrig];
+
   const xAxisType = getAxisType(xAxisDataType);
   const series: SeriesOption[] = [];
   const formatter = getNumberFormatter(
