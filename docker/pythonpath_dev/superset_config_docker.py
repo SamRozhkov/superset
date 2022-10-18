@@ -163,11 +163,11 @@ class CeleryConfig(object):
     beat_schedule = {
         'email_reports.schedule_hourly': {
             'task': 'reports.scheduler',#'email_reports.schedule_hourly',
-            'schedule': crontab(minute='*/20', hour='*'),
+            'schedule': crontab(minute='20', hour='*'),
         },
         'cache-warmup-hourly': {
             'task': 'cache-warmup',
-            'schedule': crontab(minute=20, hour='*'),
+            'schedule': crontab(minute="*/20", hour='*'),
             'kwargs': {
                 'strategy_name': 'top_n_dashboards',
                 'top_n': 5,
