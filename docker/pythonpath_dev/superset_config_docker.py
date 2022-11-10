@@ -1,6 +1,7 @@
 from flask_appbuilder.security.manager import AUTH_LDAP, AUTH_DB
 from celery.schedules import crontab
 from cachelib.redis import RedisCache
+from dateutil import tz
 
 SMTP_HOST = "smtp.yanao.ru"
 SMTP_STARTTLS = False
@@ -61,21 +62,25 @@ MAPBOX_API_KEY = "pk.eyJ1IjoiaXRhcHBhcmF0IiwiYSI6ImNsMXVhOXJwMTA4YnczY21tczdmNG4
 
 APP_ICON = "/static/assets/images/superset-logo-horiz-beta.png"
 
+DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
+
 #AUTH_TYPE = AUTH_LDAP
-AUTH_TYPE = AUTH_DB
+#AUTH_TYPE = AUTH_DB
 
 AUTH_LDAP_SERVER = "ldap://YG.LOC"
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public"
 AUTH_LDAP_BIND_USER = "CN=superset,OU=Сервис аккаунты,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
 AUTH_LDAP_SEARCH = "OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
-AUTH_LDAP_UID_FIELD = "sAMAccountName"
+#AUTH_LDAP_UID_FIELD = "sAMAccountName"
+AUTH_LDAP_UID_FIELD = "mail"
 AUTH_LDAP_FIRSTNAME_FIELD = "givenName"
 AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"
 AUTH_LDAP_BIND_PASSWORD = "10Sk2c9dw69"
 
 #AUTH_LDAP_USERNAME_FORMAT = ""
+#AUTH_LDAP_SEARCH_FILTER = ""
 AUTH_ROLE_ADMIN = 'Admin'
 AUTH_ROLE_PUBLIC = 'Public'
 #AUTH_USER_REGISTRATION_ROLE = "Public_LDAP"

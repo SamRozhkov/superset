@@ -237,5 +237,5 @@ test('should not render a save dataset modal when datasource is not query or dat
     { useRedux: true },
   );
 
-  expect(screen.queryByText(/create a dataset/i)).toBe(null);
+  expect(screen.queryByText(/create a dataset/i)).not.toBeInTheDocument();
 });
