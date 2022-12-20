@@ -13,6 +13,9 @@ SMTP_MAIL_FROM = "bigdata@yanao.ru"
 
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = False #Change to False for activate
 
+VKTEAM_API_TOKEN = '001.0728848750.2833988086:1000000015'
+VKTEAM_URL = 'https://api.vkteams.yanao.ru/bot/v1/'
+
 WEBDRIVER_TYPE = "firefox"
 '''
 WEBDRIVER_TYPE = "chrome"
