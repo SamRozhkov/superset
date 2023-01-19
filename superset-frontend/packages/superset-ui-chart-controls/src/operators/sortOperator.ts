@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 /**
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
@@ -16,50 +17,25 @@
  * specific language governing permissions and limitationsxw
  * under the License.
  */
-import { isEmpty } from 'lodash';
-import {
-  ensureIsArray,
-  getMetricLabel,
-  getXAxisLabel,
-  hasGenericChartAxes,
-  isDefined,
-  PostProcessingSort,
-} from '@superset-ui/core';
+import { DTTM_ALIAS, PostProcessingSort, RollingType } from '@superset-ui/core';
 import { PostProcessingFactory } from './types';
 
 export const sortOperator: PostProcessingFactory<PostProcessingSort> = (
   formData,
   queryObject,
 ) => {
-  // the sortOperator only used in the barchart v2
-  const sortableLabels = [
-    getXAxisLabel(formData),
-    ...ensureIsArray(formData.metrics).map(metric => getMetricLabel(metric)),
-  ].filter(Boolean);
-
+  const { x_axis: xAxis } = formData;
   if (
-    hasGenericChartAxes &&
-    isDefined(formData?.x_axis_sort) &&
-    isDefined(formData?.x_axis_sort_asc) &&
-    sortableLabels.includes(formData.x_axis_sort) &&
-    // the sort operator doesn't support sort-by multiple series.
-    isEmpty(formData.groupby)
+    (xAxis || queryObject.is_timeseries) &&
+    Object.values(RollingType).includes(formData.rolling_type)
   ) {
-    if (formData.x_axis_sort === getXAxisLabel(formData)) {
-      return {
-        operation: 'sort',
-        options: {
-          is_sort_index: true,
-          ascending: formData.x_axis_sort_asc,
-        },
-      };
-    }
-
+    const index = xAxis || DTTM_ALIAS;
     return {
       operation: 'sort',
       options: {
-        by: formData.x_axis_sort,
-        ascending: formData.x_axis_sort_asc,
+        columns: {
+          [index]: true,
+        },
       },
     };
   }

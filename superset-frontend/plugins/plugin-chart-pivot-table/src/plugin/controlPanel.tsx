@@ -19,9 +19,6 @@
 import React from 'react';
 import {
   ensureIsArray,
-  hasGenericChartAxes,
-  isAdhocColumn,
-  isPhysicalColumn,
   QueryFormMetric,
   smartDateFormatter,
   t,
@@ -35,13 +32,12 @@ import {
   sharedControls,
   emitFilterControl,
   Dataset,
-  getStandardizedControls,
 } from '@superset-ui/chart-controls';
 import { MetricsLayoutEnum } from '../types';
 
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    { ...sections.genericTime, expanded: false },
+    { ...sections.legacyTimeseriesTime, expanded: false },
     {
       label: t('Query'),
       expanded: true,
@@ -65,39 +61,6 @@ const config: ControlPanelConfig = {
               description: t('Columns to group by on the rows'),
             },
           },
-        ],
-        [
-          hasGenericChartAxes
-            ? {
-                name: 'time_grain_sqla',
-                config: {
-                  ...sharedControls.time_grain_sqla,
-                  visibility: ({ controls }) => {
-                    const dttmLookup = Object.fromEntries(
-                      ensureIsArray(controls?.groupbyColumns?.options).map(
-                        option => [option.column_name, option.is_dttm],
-                      ),
-                    );
-
-                    return [
-                      ...ensureIsArray(controls?.groupbyColumns.value),
-                      ...ensureIsArray(controls?.groupbyRows.value),
-                    ]
-                      .map(selection => {
-                        if (isAdhocColumn(selection)) {
-                          return true;
-                        }
-                        if (isPhysicalColumn(selection)) {
-                          return !!dttmLookup[selection];
-                        }
-                        return false;
-                      })
-                      .some(Boolean);
-                  },
-                },
-              }
-            : null,
-          hasGenericChartAxes ? 'temporal_columns_lookup' : null,
         ],
         [
           {
@@ -410,17 +373,14 @@ const config: ControlPanelConfig = {
       ],
     },
   ],
-  formDataOverrides: formData => {
-    const groupbyColumns = getStandardizedControls().controls.columns.filter(
-      col => !ensureIsArray(formData.groupbyRows).includes(col),
-    );
-    getStandardizedControls().controls.columns =
-      getStandardizedControls().controls.columns.filter(
-        col => !groupbyColumns.includes(col),
+  denormalizeFormData: formData => {
+    const groupbyColumns =
+      formData.standardizedFormData.standardizedState.columns.filter(
+        col => !ensureIsArray(formData.groupbyRows).includes(col),
       );
     return {
       ...formData,
-      metrics: getStandardizedControls().popAllMetrics(),
+      metrics: formData.standardizedFormData.standardizedState.metrics,
       groupbyColumns,
     };
   },

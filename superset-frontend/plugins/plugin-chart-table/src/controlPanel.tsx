@@ -19,14 +19,12 @@
  */
 import React from 'react';
 import {
+  addLocaleData,
   ChartDataResponseResult,
   ensureIsArray,
   FeatureFlag,
   GenericDataType,
-  hasGenericChartAxes,
-  isAdhocColumn,
   isFeatureEnabled,
-  isPhysicalColumn,
   QueryFormColumn,
   QueryMode,
   smartDateFormatter,
@@ -43,15 +41,18 @@ import {
   sections,
   sharedControls,
   ControlPanelState,
+  ExtraControlProps,
   ControlState,
   emitFilterControl,
   Dataset,
   ColumnMeta,
   defineSavedMetrics,
-  getStandardizedControls,
 } from '@superset-ui/chart-controls';
 
+import i18n from './i18n';
 import { PAGE_SIZE_OPTIONS } from './consts';
+
+addLocaleData(i18n);
 
 function getQueryMode(controls: ControlStateMapping): QueryMode {
   const mode = controls?.query_mode?.value;
@@ -98,14 +99,15 @@ const queryMode: ControlConfig<'RadioButtonControl'> = {
   rerender: ['all_columns', 'groupby', 'metrics', 'percent_metrics'],
 };
 
-const allColumnsControl: typeof sharedControls.groupby = {
-  ...sharedControls.groupby,
+const all_columns: typeof sharedControls.groupby = {
+  type: 'SelectControl',
   label: t('Columns'),
   description: t('Columns to display'),
   multi: true,
   freeForm: true,
   allowAll: true,
   commaChoosesOption: false,
+  default: [],
   optionRenderer: c => <ColumnOption showType column={c} />,
   valueRenderer: c => <ColumnOption column={c} />,
   valueKey: 'column_name',
@@ -113,7 +115,7 @@ const allColumnsControl: typeof sharedControls.groupby = {
     options: datasource?.columns || [],
     queryMode: getQueryMode(controls),
     externalValidationErrors:
-      isRawMode({ controls }) && ensureIsArray(controlState?.value).length === 0
+      isRawMode({ controls }) && ensureIsArray(controlState.value).length === 0
         ? [t('must have a value')]
         : [],
   }),
@@ -121,12 +123,37 @@ const allColumnsControl: typeof sharedControls.groupby = {
   resetOnHide: false,
 };
 
-const percentMetricsControl: typeof sharedControls.metrics = {
-  ...sharedControls.metrics,
+const dnd_all_columns: typeof sharedControls.groupby = {
+  type: 'DndColumnSelect',
+  label: t('Columns'),
+  description: t('Columns to display'),
+  default: [],
+  mapStateToProps({ datasource, controls }, controlState) {
+    const newState: ExtraControlProps = {};
+    if (datasource?.columns[0]?.hasOwnProperty('column_name')) {
+      const options = (datasource as Dataset).columns;
+      newState.options = Object.fromEntries(
+        options.map((option: ColumnMeta) => [option.column_name, option]),
+      );
+    } else newState.options = datasource?.columns;
+    newState.queryMode = getQueryMode(controls);
+    newState.externalValidationErrors =
+      isRawMode({ controls }) && ensureIsArray(controlState.value).length === 0
+        ? [t('must have a value')]
+        : [];
+    return newState;
+  },
+  visibility: isRawMode,
+  resetOnHide: false,
+};
+
+const percent_metrics: typeof sharedControls.metrics = {
+  type: 'MetricsControl',
   label: t('Percentage metrics'),
   description: t(
     'Metrics for which percentage of total are to be displayed. Calculated from only data within the row limit.',
   ),
+  multi: true,
   visibility: isAggMode,
   resetOnHide: false,
   mapStateToProps: ({ datasource, controls }, controlState) => ({
@@ -138,7 +165,7 @@ const percentMetricsControl: typeof sharedControls.metrics = {
     externalValidationErrors: validateAggControlValues(controls, [
       controls.groupby?.value,
       controls.metrics?.value,
-      controlState?.value,
+      controlState.value,
     ]),
   }),
   rerender: ['groupby', 'metrics'],
@@ -146,9 +173,14 @@ const percentMetricsControl: typeof sharedControls.metrics = {
   validators: [],
 };
 
+const dnd_percent_metrics = {
+  ...percent_metrics,
+  type: 'DndMetricSelect',
+};
+
 const config: ControlPanelConfig = {
   controlPanelSections: [
-    sections.genericTime,
+    sections.legacyTimeseriesTime,
     {
       label: t('Query'),
       expanded: true,
@@ -190,37 +222,6 @@ const config: ControlPanelConfig = {
           },
         ],
         [
-          hasGenericChartAxes && isAggMode
-            ? {
-                name: 'time_grain_sqla',
-                config: {
-                  ...sharedControls.time_grain_sqla,
-                  visibility: ({ controls }) => {
-                    const dttmLookup = Object.fromEntries(
-                      ensureIsArray(controls?.groupby?.options).map(option => [
-                        option.column_name,
-                        option.is_dttm,
-                      ]),
-                    );
-
-                    return ensureIsArray(controls?.groupby.value)
-                      .map(selection => {
-                        if (isAdhocColumn(selection)) {
-                          return true;
-                        }
-                        if (isPhysicalColumn(selection)) {
-                          return !!dttmLookup[selection];
-                        }
-                        return false;
-                      })
-                      .some(Boolean);
-                  },
-                },
-              }
-            : null,
-          hasGenericChartAxes && isAggMode ? 'temporal_columns_lookup' : null,
-        ],
-        [
           {
             name: 'metrics',
             override: {
@@ -253,13 +254,19 @@ const config: ControlPanelConfig = {
           },
           {
             name: 'all_columns',
-            config: allColumnsControl,
+            config: isFeatureEnabled(FeatureFlag.ENABLE_EXPLORE_DRAG_AND_DROP)
+              ? dnd_all_columns
+              : all_columns,
           },
         ],
         [
           {
             name: 'percent_metrics',
-            config: percentMetricsControl,
+            config: {
+              ...(isFeatureEnabled(FeatureFlag.ENABLE_EXPLORE_DRAG_AND_DROP)
+                ? dnd_percent_metrics
+                : percent_metrics),
+            },
           },
         ],
         ['adhoc_filters'],
@@ -309,7 +316,6 @@ const config: ControlPanelConfig = {
           {
             name: 'row_limit',
             override: {
-              default: 1000,
               visibility: ({ controls }: ControlPanelsContainerProps) =>
                 !controls?.server_pagination?.value,
             },
@@ -538,10 +544,10 @@ const config: ControlPanelConfig = {
       ],
     },
   ],
-  formDataOverrides: formData => ({
+  denormalizeFormData: formData => ({
     ...formData,
-    metrics: getStandardizedControls().popAllMetrics(),
-    groupby: getStandardizedControls().popAllColumns(),
+    metrics: formData.standardizedFormData.standardizedState.metrics,
+    groupby: formData.standardizedFormData.standardizedState.columns,
   }),
 };
 

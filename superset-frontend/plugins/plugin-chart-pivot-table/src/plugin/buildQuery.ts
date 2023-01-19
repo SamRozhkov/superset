@@ -16,14 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import omit from 'lodash/omit';
-
 import {
-  AdhocColumn,
   buildQueryContext,
   ensureIsArray,
-  hasGenericChartAxes,
-  isPhysicalColumn,
   QueryFormColumn,
   QueryFormOrderBy,
 } from '@superset-ui/core';
@@ -32,29 +27,10 @@ import { PivotTableQueryFormData } from '../types';
 export default function buildQuery(formData: PivotTableQueryFormData) {
   const { groupbyColumns = [], groupbyRows = [] } = formData;
   // TODO: add deduping of AdhocColumns
-  const columns = Array.from(
-    new Set([
-      ...ensureIsArray<QueryFormColumn>(groupbyColumns),
-      ...ensureIsArray<QueryFormColumn>(groupbyRows),
-    ]),
-  ).map(col => {
-    if (
-      isPhysicalColumn(col) &&
-      formData.time_grain_sqla &&
-      hasGenericChartAxes &&
-      formData?.temporal_columns_lookup?.[col]
-    ) {
-      return {
-        timeGrain: formData.time_grain_sqla,
-        columnType: 'BASE_AXIS',
-        sqlExpression: col,
-        label: col,
-        expressionType: 'SQL',
-      } as AdhocColumn;
-    }
-    return col;
-  });
-
+  const groupbySet = new Set([
+    ...ensureIsArray<QueryFormColumn>(groupbyColumns),
+    ...ensureIsArray<QueryFormColumn>(groupbyRows),
+  ]);
   return buildQueryContext(formData, baseQueryObject => {
     const { series_limit_metric, metrics, order_desc } = baseQueryObject;
     let orderBy: QueryFormOrderBy[] | undefined;
@@ -65,11 +41,9 @@ export default function buildQuery(formData: PivotTableQueryFormData) {
     }
     return [
       {
-        ...(hasGenericChartAxes
-          ? omit(baseQueryObject, ['extras.time_grain_sqla'])
-          : baseQueryObject),
+        ...baseQueryObject,
         orderby: orderBy,
-        columns,
+        columns: [...groupbySet],
       },
     ];
   });

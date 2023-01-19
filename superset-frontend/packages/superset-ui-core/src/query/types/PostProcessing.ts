@@ -184,9 +184,7 @@ export type PostProcessingCompare =
 interface _PostProcessingSort {
   operation: 'sort';
   options: {
-    is_sort_index?: boolean;
-    by?: string[] | string;
-    ascending?: boolean[] | boolean;
+    columns: Record<string, boolean>;
   };
 }
 export type PostProcessingSort = _PostProcessingSort | DefaultPostProcessing;

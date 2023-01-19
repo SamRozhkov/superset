@@ -18,7 +18,6 @@
  */
 import { QueryObject, SqlaFormData } from '@superset-ui/core';
 import { sortOperator } from '@superset-ui/chart-controls';
-import * as supersetCoreModule from '@superset-ui/core';
 
 const formData: SqlaFormData = {
   metrics: [
@@ -53,96 +52,92 @@ const queryObject: QueryObject = {
   ],
 };
 
-test('should ignore the sortOperator', () => {
-  // FF is disabled
-  Object.defineProperty(supersetCoreModule, 'hasGenericChartAxes', {
-    value: false,
-  });
+test('skip sort', () => {
   expect(sortOperator(formData, queryObject)).toEqual(undefined);
-
-  // FF is enabled
-  Object.defineProperty(supersetCoreModule, 'hasGenericChartAxes', {
-    value: true,
-  });
+  expect(
+    sortOperator(formData, { ...queryObject, is_timeseries: false }),
+  ).toEqual(undefined);
   expect(
     sortOperator(
-      {
-        ...formData,
-        ...{
-          x_axis_sort: undefined,
-          x_axis_sort_asc: true,
-        },
-      },
-      queryObject,
+      { ...formData, rolling_type: 'xxxx' },
+      { ...queryObject, is_timeseries: true },
     ),
   ).toEqual(undefined);
-
-  // sortOperator doesn't support multiple series
-  Object.defineProperty(supersetCoreModule, 'hasGenericChartAxes', {
-    value: true,
-  });
   expect(
-    sortOperator(
-      {
-        ...formData,
-        ...{
-          x_axis_sort: 'metric label',
-          x_axis_sort_asc: true,
-          groupby: ['col1'],
-          x_axis: 'axis column',
-        },
-      },
-      queryObject,
-    ),
+    sortOperator(formData, { ...queryObject, is_timeseries: true }),
   ).toEqual(undefined);
 });
 
-test('should sort by metric', () => {
-  Object.defineProperty(supersetCoreModule, 'hasGenericChartAxes', {
-    value: true,
-  });
+test('sort by __timestamp', () => {
   expect(
     sortOperator(
-      {
-        ...formData,
-        ...{
-          metrics: ['a metric label'],
-          x_axis_sort: 'a metric label',
-          x_axis_sort_asc: true,
-        },
-      },
-      queryObject,
+      { ...formData, rolling_type: 'cumsum' },
+      { ...queryObject, is_timeseries: true },
     ),
   ).toEqual({
     operation: 'sort',
     options: {
-      by: 'a metric label',
-      ascending: true,
+      columns: {
+        __timestamp: true,
+      },
+    },
+  });
+
+  expect(
+    sortOperator(
+      { ...formData, rolling_type: 'sum' },
+      { ...queryObject, is_timeseries: true },
+    ),
+  ).toEqual({
+    operation: 'sort',
+    options: {
+      columns: {
+        __timestamp: true,
+      },
+    },
+  });
+
+  expect(
+    sortOperator(
+      { ...formData, rolling_type: 'mean' },
+      { ...queryObject, is_timeseries: true },
+    ),
+  ).toEqual({
+    operation: 'sort',
+    options: {
+      columns: {
+        __timestamp: true,
+      },
+    },
+  });
+
+  expect(
+    sortOperator(
+      { ...formData, rolling_type: 'std' },
+      { ...queryObject, is_timeseries: true },
+    ),
+  ).toEqual({
+    operation: 'sort',
+    options: {
+      columns: {
+        __timestamp: true,
+      },
     },
   });
 });
 
-test('should sort by axis', () => {
-  Object.defineProperty(supersetCoreModule, 'hasGenericChartAxes', {
-    value: true,
-  });
+test('sort by named x-axis', () => {
   expect(
     sortOperator(
-      {
-        ...formData,
-        ...{
-          x_axis_sort: 'Categorical Column',
-          x_axis_sort_asc: true,
-          x_axis: 'Categorical Column',
-        },
-      },
-      queryObject,
+      { ...formData, x_axis: 'ds', rolling_type: 'cumsum' },
+      { ...queryObject },
     ),
   ).toEqual({
     operation: 'sort',
     options: {
-      is_sort_index: true,
-      ascending: true,
+      columns: {
+        ds: true,
+      },
     },
   });
 });
