@@ -11,15 +11,15 @@ SMTP_USER = "bigdata@yanao.ru"
 SMTP_PASSWORD = "!Rfj_dwgY`THPQrf2u5u"
 SMTP_MAIL_FROM = "bigdata@yanao.ru"
 
-ALERT_REPORTS_NOTIFICATION_DRY_RUN = False #Change to False for activate
+ALERT_REPORTS_NOTIFICATION_DRY_RUN = True #Change to False for activate
 
 VKTEAM_API_TOKEN = '001.0728848750.2833988086:1000000015'
 VKTEAM_URL = 'https://api.vkteams.yanao.ru/bot/v1/'
 
-WEBDRIVER_TYPE = "firefox"
-'''
-WEBDRIVER_TYPE = "chrome"
-'''
+#WEBDRIVER_TYPE = "firefox"
+
+#WEBDRIVER_TYPE = "chrome"
+
 WEBDRIVER_OPTION_ARGS = [
     "--force-device-scale-factor=2.0",
     "--high-dpi-support=2.0",
@@ -28,8 +28,17 @@ WEBDRIVER_OPTION_ARGS = [
     "--disable-dev-shm-usage",
     "--no-sandbox",
     "--disable-setuid-sandbox",
-    "--disable-extensions",
+    "--disable-extensions"
 ]
+
+WEBDRIVER_OPTION_ARGS = [
+    "--headless",
+]
+
+WEBDRIVER_BASEURL='http://localhost:8088/' #env('DASHBOARDS_BASE_URL')
+
+SCREENSHOT_LOCATE_WAIT = 1000
+SCREENSHOT_LOAD_WAIT = 6000
 
 WEBDRIVER_BASEURL = "http://superset:8088/"
 WEBDRIVER_BASEURL_USER_FRIENDLY = "http://localhost:8088/"
@@ -170,8 +179,12 @@ class CeleryConfig(object):
     }
     beat_schedule = {
         'email_reports.schedule_hourly': {
-            'task': 'reports.scheduler',#'email_reports.schedule_hourly',
-            'schedule': crontab(minute='20', hour='*'),
+            'task': 'email_reports.schedule_hourly',
+            'schedule': crontab(minute='1', hour='*'),
+        },
+        'reports.scheduler': {
+            'task': 'reports.scheduler',
+            'schedule': crontab(minute='*', hour='*'),
         },
         'cache-warmup-hourly': {
             'task': 'cache-warmup',
@@ -181,7 +194,7 @@ class CeleryConfig(object):
                 'top_n': 5,
                 'since': '7 days ago',
             },
-        },
+        }
     }
 
 '''

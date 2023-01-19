@@ -19,7 +19,7 @@
 import React, { lazy } from 'react';
 
 // not lazy loaded since this is the home page.
-import Welcome from 'src/views/CRUD/welcome/Welcome';
+/* import Welcome from 'src/views/CRUD/welcome/Welcome'; */
 
 const AnnotationLayersList = lazy(
   () =>
@@ -104,7 +104,7 @@ type Routes = {
 export const routes: Routes = [
   {
     path: '/superset/welcome/',
-    Component: Welcome,
+    Component: /* Welcome */ DashboardList,
   },
   {
     path: '/dashboard/list/',

@@ -23,12 +23,14 @@ FROM python:${PY_VER} AS superset-py
 
 RUN mkdir /app \
         && apt-get update -y \
+        && apt-get install -y apt-utils \
         && apt-get install -y --no-install-recommends \
             build-essential \
             default-libmysqlclient-dev \
             libpq-dev \
             libsasl2-dev \
             libecpg-dev \
+            libldap2-dev \
         && rm -rf /var/lib/apt/lists/*
 
 # First, we just wanna install requirements, which will allow us to utilize the cache
@@ -91,6 +93,9 @@ RUN mkdir -p ${PYTHONPATH} \
             libsasl2-modules-gssapi-mit \
             libpq-dev \
             libecpg-dev \
+            apt-utils \
+            libldap2-dev \
+            libsasl2-dev \
         && rm -rf /var/lib/apt/lists/*
 
 COPY --from=superset-py /usr/local/lib/python3.8/site-packages/ /usr/local/lib/python3.8/site-packages/
@@ -124,7 +129,8 @@ CMD /usr/bin/run-server.sh
 ######################################################################
 # Dev image...
 ######################################################################
-FROM lean AS dev
+FROM lean
+#AS dev
 ARG GECKODRIVER_VERSION=v0.28.0
 ARG FIREFOX_VERSION=88.0
 
