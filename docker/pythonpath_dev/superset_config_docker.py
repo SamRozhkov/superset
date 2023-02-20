@@ -11,28 +11,23 @@ SMTP_USER = "bigdata@yanao.ru"
 SMTP_PASSWORD = "!Rfj_dwgY`THPQrf2u5u"
 SMTP_MAIL_FROM = "bigdata@yanao.ru"
 
-ALERT_REPORTS_NOTIFICATION_DRY_RUN = True #Change to False for activate
+ALERT_REPORTS_NOTIFICATION_DRY_RUN = False #Change to False for activate
+EMAIL_REPORTS_SUBJECT_PREFIX = 'Отчет'
 
 VKTEAM_API_TOKEN = '001.0728848750.2833988086:1000000015'
 VKTEAM_URL = 'https://api.vkteams.yanao.ru/bot/v1/'
 
-#WEBDRIVER_TYPE = "firefox"
-
-#WEBDRIVER_TYPE = "chrome"
-
+WEBDRIVER_TYPE = "chrome"
 WEBDRIVER_OPTION_ARGS = [
     "--force-device-scale-factor=2.0",
     "--high-dpi-support=2.0",
     "--headless",
     "--disable-gpu",
     "--disable-dev-shm-usage",
+    # This is required because our process runs as root (in order to install pip packages)
     "--no-sandbox",
     "--disable-setuid-sandbox",
-    "--disable-extensions"
-]
-
-WEBDRIVER_OPTION_ARGS = [
-    "--headless",
+    "--disable-extensions",
 ]
 
 WEBDRIVER_BASEURL='http://localhost:8088/' #env('DASHBOARDS_BASE_URL')
@@ -67,6 +62,8 @@ FEATURE_FLAGS = {
     #"GLOBAL_ASYNC_QUERIES": True,
     "DASHBOARD_NATIVE_FILTERS_SET": True,
     "DASHBOARD_FILTERS_EXPERIMENTAL": True,
+    "RLS_IN_SQLLAB": True,
+    "DRILL_TO_DETAIL": True
 }
 SECRET_KEY = 'wtreAEzlsuEVZu/S2B3I8XnTyx4CqJkoxw4tyrK+HRk1JrE1bBWAuVeU'
 
@@ -175,7 +172,7 @@ class CeleryConfig(object):
             'time_limit': 120,
             'soft_time_limit': 150,
             'ignore_result': True,
-        },
+        }
     }
     beat_schedule = {
         'email_reports.schedule_hourly': {

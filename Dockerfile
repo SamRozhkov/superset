@@ -129,8 +129,7 @@ CMD /usr/bin/run-server.sh
 ######################################################################
 # Dev image...
 ######################################################################
-FROM lean
-#AS dev
+FROM lean AS dev
 ARG GECKODRIVER_VERSION=v0.28.0
 ARG FIREFOX_VERSION=88.0
 
@@ -167,6 +166,7 @@ FROM lean AS ci
 COPY --chown=superset ./docker/docker-bootstrap.sh /app/docker/
 COPY --chown=superset ./docker/docker-init.sh /app/docker/
 COPY --chown=superset ./docker/docker-ci.sh /app/docker/
+COPY --chown=superset ./docker/docker-worker-chrome-install.sh /app/docker/
 
 RUN chmod a+x /app/docker/*.sh
 

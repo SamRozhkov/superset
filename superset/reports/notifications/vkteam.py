@@ -10,12 +10,11 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-class VkteamNotifocation(BaseNotification):
 
+class VkteamNotification(BaseNotification): # pylint: disable=too-few-public-methods
     type = ReportRecipientType.VKTEAM
 
-    @staticmethod
-    def _get_token() -> str:
+    def _get_token(self) -> str:
         return app.config('VKTEAM_API_TOKEN')
 
     def _get_url(self) -> str:
@@ -39,7 +38,6 @@ class VkteamNotifocation(BaseNotification):
                 'caption': text,
                 'file': self._content.screenshots[0].decode('utf-8')
             })
+            logger.info('Report sent to vkteam')
         except Exception as ex:
             raise NotificationError(ex) from ex
-
-        logger.info('Team')

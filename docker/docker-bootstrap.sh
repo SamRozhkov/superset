@@ -17,18 +17,6 @@
 #
 #apt-get update && apt-get install -y libldap2-dev libsasl2-dev
 
-#GECKODRIVER_VERSION=v0.28.0
-#FIREFOX_VERSION=88.0
-
-#wget https://github.com/mozilla/geckodriver/releases/download/${GECKODRIVER_VERSION}/geckodriver-${GECKODRIVER_VERSION}-linux64.tar.gz -O /tmp/geckodriver.tar.gz && \
-#    tar xvfz /tmp/geckodriver.tar.gz -C /tmp && \
-#    mv /tmp/geckodriver /usr/local/bin/geckodriver && \
-#    rm /tmp/geckodriver.tar.gz
-
-#wget https://download-installer.cdn.mozilla.net/pub/firefox/releases/${FIREFOX_VERSION}/linux-x86_64/en-US/firefox-${FIREFOX_VERSION}.tar.bz2 -O /opt/firefox.tar.bz2 && \
-#    tar xvf /opt/firefox.tar.bz2 -C /opt && \
-#    ln -s /opt/firefox/firefox /usr/local/bin/firefox
-
 set -eo pipefail
 
 REQUIREMENTS_LOCAL="/app/docker/requirements-local.txt"
@@ -49,6 +37,7 @@ else
 fi
 
 if [[ "${1}" == "worker" ]]; then
+  sh /app/docker/docker-worker-chrome-install.sh
   echo "Starting Celery worker..."
   celery --app=superset.tasks.celery_app:app worker -Ofair -l INFO
 elif [[ "${1}" == "beat" ]]; then
