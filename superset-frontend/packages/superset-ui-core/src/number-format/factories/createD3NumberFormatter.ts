@@ -40,12 +40,17 @@ export default function createD3NumberFormatter(config: {
 
   let formatFunc: NumberFormatFunction;
   let isInvalid = false;
-
+  let defaultLocale: FormatLocaleDefinition  = {
+    currency: ["", "\u00a0\u20bd"],
+    thousands: "\u00a0",
+    grouping: [3],
+    decimal: ",",
+  }
   try {
     formatFunc =
       typeof locale === 'undefined'
         ? d3Format(formatString)
-        : formatLocale(locale).format(formatString);
+        : formatLocale(defaultLocale).format(formatString);
   } catch (error) {
     formatFunc = value => `${value} (Invalid format: ${formatString})`;
     isInvalid = true;
