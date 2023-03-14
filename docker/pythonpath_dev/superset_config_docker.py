@@ -11,6 +11,8 @@ SMTP_USER = "bigdata@yanao.ru"
 SMTP_PASSWORD = "!Rfj_dwgY`THPQrf2u5u"
 SMTP_MAIL_FROM = "bigdata@yanao.ru"
 
+SLACK_API_TOKEN = ''
+
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = False #Change to False for activate
 EMAIL_REPORTS_SUBJECT_PREFIX = 'Отчет'
 
@@ -63,7 +65,8 @@ FEATURE_FLAGS = {
     "DASHBOARD_NATIVE_FILTERS_SET": True,
     "DASHBOARD_FILTERS_EXPERIMENTAL": True,
     "RLS_IN_SQLLAB": True,
-    "DRILL_TO_DETAIL": True
+    "DRILL_TO_DETAIL": True,
+    "ALLOW_ADHOC_SUBQUERY": True
 }
 SECRET_KEY = 'wtreAEzlsuEVZu/S2B3I8XnTyx4CqJkoxw4tyrK+HRk1JrE1bBWAuVeU'
 
@@ -208,4 +211,16 @@ CELERYBEAT_SCHEDULE = {
 }
 '''
 CELERY_CONFIG = CeleryConfig
+
+
+
+EXTRA_CATEGORICAL_COLOR_SCHEMES = [
+{
+     "id": 'Yamal AUTODOR',
+     "description": '',
+     "label": 'Autodor Colors',
+     "isDefault": False,
+     "colors": ['#1C1D1C', '#F26635', '#4D4E4D', '#EF8050', '#777777', '#F4A27C', '#A4A4A4', '#F8BEA4']
+     #"colors":['#1C1D1C', '#4D4E4D', '#777777', '#A4A4A4', '#F26635', '#EF8050', '#F4A27C', '#F8BEA4']
+ }]
 

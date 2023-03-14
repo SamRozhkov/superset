@@ -147,10 +147,11 @@
         "Elige al menos un campo para [Series]"
       ],
       "Sunburst": [""],
-      "Sankey": [""],
+      "SankeyWithLoops": [""],
       "Pick exactly 2 columns as [Source / Target]": [
         "Elige exactamente 2 columnas como [Origen / Destino]"
       ],
+      "Sankey": [""],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         "Hay un bucle en tu Sankey, por favor proporciona un árbol. Aquí hay un enlace defectuoso: {}"
       ],
@@ -651,6 +652,7 @@
       ],
       "%(object)s does not exist in this database.": [""],
       "Home": ["Inicio"],
+      "Annotation Layers": ["Capas de Anotación"],
       "Plugins": [""],
       "Manage": ["Administrar"],
       "Saved Queries": ["Consultas Guardadas"],
@@ -875,7 +877,6 @@
       "Start": ["Iniciar"],
       "End": [""],
       "JSON Metadata": ["Metadatos JSON"],
-      "Annotation Layers": ["Capas de Anotación"],
       "Show Annotation Layer": ["Mostrar Capa de Anotación"],
       "Add Annotation Layer": ["Añadir Capa de Anotación"],
       "Edit Annotation Layer": ["Editar Capa de Anotación"],

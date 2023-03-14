@@ -218,10 +218,10 @@
         "Izberite vsaj eno polje za [Serije]"
       ],
       "Sunburst": ["Sunburst"],
-      "Sankey": ["Sankey"],
       "Pick exactly 2 columns as [Source / Target]": [
         "Izberite natanko dva stolpca za [Izvor / Cilj]"
       ],
+      "Sankey": ["Sankey"],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         "V 'Sankey' je zanka, določite drevo. To je okvarjena povezava: {}"
       ],
@@ -844,6 +844,7 @@
         "%(object)s ne obstaja v tej podatkovni bazi."
       ],
       "Home": ["Domov"],
+      "Annotation Layers": ["Sloji z oznakami"],
       "Plugins": ["Vtičniki"],
       "Manage": ["Upravljaj"],
       "Saved Queries": ["Shranjene poizvedbe"],
@@ -1120,7 +1121,6 @@
       "Start": ["Začetek"],
       "End": ["Konec"],
       "JSON Metadata": ["JSON metapodatki"],
-      "Annotation Layers": ["Sloji z oznakami"],
       "Show Annotation Layer": ["Prikaži sloj z oznakami"],
       "Add Annotation Layer": ["Dodaj sloj z oznakami"],
       "Edit Annotation Layer": ["Uredi sloj z oznakami"],

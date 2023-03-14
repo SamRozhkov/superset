@@ -126,8 +126,9 @@
       "Can't have overlap between Series and Breakdowns": [""],
       "Pick at least one field for [Series]": [""],
       "Sunburst": [""],
-      "Sankey": [""],
+      "SankeyWithLoops": [""],
       "Pick exactly 2 columns as [Source / Target]": [""],
+      "Sankey": [""],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         ""
       ],
@@ -547,6 +548,7 @@
       "%(object)s does not exist in this database.": [""],
       "You don't have access to this embedded dashboard config.": [""],
       "Home": [""],
+      "Annotation Layers": ["주석 레이어"],
       "Plugins": ["플러그인"],
       "Manage": ["관리"],
       "Saved Queries": ["저장된 Query"],
@@ -695,7 +697,6 @@
       "Start": ["시작 시간"],
       "End": ["끝 시간"],
       "JSON Metadata": [""],
-      "Annotation Layers": ["주석 레이어"],
       "Show Annotation Layer": ["주석 레이어"],
       "Add Annotation Layer": [""],
       "Edit Annotation Layer": ["주석 레이어"],

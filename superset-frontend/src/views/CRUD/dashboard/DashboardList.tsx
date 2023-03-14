@@ -161,7 +161,7 @@ function DashboardList(props: DashboardListProps) {
 
   // const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];
 
-  const initialSort = [{ 'id': 'dashboard_title', desc: false }];
+  const initialSort = [{ id: 'dashboard_title', desc: false }];
 
   function openDashboardEditModal(dashboard: Dashboard) {
     setDashboardToEdit(dashboard);

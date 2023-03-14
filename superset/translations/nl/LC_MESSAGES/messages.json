@@ -188,10 +188,11 @@
         "Kies minstens één veld voor [Series]"
       ],
       "Sunburst": ["Sunburst"],
-      "Sankey": ["Sankey"],
+      "SankeyWithLoops": [""],
       "Pick exactly 2 columns as [Source / Target]": [
         "Kies precies 2 kolommen als [Bron / Doel]"
       ],
+      "Sankey": ["Sankey"],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         ""
       ],
@@ -797,6 +798,7 @@
       ],
       "%(object)s does not exist in this database.": [""],
       "Home": ["Home"],
+      "Annotation Layers": ["Aantekeningen Lagen"],
       "Plugins": ["Plugins"],
       "Manage": ["Beheer"],
       "Saved Queries": ["Opgeslagen Queries"],
@@ -1062,7 +1064,6 @@
       "Start": ["Start"],
       "End": ["Einde"],
       "JSON Metadata": ["JSON Metadata"],
-      "Annotation Layers": ["Aantekeningen Lagen"],
       "Show Annotation Layer": ["Toon Aantekeningen Laag"],
       "Add Annotation Layer": ["Voeg Aantekeningen Laag toe"],
       "Edit Annotation Layer": ["Bewerk Aantenekening Laag"],

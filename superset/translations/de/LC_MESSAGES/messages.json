@@ -226,10 +226,10 @@
         "Wählen Sie mindestens ein Feld für [Serie] aus."
       ],
       "Sunburst": ["Sunburst"],
-      "Sankey": ["Sankey"],
       "Pick exactly 2 columns as [Source / Target]": [
         "Wählen Sie genau 2 Spalten als [Quelle / Ziel]"
       ],
+      "Sankey": ["Sankey"],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         "Es gibt eine Schleife in Ihrem Sankey, bitte geben Sie einen Baum an. Hier ist ein fehlerhafter Link: {}"
       ],
@@ -874,6 +874,7 @@
         "%(object)s existiert nicht in der Datenbank."
       ],
       "Home": ["Startseite"],
+      "Annotation Layers": ["Anmerkungsebenen"],
       "Plugins": ["Plugins"],
       "Manage": ["Verwalten"],
       "Saved Queries": ["Gespeicherte Abfragen"],
@@ -1160,7 +1161,6 @@
       "Start": ["Start"],
       "End": ["Ende"],
       "JSON Metadata": ["JSON-Metadaten"],
-      "Annotation Layers": ["Anmerkungsebenen"],
       "Show Annotation Layer": ["Anmerkungsebene anzeigen"],
       "Add Annotation Layer": ["Anmerkungsebene hinzufügen"],
       "Edit Annotation Layer": ["Anmerkungsebene bearbeiten"],

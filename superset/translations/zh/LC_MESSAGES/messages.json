@@ -121,10 +121,10 @@
       ],
       "Pick at least one field for [Series]": ["为 [序列] 选择至少一个字段"],
       "Sunburst": ["环状层次图"],
-      "Sankey": ["蛇形图"],
       "Pick exactly 2 columns as [Source / Target]": [
         "为 [来源 / 目标] 选择两个列"
       ],
+      "Sankey": ["蛇形图"],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         "桑基图里面有一个循环，请提供一棵树。这是一个错误的链接：{}"
       ],
@@ -516,6 +516,7 @@
       ],
       "%(object)s does not exist in this database.": [""],
       "Home": ["主页"],
+      "Annotation Layers": ["注释层"],
       "Plugins": ["插件"],
       "Manage": ["管理"],
       "Saved Queries": ["已保存查询"],
@@ -696,7 +697,6 @@
       "Start": ["开始"],
       "End": ["结束"],
       "JSON Metadata": ["JSON 元数据"],
-      "Annotation Layers": ["注释层"],
       "Show Annotation Layer": ["查看注释层"],
       "Add Annotation Layer": ["添加注释层"],
       "Edit Annotation Layer": ["编辑注释层"],

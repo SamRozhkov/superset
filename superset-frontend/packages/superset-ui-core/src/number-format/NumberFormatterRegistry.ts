@@ -21,6 +21,7 @@ import createD3NumberFormatter from './factories/createD3NumberFormatter';
 import createSmartNumberFormatter from './factories/createSmartNumberFormatter';
 import NumberFormats from './NumberFormats';
 import NumberFormatter from './NumberFormatter';
+import defaultLocale from './defaultLocale';
 
 export default class NumberFormatterRegistry extends RegistryWithDefaultKey<
   NumberFormatter,
@@ -59,6 +60,7 @@ export default class NumberFormatterRegistry extends RegistryWithDefaultKey<
     // Create new formatter if does not exist
     const formatter = createD3NumberFormatter({
       formatString: targetFormat,
+      locale: defaultLocale,
     });
     this.registerValue(targetFormat, formatter);
 

@@ -115,8 +115,9 @@
       "Can't have overlap between Series and Breakdowns": [""],
       "Pick at least one field for [Series]": [""],
       "Sunburst": [""],
-      "Sankey": ["サンキー"],
+      "SankeyWithLoops": [""],
       "Pick exactly 2 columns as [Source / Target]": [""],
+      "Sankey": ["サンキー"],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         ""
       ],
@@ -554,6 +555,7 @@
       ],
       "%(object)s does not exist in this database.": [""],
       "Home": ["ホーム"],
+      "Annotation Layers": ["注釈レイヤー"],
       "Plugins": ["プラグイン"],
       "Manage": ["管理"],
       "Saved Queries": ["保存したクエリ"],
@@ -770,7 +772,6 @@
       "Start": ["開始時間"],
       "End": ["終了時間"],
       "JSON Metadata": ["JSONメタデータ"],
-      "Annotation Layers": ["注釈レイヤー"],
       "Show Annotation Layer": ["注釈レイヤーを表示"],
       "Add Annotation Layer": ["注釈レイヤーを追加"],
       "Edit Annotation Layer": ["注釈レイヤーを編集"],

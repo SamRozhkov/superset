@@ -17,9 +17,12 @@
  * under the License.
  */
 
-import { format as d3Format } from 'd3-format';
+import { format as d3Format, formatDefaultLocale } from 'd3-format';
 import NumberFormatter from '../NumberFormatter';
 import NumberFormats from '../NumberFormats';
+import defaultLocale from '../defaultLocale';
+
+formatDefaultLocale(defaultLocale);
 
 const siFormatter = d3Format(`.3~s`);
 const float2PointFormatter = d3Format(`.2~f`);

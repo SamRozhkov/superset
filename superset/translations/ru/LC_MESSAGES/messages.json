@@ -7,21 +7,39 @@
         "plural_forms": "nplurals=1; plural=0",
         "lang": "ru"
       },
-      "The hostname provided can't be resolved.": [""],
+      "The hostname provided can't be resolved.": [
+        "Указанное имя хоста не может быть разрешено."
+      ],
       "The host might be down, and can't be reached on the provided port.": [
-        ""
+        "Возможно, хост не работает, и с ним невозможно связаться по предоставленному порту."
       ],
-      "The username provided when connecting to a database is not valid.": [""],
-      "The password provided when connecting to a database is not valid.": [""],
-      "Either the username or the password is wrong.": [""],
-      "Either the database is spelled incorrectly or does not exist.": [""],
-      "The submitted payload has the incorrect format.": [""],
-      "The submitted payload has the incorrect schema.": [""],
+      "The username provided when connecting to a database is not valid.": [
+        "Имя пользователя, указанное при подключении к базе данных, недействительно."
+      ],
+      "The password provided when connecting to a database is not valid.": [
+        "Пароль, указанный при подключении к базе данных, недействителен."
+      ],
+      "Either the username or the password is wrong.": [
+        "Имя пользователя или пароль не верны."
+      ],
+      "Either the database is spelled incorrectly or does not exist.": [
+        "Имя базы указано не верно, либо ее не существует."
+      ],
+      "The submitted payload has the incorrect format.": [
+        "Отправленные данные имею не верный формат"
+      ],
+      "The submitted payload has the incorrect schema.": [
+        "Отправленые данные имеют не верную схему."
+      ],
       "Results backend needed for asynchronous queries is not configured.": [
-        ""
+        "Для выполнения асинхронных запросов серверн не настроен."
       ],
-      "Database does not allow data manipulation.": [""],
-      "CVAS (create view as select) query has more than one statement.": [""],
+      "Database does not allow data manipulation.": [
+        "Нет рарешений для изменений данных на сервере."
+      ],
+      "CVAS (create view as select) query has more than one statement.": [
+        "CVAS (create view as select) может быть объявлена только один раз."
+      ],
       "CVAS (create view as select) query is not a SELECT statement.": [""],
       "Query is too complex and takes too long to run.": [""],
       "The database is currently running too many queries.": [""],
@@ -137,10 +155,11 @@
         "Выберите хотя бы одно значение для поля [Столбцы данных]"
       ],
       "Sunburst": ["Sunburst"],
-      "Sankey": ["Sankey"],
+      "SankeyWithLoops": [""],
       "Pick exactly 2 columns as [Source / Target]": [
         "Выберите ровно два среза в поле [Источник / Назначение]"
       ],
+      "Sankey": ["Sankey"],
       "There's a loop in your Sankey, please provide a tree. Here's a faulty link: {}": [
         "В полях [Источника] и [Назначения] есть одинаковый срез данных - {}. Срезы не должны пересекаться!"
       ],
@@ -610,6 +629,7 @@
       ],
       "%(object)s does not exist in this database.": [""],
       "Home": ["Главная"],
+      "Annotation Layers": ["Слои аннотаций"],
       "Plugins": ["Плагины"],
       "Manage": ["Управление"],
       "Saved Queries": ["Сохраненные запросы"],
@@ -811,7 +831,6 @@
       "Start": ["Время начала"],
       "End": ["Конец"],
       "JSON Metadata": ["Параметры JSON"],
-      "Annotation Layers": ["Слои аннотаций"],
       "Show Annotation Layer": ["Слои аннотаций"],
       "Add Annotation Layer": ["Добавить слой аннотации"],
       "Edit Annotation Layer": ["Добавить слой аннотации"],
@@ -1243,7 +1262,7 @@
       "The time column for the visualization. Note that you can define arbitrary expression that return a DATETIME column in the table. Also note that the filter below is applied against this column or expression": [
         "Столбец данных с датой или временем. Вы можете определить произвольное выражение, которое будет возвращать столбец даты/времени в таблице. Фильтр ниже будет применён к этому столбцу или выражению"
       ],
-      "Drop temporal column here": [""],
+      "Drop temporal column here": ["Удалить пустую колонку"],
       "One or many columns to group by. High cardinality groupings should include a sort by metric and series limit to limit the number of fetched and rendered series.": [
         ""
       ],
@@ -1766,9 +1785,11 @@
         ""
       ],
       "Stack": [""],
-      "Show legend": [""],
-      "Whether to display a legend for the chart": [""],
-      "Legend type": [""],
+      "Show legend": ["Показать легенду"],
+      "Whether to display a legend for the chart": [
+        "Отображать легенду для диаграммы"
+      ],
+      "Legend type": ["Тип легенды"],
       "Show series values on the chart": [""],
       "Stack series": [""],
       "Stack series on top of each other": [""],
@@ -1776,7 +1797,7 @@
       "Only show the total value on the stacked chart, and not show on the selected category": [
         ""
       ],
-      "Dimension to use on x-axis.": [""],
+      "Dimension to use on x-axis.": ["Измерение используемое для оси X"],
       "Percentage threshold": [""],
       "Minimum threshold in percentage points for showing labels.": [""],
       "Rich tooltip": [""],
