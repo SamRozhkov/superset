@@ -41,7 +41,7 @@ export type DatabaseObject = {
   id: number;
 };
 
-export type NotificationMethodOption = 'Email' | 'Slack';
+export type NotificationMethodOption = 'Email' | 'Slack' | 'VKTeam';
 
 export type Recipient = {
   recipient_config_json: {
