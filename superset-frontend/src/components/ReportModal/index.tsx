@@ -173,7 +173,7 @@ function ReportModal({
         {
           recipient_config_json: { target: userEmail },
           type: 'Email',
-        }
+        },
       ],
       name: currentReport.name,
       description: currentReport.description,

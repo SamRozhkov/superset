@@ -82,7 +82,12 @@ interface AlertReportModalProps {
   show: boolean;
 }
 
-const DEFAULT_NOTIFICATION_METHODS: NotificationMethodOption[] = ['Email', 'Slack', 'VKTeam'];
+const DEFAULT_NOTIFICATION_METHODS: NotificationMethodOption[] = [
+  'Email',
+  'Slack',
+  'VKTeam',
+];
+
 const DEFAULT_NOTIFICATION_FORMAT = 'PNG';
 const CONDITIONS = [
   {
