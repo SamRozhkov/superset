@@ -1,4 +1,5 @@
-CHROME_VERSION=109.0.5414.74
+CHROME_VERSION=`curl -s https://chromedriver.storage.googleapis.com/LATEST_RELEASE`
+#109.0.5414.74
 
 apt-get update -y && \
     wget http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb && \

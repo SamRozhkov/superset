@@ -178,9 +178,13 @@ class CeleryConfig(object):
         }
     }
     beat_schedule = {
-        'email_reports.schedule_hourly': {
-            'task': 'email_reports.schedule_hourly',
-            'schedule': crontab(minute='1', hour='*'),
+        #'email_reports.schedule_hourly': {
+        #    'task': 'email_reports.schedule_hourly',
+        #    'schedule': crontab(minute='1', hour='*'),
+        #},
+        "reports.prune_log": {
+            "task": "reports.prune_log",
+            "schedule": crontab(minute=10, hour=0),
         },
         'reports.scheduler': {
             'task': 'reports.scheduler',
