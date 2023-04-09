@@ -222,12 +222,13 @@ export default function TableChart<D extends DataRecord = DataRecord>(
     serverPaginationData,
     setDataMask,
     showCellBars = true,
-    emitFilter = false,
     sortDesc = false,
     filters,
     sticky = true, // whether to use sticky header
     columnColorFormatters,
     allowRearrangeColumns = false,
+    onContextMenu,
+    emitCrossFilters,
   } = props;
   const timestampFormatter = useCallback(
     value => getTimeFormatterForGranularity(timeGrain)(value),
@@ -288,7 +289,7 @@ export default function TableChart<D extends DataRecord = DataRecord>(
         },
       });
     },
-    [emitFilter, setDataMask],
+    [emitCrossFilters, setDataMask],
   );
 
   // only take relevant page size options

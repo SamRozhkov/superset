@@ -103,12 +103,10 @@ export const hydrateDashboard =
       updateColorSchema(metadata, metadata?.label_colors);
     }
 
-    // dashboard layout
-    const { position_data } = dashboardData;
     // new dash: position_json could be {} or null
     const layout =
-      position_data && Object.keys(position_data).length > 0
-        ? position_data
+      positionData && Object.keys(positionData).length > 0
+        ? positionData
         : getEmptyLayout();
 
     // create a lookup to sync layout names with slice names
