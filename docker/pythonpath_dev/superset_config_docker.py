@@ -78,7 +78,7 @@ APP_ICON = "/static/assets/images/superset-logo-horiz-beta.png"
 
 DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
-#AUTH_TYPE = AUTH_LDAP
+AUTH_TYPE = AUTH_LDAP
 #AUTH_TYPE = AUTH_DB
 
 AUTH_LDAP_SERVER = "ldap://YG.LOC"

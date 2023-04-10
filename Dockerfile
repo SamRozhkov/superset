@@ -68,7 +68,6 @@ RUN mkdir -p ${PYTHONPATH} \
             libecpg-dev \
             apt-utils \
             libldap2-dev \
-            libsasl2-dev \
         && rm -rf /var/lib/apt/lists/*
 
 COPY ./requirements/*.txt  /app/requirements/
