@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 #x-superset-image: &superset-image apache/superset:${TAG:-latest-dev}
-x-superset-image: &superset-image apache/superset:2.0.0
+x-superset-image: &superset-image samrozhkov/superset:0.0.3
 x-superset-user: &superset-user root
 x-superset-depends-on: &superset-depends-on
   - db
@@ -31,7 +31,7 @@ x-superset-volumes: &superset-volumes
 version: "3.7"
 services:
   redis:
-    image: redis:7
+    image: redis:latest
     container_name: superset_cache
     restart: unless-stopped
     ports:
@@ -68,7 +68,7 @@ services:
     build: ./superset-websocket
     image: superset-websocket
     ports:
-      - 8081:8080
+      - 8080:8080
     depends_on:
       - redis
     # Mount everything in superset-websocket into container and
@@ -86,7 +86,7 @@ services:
       - /home/superset-websocket/node_modules
       - /home/superset-websocket/dist
     environment:
-      - PORT=8081
+      - PORT=8080
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_SSL=false
@@ -101,8 +101,6 @@ services:
     volumes: *superset-volumes
     environment:
       CYPRESS_CONFIG: "${CYPRESS_CONFIG}"
-    healthcheck:
-      disable: true
 
   superset-node:
     image: node:16
@@ -121,8 +119,6 @@ services:
     depends_on: *superset-depends-on
     user: *superset-user
     volumes: *superset-volumes
-    healthcheck:
-      test: ["CMD-SHELL", "celery -A superset.tasks.celery_app:app inspect ping -d celery@$$HOSTNAME"]
     # Bump memory limit if processing selenium / thumbnails on superset-worker
     # mem_limit: 2038m
     # mem_reservation: 128M
@@ -136,8 +132,6 @@ services:
     depends_on: *superset-depends-on
     user: *superset-user
     volumes: *superset-volumes
-    healthcheck:
-      disable: true
 
   superset-tests-worker:
     image: *superset-image
@@ -154,8 +148,6 @@ services:
     depends_on: *superset-depends-on
     user: *superset-user
     volumes: *superset-volumes
-    healthcheck:
-      test: ["CMD-SHELL", "celery inspect ping -A superset.tasks.celery_app:app -d celery@$$HOSTNAME"]
 
 volumes:
   superset_home:
