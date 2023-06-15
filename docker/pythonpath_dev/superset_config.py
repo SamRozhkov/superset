@@ -95,6 +95,11 @@ class CeleryConfig(object):
             "task": "reports.prune_log",
             "schedule": crontab(minute=10, hour=0),
         },
+        'cache-warmup-hourly': {
+            'task': 'cache-warmup',
+            'schedule': crontab(minute="*", hour="*"),  # @hourly
+            'kwargs': {'strategy_name': 'dummy'},
+        },
     }
 
 
