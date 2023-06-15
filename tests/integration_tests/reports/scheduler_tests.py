@@ -16,13 +16,12 @@
 # under the License.
 
 from random import randint
-from typing import List
 from unittest.mock import patch
 
 import pytest
 from flask_appbuilder.security.sqla.models import User
 from freezegun import freeze_time
-from freezegun.api import FakeDatetime  # type: ignore
+from freezegun.api import FakeDatetime
 
 from superset.extensions import db
 from superset.reports.models import ReportScheduleType
@@ -32,7 +31,7 @@ from tests.integration_tests.test_app import app
 
 
 @pytest.fixture
-def owners(get_user) -> List[User]:
+def owners(get_user) -> list[User]:
     return [get_user("admin")]
 
 

@@ -17,6 +17,7 @@
  * under the License.
  */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { omit } from 'lodash';
 import { Input } from 'src/components/Input';
 import { FormItem } from 'src/components/Form';
 import jsonStringify from 'json-stringify-pretty-compact';
@@ -194,15 +195,11 @@ const PropertiesModal = ({
       setRoles(roles);
       setColorScheme(metadata.color_scheme);
 
-      // temporary fix to remove positions from dashboards' metadata
-      if (metadata?.positions) {
-        delete metadata.positions;
-      }
-      const metaDataCopy = { ...metadata };
-
-      delete metaDataCopy.shared_label_colors;
-
-      delete metaDataCopy.color_scheme_domain;
+      const metaDataCopy = omit(metadata, [
+        'positions',
+        'shared_label_colors',
+        'color_scheme_domain',
+      ]);
 
       setJsonMetadata(metaDataCopy ? jsonStringify(metaDataCopy) : '');
     },
@@ -560,7 +557,7 @@ const PropertiesModal = ({
             </StyledFormItem>
             <p className="help-block">
               {t(
-                'Roles is a list which defines access to the dashboard. Granting a role access to a dashboard will bypass dataset level checks. If no roles are defined, then the dashboard is available to all roles.',
+                'Roles is a list which defines access to the dashboard. Granting a role access to a dashboard will bypass dataset level checks. If no roles are defined, regular access permissions apply.',
               )}
             </p>
           </Col>

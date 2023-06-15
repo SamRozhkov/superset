@@ -50,7 +50,6 @@ export const EXPAND_TABLE = 'EXPAND_TABLE';
 export const COLLAPSE_TABLE = 'COLLAPSE_TABLE';
 export const QUERY_EDITOR_SETDB = 'QUERY_EDITOR_SETDB';
 export const QUERY_EDITOR_SET_SCHEMA = 'QUERY_EDITOR_SET_SCHEMA';
-export const QUERY_EDITOR_SET_TABLE_OPTIONS = 'QUERY_EDITOR_SET_TABLE_OPTIONS';
 export const QUERY_EDITOR_SET_TITLE = 'QUERY_EDITOR_SET_TITLE';
 export const QUERY_EDITOR_SET_AUTORUN = 'QUERY_EDITOR_SET_AUTORUN';
 export const QUERY_EDITOR_SET_SQL = 'QUERY_EDITOR_SET_SQL';
@@ -80,13 +79,11 @@ export const STOP_QUERY = 'STOP_QUERY';
 export const REQUEST_QUERY_RESULTS = 'REQUEST_QUERY_RESULTS';
 export const QUERY_SUCCESS = 'QUERY_SUCCESS';
 export const QUERY_FAILED = 'QUERY_FAILED';
+export const CLEAR_INACTIVE_QUERIES = 'CLEAR_INACTIVE_QUERIES';
 export const CLEAR_QUERY_RESULTS = 'CLEAR_QUERY_RESULTS';
 export const REMOVE_DATA_PREVIEW = 'REMOVE_DATA_PREVIEW';
 export const CHANGE_DATA_PREVIEW_ID = 'CHANGE_DATA_PREVIEW_ID';
 
-export const START_QUERY_VALIDATION = 'START_QUERY_VALIDATION';
-export const QUERY_VALIDATION_RETURNED = 'QUERY_VALIDATION_RETURNED';
-export const QUERY_VALIDATION_FAILED = 'QUERY_VALIDATION_FAILED';
 export const COST_ESTIMATE_STARTED = 'COST_ESTIMATE_STARTED';
 export const COST_ESTIMATE_RETURNED = 'COST_ESTIMATE_RETURNED';
 export const COST_ESTIMATE_FAILED = 'COST_ESTIMATE_FAILED';
@@ -137,21 +134,6 @@ export function getUpToDateQuery(rootState, queryEditor, key) {
 
 export function resetState() {
   return { type: RESET_STATE };
-}
-
-export function startQueryValidation(query) {
-  Object.assign(query, {
-    id: query.id ? query.id : shortid.generate(),
-  });
-  return { type: START_QUERY_VALIDATION, query };
-}
-
-export function queryValidationReturned(query, results) {
-  return { type: QUERY_VALIDATION_RETURNED, query, results };
-}
-
-export function queryValidationFailed(query, message, error) {
-  return { type: QUERY_VALIDATION_FAILED, query, message, error };
 }
 
 export function updateQueryEditor(alterations) {
@@ -217,6 +199,10 @@ export function estimateQueryCost(queryEditor) {
         ),
     ]);
   };
+}
+
+export function clearInactiveQueries() {
+  return { type: CLEAR_INACTIVE_QUERIES };
 }
 
 export function startQuery(query) {
@@ -353,14 +339,6 @@ export function fetchQueryResults(query, displayLimit) {
   };
 }
 
-export function cleanSqlComments(sql) {
-  if (!sql) return '';
-  // it sanitizes the following comment block groups
-  // group 1 -> /* */
-  // group 2 -> --
-  return sql.replace(/(--.*?$|\/\*[\s\S]*?\*\/)\n?/gm, '\n').trim();
-}
-
 export function runQuery(query) {
   return function (dispatch) {
     dispatch(startQuery(query));
@@ -370,7 +348,7 @@ export function runQuery(query) {
       json: true,
       runAsync: query.runAsync,
       schema: query.schema,
-      sql: cleanSqlComments(query.sql),
+      sql: query.sql,
       sql_editor_id: query.sqlEditorId,
       tab: query.tab,
       tmp_table_name: query.tempTable,
@@ -441,49 +419,6 @@ export function reRunQuery(query) {
   // run Query with a new id
   return function (dispatch) {
     dispatch(runQuery({ ...query, id: shortid.generate() }));
-  };
-}
-
-export function validateQuery(queryEditor, sql) {
-  return function (dispatch, getState) {
-    const {
-      sqlLab: { unsavedQueryEditor },
-    } = getState();
-    const qe = {
-      ...queryEditor,
-      ...(queryEditor.id === unsavedQueryEditor.id && unsavedQueryEditor),
-    };
-
-    const query = {
-      dbId: qe.dbId,
-      sql,
-      sqlEditorId: qe.id,
-      schema: qe.schema,
-      templateParams: qe.templateParams,
-    };
-    dispatch(startQueryValidation(query));
-
-    const postPayload = {
-      schema: query.schema,
-      sql: query.sql,
-      template_params: query.templateParams,
-    };
-
-    return SupersetClient.post({
-      endpoint: `/api/v1/database/${query.dbId}/validate_sql/`,
-      body: JSON.stringify(postPayload),
-      headers: { 'Content-Type': 'application/json' },
-    })
-      .then(({ json }) => dispatch(queryValidationReturned(query, json.result)))
-      .catch(response =>
-        getClientErrorObject(response.result).then(error => {
-          let message = error.error || error.statusText || t('Unknown error');
-          if (message.includes('CSRF token')) {
-            message = t(COMMON_ERR_MESSAGES.SESSION_TIMED_OUT);
-          }
-          dispatch(queryValidationFailed(query, message, error));
-        }),
-      );
   };
 }
 
@@ -950,10 +885,6 @@ export function queryEditorSetSchema(queryEditor, schema) {
         ),
       );
   };
-}
-
-export function queryEditorSetTableOptions(queryEditor, options) {
-  return { type: QUERY_EDITOR_SET_TABLE_OPTIONS, queryEditor, options };
 }
 
 export function queryEditorSetAutorun(queryEditor, autorun) {
@@ -1501,7 +1432,7 @@ export function createDatasourceStarted() {
   return { type: CREATE_DATASOURCE_STARTED };
 }
 export function createDatasourceSuccess(data) {
-  const datasource = `${data.table_id}__table`;
+  const datasource = `${data.id}__table`;
   return { type: CREATE_DATASOURCE_SUCCESS, datasource };
 }
 export function createDatasourceFailed(err) {
@@ -1511,9 +1442,18 @@ export function createDatasourceFailed(err) {
 export function createDatasource(vizOptions) {
   return dispatch => {
     dispatch(createDatasourceStarted());
+    const { dbId, schema, datasourceName, sql } = vizOptions;
     return SupersetClient.post({
-      endpoint: '/superset/sqllab_viz/',
-      postPayload: { data: vizOptions },
+      endpoint: '/api/v1/dataset/',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        database: dbId,
+        schema,
+        sql,
+        table_name: datasourceName,
+        is_managed_externally: false,
+        external_url: null,
+      }),
     })
       .then(({ json }) => {
         dispatch(createDatasourceSuccess(json));
@@ -1551,37 +1491,6 @@ export function createCtasDatasource(vizOptions) {
         const errorMsg = t('An error occurred while creating the data source');
         dispatch(createDatasourceFailed(errorMsg));
         return Promise.reject(new Error(errorMsg));
-      });
-  };
-}
-
-export function queryEditorSetFunctionNames(queryEditor, dbId) {
-  return function (dispatch) {
-    return SupersetClient.get({
-      endpoint: encodeURI(`/api/v1/database/${dbId}/function_names/`),
-    })
-      .then(({ json }) =>
-        dispatch({
-          type: QUERY_EDITOR_SET_FUNCTION_NAMES,
-          queryEditor,
-          functionNames: json.function_names,
-        }),
-      )
-      .catch(err => {
-        if (err.status === 404) {
-          // for databases that have been deleted, just reset the function names
-          dispatch({
-            type: QUERY_EDITOR_SET_FUNCTION_NAMES,
-            queryEditor,
-            functionNames: [],
-          });
-        } else {
-          dispatch(
-            addDangerToast(
-              t('An error occurred while fetching function names.'),
-            ),
-          );
-        }
       });
   };
 }

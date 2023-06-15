@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from flask import request, Response
 from flask_appbuilder import expose
@@ -56,8 +56,8 @@ class ResourceSchema(PermissiveSchema):
 
     @post_load
     def convert_enum_to_value(  # pylint: disable=no-self-use
-        self, data: Dict[str, Any], **kwargs: Any  # pylint: disable=unused-argument
-    ) -> Dict[str, Any]:
+        self, data: dict[str, Any], **kwargs: Any  # pylint: disable=unused-argument
+    ) -> dict[str, Any]:
         # we don't care about the enum, we want the value inside
         data["type"] = data["type"].value
         return data
@@ -82,7 +82,7 @@ class SecurityRestApi(BaseSupersetApi):
     allow_browser_login = True
     openapi_spec_tag = "Security"
 
-    @expose("/csrf_token/", methods=["GET"])
+    @expose("/csrf_token/", methods=("GET",))
     @event_logger.log_this
     @protect()
     @safe
@@ -112,7 +112,7 @@ class SecurityRestApi(BaseSupersetApi):
         """
         return self.response(200, result=generate_csrf())
 
-    @expose("/guest_token/", methods=["POST"])
+    @expose("/guest_token/", methods=("POST",))
     @event_logger.log_this
     @protect()
     @safe

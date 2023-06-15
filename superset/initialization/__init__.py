@@ -19,7 +19,7 @@ from __future__ import annotations
 import logging
 import os
 import sys
-from typing import Any, Callable, Dict, TYPE_CHECKING
+from typing import Any, Callable, TYPE_CHECKING
 
 import wtforms_json
 from deprecation import deprecated
@@ -68,7 +68,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
 
         self.superset_app = app
         self.config = app.config
-        self.manifest: Dict[Any, Any] = {}
+        self.manifest: dict[Any, Any] = {}
 
     @deprecated(details="use self.superset_app instead of self.flask_app")  # type: ignore
     @property
@@ -116,6 +116,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         # the global Flask app
         #
         # pylint: disable=import-outside-toplevel,too-many-locals,too-many-statements
+        from superset import security_manager
         from superset.advanced_data_type.api import AdvancedDataTypeRestApi
         from superset.annotation_layers.annotations.api import AnnotationRestApi
         from superset.annotation_layers.api import AnnotationLayerRestApi
@@ -125,7 +126,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.charts.api import ChartRestApi
         from superset.charts.data.api import ChartDataRestApi
         from superset.connectors.sqla.views import (
-            RowLevelSecurityFiltersModelView,
+            RowLevelSecurityView,
             SqlMetricInlineView,
             TableColumnInlineView,
             TableModelView,
@@ -150,10 +151,10 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.queries.saved_queries.api import SavedQueryRestApi
         from superset.reports.api import ReportScheduleRestApi
         from superset.reports.logs.api import ReportExecutionLogRestApi
+        from superset.row_level_security.api import RLSRestApi
         from superset.security.api import SecurityRestApi
         from superset.sqllab.api import SqlLabRestApi
         from superset.tags.api import TagRestApi
-        from superset.views.access_requests import AccessRequestsModelView
         from superset.views.alerts import AlertView, ReportView
         from superset.views.all_entities import TaggedObjectsModelView, TaggedObjectView
         from superset.views.annotations import AnnotationLayerView
@@ -222,6 +223,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_api(QueryRestApi)
         appbuilder.add_api(ReportScheduleRestApi)
         appbuilder.add_api(ReportExecutionLogRestApi)
+        appbuilder.add_api(RLSRestApi)
         appbuilder.add_api(SavedQueryRestApi)
         appbuilder.add_api(TagRestApi)
         appbuilder.add_api(SqlLabRestApi)
@@ -289,14 +291,6 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
             category_label=__("Manage"),
             category_icon="",
         )
-        appbuilder.add_view(
-            RowLevelSecurityFiltersModelView,
-            "Row Level Security",
-            label=__("Row Level Security"),
-            category="Security",
-            category_label=__("Security"),
-            icon="fa-lock",
-        )
 
         #
         # Setup views with no menu
@@ -340,10 +334,12 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
             category="Manage",
             category_label=__("Manage"),
             category_icon="fa-wrench",
-            cond=lambda: not feature_flag_manager.is_feature_enabled(
-                "VERSIONED_EXPORT"
+            cond=lambda: (
+                security_manager.can_access("can_import_dashboards", "Superset")
+                and not feature_flag_manager.is_feature_enabled("VERSIONED_EXPORT")
             ),
         )
+
         appbuilder.add_link(
             "SQL Editor",
             label=__("SQL Lab"),
@@ -426,13 +422,13 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         )
 
         appbuilder.add_view(
-            AccessRequestsModelView,
-            "Access requests",
-            label=__("Access requests"),
+            RowLevelSecurityView,
+            "Row Level Security",
+            href="/rowlevelsecurity/list/",
+            label=__("Row Level Security"),
             category="Security",
             category_label=__("Security"),
-            icon="fa-table",
-            menu_cond=lambda: bool(self.config["ENABLE_ACCESS_REQUEST"]),
+            icon="fa-lock",
         )
 
     def init_app_in_ctx(self) -> None:
@@ -449,8 +445,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
 
         # Hook that provides administrators a handle on the Flask APP
         # after initialization
-        flask_app_mutator = self.config["FLASK_APP_MUTATOR"]
-        if flask_app_mutator:
+        if flask_app_mutator := self.config["FLASK_APP_MUTATOR"]:
             flask_app_mutator(self.superset_app)
 
         if feature_flag_manager.is_feature_enabled("TAGGING_SYSTEM"):
@@ -583,7 +578,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
             CORS(self.superset_app, **self.config["CORS_OPTIONS"])
 
         if self.config["ENABLE_PROXY_FIX"]:
-            self.superset_app.wsgi_app = ProxyFix(  # type: ignore
+            self.superset_app.wsgi_app = ProxyFix(
                 self.superset_app.wsgi_app, **self.config["PROXY_FIX_CONFIG"]
             )
 
@@ -594,7 +589,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
                     self.app = app
 
                 def __call__(
-                    self, environ: Dict[str, Any], start_response: Callable[..., Any]
+                    self, environ: dict[str, Any], start_response: Callable[..., Any]
                 ) -> Any:
                     # Setting wsgi.input_terminated tells werkzeug.wsgi to ignore
                     # content-length and read the stream till the end.
@@ -602,9 +597,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
                         environ["wsgi.input_terminated"] = True
                     return self.app(environ, start_response)
 
-            self.superset_app.wsgi_app = ChunkedEncodingFix(  # type: ignore
-                self.superset_app.wsgi_app  # type: ignore
-            )
+            self.superset_app.wsgi_app = ChunkedEncodingFix(self.superset_app.wsgi_app)
 
         if self.config["UPLOAD_FOLDER"]:
             try:
@@ -613,9 +606,7 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
                 pass
 
         for middleware in self.config["ADDITIONAL_MIDDLEWARE"]:
-            self.superset_app.wsgi_app = middleware(  # type: ignore
-                self.superset_app.wsgi_app
-            )
+            self.superset_app.wsgi_app = middleware(self.superset_app.wsgi_app)
 
         # Flask-Compress
         Compress(self.superset_app)
