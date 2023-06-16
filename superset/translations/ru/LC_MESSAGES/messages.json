@@ -3526,7 +3526,7 @@
       "Rename tab": ["Переименовать вкладку"],
       "Rendering": ["Отрисовка"],
       "Replace": ["Заменить"],
-      "Report": ["Отчет"],
+      "Report": ["Report"],
       "Report Name": ["Имя отчета"],
       "Report Schedule could not be created.": [
         "Невозможно удалить расписание отчета."

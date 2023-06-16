@@ -1,3 +1,5 @@
+from typing import Optional
+
 from flask_appbuilder.security.manager import AUTH_LDAP, AUTH_DB
 from celery.schedules import crontab
 from cachelib.redis import RedisCache
@@ -13,7 +15,7 @@ SMTP_MAIL_FROM = "bigdata@yanao.ru"
 
 SLACK_API_TOKEN = ''
 
-ALERT_REPORTS_NOTIFICATION_DRY_RUN = False #Change to False for activate
+ALERT_REPORTS_NOTIFICATION_DRY_RUN = False  # Change to False for activate
 EMAIL_REPORTS_SUBJECT_PREFIX = 'Отчет'
 
 VKTEAM_API_TOKEN = '001.0728848750.2833988086:1000000015'
@@ -32,7 +34,7 @@ WEBDRIVER_OPTION_ARGS = [
     "--disable-extensions",
 ]
 
-WEBDRIVER_BASEURL='http://localhost:8088/' #env('DASHBOARDS_BASE_URL')
+WEBDRIVER_BASEURL = 'http://localhost:8088/'  # env('DASHBOARDS_BASE_URL')
 
 SCREENSHOT_LOCATE_WAIT = 1000
 SCREENSHOT_LOAD_WAIT = 6000
@@ -45,7 +47,7 @@ BABEL_DEFAULT_LOCALE = "ru"
 
 LANGUAGES = {
     "ru": {"flag": "ru", "name": "Russian"},
-    #"en": {"flag": "us", "name": "English"},
+    # "en": {"flag": "us", "name": "English"},
 }
 
 FEATURE_FLAGS = {
@@ -61,15 +63,20 @@ FEATURE_FLAGS = {
     "DASHBOARD_CACHE": True,
     "UX_BETA": False,
     "TAGGING_SYSTEM": True,
-    #"GLOBAL_ASYNC_QUERIES": True,
+    # "GLOBAL_ASYNC_QUERIES": True,
     "DASHBOARD_NATIVE_FILTERS_SET": True,
     "DASHBOARD_FILTERS_EXPERIMENTAL": True,
     "RLS_IN_SQLLAB": True,
     "DRILL_TO_DETAIL": True,
     "ALLOW_ADHOC_SUBQUERY": True,
     "HORIZONTAL_FILTER_BAR": True,
-    "RLS_FORM_QUERY_REL_FIELDS": True
+    "RLS_FORM_QUERY_REL_FIELDS": True,
+    "DASHBOARD_EDIT_CHART_IN_NEW_TAB": True,
+    #"EMBEDDABLE_CHARTS": True,
 }
+
+HTML_SANITIZATION = False
+
 SECRET_KEY = 'wtreAEzlsuEVZu/S2B3I8XnTyx4CqJkoxw4tyrK+HRk1JrE1bBWAuVeU'
 
 MAPBOX_API_KEY = "pk.eyJ1IjoiaXRhcHBhcmF0IiwiYSI6ImNsMXVhOXJwMTA4YnczY21tczdmNG41c28ifQ.rNjd1zZfhPo0vpcon8kc9w"
@@ -79,48 +86,54 @@ APP_ICON = "/static/assets/images/superset-logo-horiz-beta.png"
 DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
 AUTH_TYPE = AUTH_LDAP
-#AUTH_TYPE = AUTH_DB
+# AUTH_TYPE = AUTH_DB
 
 AUTH_LDAP_SERVER = "ldap://YG.LOC"
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public"
 AUTH_LDAP_BIND_USER = "CN=superset,OU=Сервис аккаунты,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
 AUTH_LDAP_SEARCH = "OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
-#AUTH_LDAP_UID_FIELD = "sAMAccountName"
+# AUTH_LDAP_UID_FIELD = "sAMAccountName"
 AUTH_LDAP_UID_FIELD = "mail"
 AUTH_LDAP_FIRSTNAME_FIELD = "givenName"
 AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"
 AUTH_LDAP_BIND_PASSWORD = "10Sk2c9dw69"
 
-#AUTH_LDAP_USERNAME_FORMAT = ""
-#AUTH_LDAP_SEARCH_FILTER = ""
+# AUTH_LDAP_USERNAME_FORMAT = ""
+# AUTH_LDAP_SEARCH_FILTER = ""
 AUTH_ROLE_ADMIN = 'Admin'
 AUTH_ROLE_PUBLIC = 'Public'
-#AUTH_USER_REGISTRATION_ROLE = "Public_LDAP"
+# AUTH_USER_REGISTRATION_ROLE = "Public_LDAP"
 
 AUTH_ROLES_MAPPING = {
-    "CN=Пользователи,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": ["User"],
-    "CN=supersetadmin,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": ["Admin"],
+    "CN=Пользователи,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": [
+        "User"],
+    "CN=supersetadmin,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": [
+        "Admin"],
 }
 AUTH_LDAP_GROUP_FIELD = "memberOf"
-#AUTH_ROLES_SYNC_AT_LOGIN = True
+# AUTH_ROLES_SYNC_AT_LOGIN = True
 PERMANENT_SESSION_LIFETIME = 1800
+
+REDIS_HOST = '10.12.4.253'
+REDIS_PORT = 6379
 
 CACHE_CONFIG = {
     'CACHE_TYPE': 'RedisCache',
     'CACHE_DEFAULT_TIMEOUT': 300,
     'CACHE_KEY_PREFIX': 'superset_cache',
-    'CACHE_REDIS_HOST': 'superset_cache',
-    'CACHE_REDIS_PORT': 6379,
+    'CACHE_REDIS_HOST': REDIS_HOST,
+    'CACHE_REDIS_PORT': REDIS_PORT,
     'CACHE_REDIS_DB': 0,
-    'CACHE_REDIS_URL': 'redis://superset_cache:6379/0',
+    'CACHE_REDIS_URL': f'redis://{REDIS_HOST}:{REDIS_PORT}/0',
 }
 
 DATA_CACHE_CONFIG = {
     **CACHE_CONFIG,
-    "CACHE_KEY_PREFIX": "superset_data_cache",  # make sure this string is unique to avoid collisions
-    "CACHE_DEFAULT_TIMEOUT": 300, #86400,  # 60 seconds * 60 minutes * 24 hours
+    "CACHE_KEY_PREFIX": "superset_data_cache",
+    # make sure this string is unique to avoid collisions
+    "CACHE_DEFAULT_TIMEOUT": 300,  # 86400,  # 60 seconds * 60 minutes * 24 hours
 }
 
 EXPLORE_STATE_CACHE_CONFIG = {
@@ -141,7 +154,8 @@ EXPLORE_FORM_DATA_CACHE_CONFIG = {
     "CACHE_DEFAULT_TIMEOUT": 300,
 }
 
-RESULTS_BACKEND: RedisCache(host="superset_cache", port=6379, key_prefix="superset_results")
+RESULTS_BACKEND: RedisCache(host=REDIS_HOST, port=REDIS_PORT,
+                            key_prefix="superset_results", db=1)
 '''
 RESULTS_BACKEND = {
     **CACHE_CONFIG,
@@ -151,20 +165,21 @@ RESULTS_BACKEND = {
 '''
 
 THUMBNAIL_CACHE_CONFIG = {
-   **CACHE_CONFIG,
-   'CACHE_DEFAULT_TIMEOUT': 24*60*60,
-   'CACHE_KEY_PREFIX': 'thumbnail_',
-   'CACHE_NO_NULL_WARNING': True,
+    **CACHE_CONFIG,
+    'CACHE_DEFAULT_TIMEOUT': 24 * 60 * 60,
+    'CACHE_KEY_PREFIX': 'thumbnail_',
+    'CACHE_NO_NULL_WARNING': True,
 }
 
+
 class CeleryConfig(object):
-    broker_url = CACHE_CONFIG['CACHE_REDIS_URL'] #'redis://localhost:6379/0'
+    broker_url = CACHE_CONFIG['CACHE_REDIS_URL']  # 'redis://localhost:6379/0'
     imports = (
         'superset.sql_lab',
         'superset.tasks',
         'superset.tasks.thumbnails'
     )
-    result_backend = CACHE_CONFIG['CACHE_REDIS_URL']#'redis://localhost:6379/0'
+    result_backend = CACHE_CONFIG['CACHE_REDIS_URL']  # 'redis://localhost:6379/0'
     worker_log_level = 'DEBUG'
     worker_prefetch_multiplier = 10
     task_acks_late = True
@@ -180,10 +195,10 @@ class CeleryConfig(object):
         }
     }
     beat_schedule = {
-        #'email_reports.schedule_hourly': {
+        # 'email_reports.schedule_hourly': {
         #    'task': 'email_reports.schedule_hourly',
         #    'schedule': crontab(minute='1', hour='*'),
-        #},
+        # },
         "reports.prune_log": {
             "task": "reports.prune_log",
             "schedule": crontab(minute=10, hour=0),
@@ -203,6 +218,7 @@ class CeleryConfig(object):
         }
     }
 
+
 '''
 CELERYBEAT_SCHEDULE = {
     'cache-warmup-hourly': {
@@ -218,15 +234,31 @@ CELERYBEAT_SCHEDULE = {
 '''
 CELERY_CONFIG = CeleryConfig
 
-
+TALISMAN_ENABLED = False
+TALISMAN_CONFIG = {
+    "force_https": False,
+    "content_security_policy": {
+        "default-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+        "img-src": ["'self'",
+                    "data:",
+                    "blob:",
+                    "*"],
+        "worker-src": ["'self'", "blob:"],
+        "connect-src": ["'self'",
+                        "https://api.mapbox.com",
+                        "https://events.mapbox.com",
+                        "https://zakupki.yanao.ru"],
+        "object-src": "'none'",
+    }
+}
 
 EXTRA_CATEGORICAL_COLOR_SCHEMES = [
-{
-     "id": 'Yamal AUTODOR',
-     "description": '',
-     "label": 'Autodor Colors',
-     "isDefault": False,
-     "colors": ['#1C1D1C', '#F26635', '#4D4E4D', '#EF8050', '#777777', '#F4A27C', '#A4A4A4', '#F8BEA4']
-     #"colors":['#1C1D1C', '#4D4E4D', '#777777', '#A4A4A4', '#F26635', '#EF8050', '#F4A27C', '#F8BEA4']
- }]
-
+    {
+        "id": 'Yamal AUTODOR',
+        "description": '',
+        "label": 'Autodor Colors',
+        "isDefault": False,
+        "colors": ['#1C1D1C', '#F26635', '#4D4E4D', '#EF8050', '#777777', '#F4A27C',
+                   '#A4A4A4', '#F8BEA4']
+        # "colors":['#1C1D1C', '#4D4E4D', '#777777', '#A4A4A4', '#F26635', '#EF8050', '#F4A27C', '#F8BEA4']
+    }]
