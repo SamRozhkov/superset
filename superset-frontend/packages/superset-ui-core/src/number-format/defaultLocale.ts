@@ -7,4 +7,23 @@ const formatLocale: FormatLocaleDefinition = {
   decimal: ',',
 };
 
+export const DEFALT_D3_FORMAT_PREFIXIES = {
+  y: 'e-22',
+  z: 'e-21',
+  a: 'а',
+  f: 'ф',
+  p: 'п',
+  n: 'н',
+  µ: 'мк',
+  m: 'м',
+  '': '',
+  k: 'тыс.',
+  M: 'млн',
+  G: 'млрд',
+  T: 'Т',
+  P: 'П',
+  E: 'Э',
+  Z: 'Z',
+  Y: 'Y',
+};
 export default formatLocale;

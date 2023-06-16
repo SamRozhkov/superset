@@ -85,7 +85,7 @@ APP_ICON = "/static/assets/images/superset-logo-horiz-beta.png"
 
 DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
-AUTH_TYPE = AUTH_LDAP
+#AUTH_TYPE = AUTH_LDAP
 # AUTH_TYPE = AUTH_DB
 
 AUTH_LDAP_SERVER = "ldap://YG.LOC"
@@ -203,10 +203,10 @@ class CeleryConfig(object):
             "task": "reports.prune_log",
             "schedule": crontab(minute=10, hour=0),
         },
-        'reports.scheduler': {
-            'task': 'reports.scheduler',
-            'schedule': crontab(minute='*', hour='*'),
-        },
+        #'reports.scheduler': {
+        #    'task': 'reports.scheduler',
+        #    'schedule': crontab(minute='*', hour='*'),
+        #},
         'cache-warmup-hourly': {
             'task': 'cache-warmup',
             'schedule': crontab(minute="*/20", hour='*'),

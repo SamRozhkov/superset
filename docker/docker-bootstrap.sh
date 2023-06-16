@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-#apt-get update && apt-get install -y libldap2-dev libsasl2-dev
+apt-get update && apt-get install -y libldap2-dev libsasl2-dev
 
 set -eo pipefail
 

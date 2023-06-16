@@ -19,6 +19,7 @@
 import { ExtensibleFunction } from '../models';
 import { isRequired } from '../utils';
 import { NumberFormatFunction } from './types';
+import { DEFALT_D3_FORMAT_PREFIXIES } from "./defaultLocale";
 
 export const PREVIEW_VALUE = 12345.432;
 
@@ -47,6 +48,8 @@ class NumberFormatter extends ExtensibleFunction {
 
   isInvalid: boolean;
 
+  prefixies: any;
+
   constructor(config: NumberFormatterConfig) {
     super((value: number) => this.format(value));
 
@@ -62,6 +65,7 @@ class NumberFormatter extends ExtensibleFunction {
     this.description = description;
     this.formatFunc = formatFunc;
     this.isInvalid = isInvalid;
+    this.prefixies = DEFALT_D3_FORMAT_PREFIXIES;
   }
 
   format(value: number | null | undefined) {
@@ -75,7 +79,15 @@ class NumberFormatter extends ExtensibleFunction {
       return '-∞';
     }
 
-    return this.formatFunc(value);
+    let v = this.formatFunc(value);
+    if (this.id.endsWith('s')) {
+      let p = v.slice(v.length - 1, v.length);
+      let replace_value = this.prefixies[p];
+      if (replace_value) {
+        v = v.replace(p, replace_value);
+      }
+    }
+    return v;
   }
 
   preview(value = PREVIEW_VALUE) {
