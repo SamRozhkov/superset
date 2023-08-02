@@ -19,7 +19,10 @@
 import { ExtensibleFunction } from '../models';
 import { isRequired } from '../utils';
 import { NumberFormatFunction } from './types';
-import { DEFALT_D3_FORMAT_PREFIXIES } from './defaultLocale';
+import {
+  DEFALT_D3_FORMAT_PREFIXIES,
+  FormatLocalePrefixies,
+} from './defaultLocale';
 
 export const PREVIEW_VALUE = 12345.432;
 
@@ -48,7 +51,7 @@ class NumberFormatter extends ExtensibleFunction {
 
   isInvalid: boolean;
 
-  prefixies: any;
+  prefixies: FormatLocalePrefixies;
 
   constructor(config: NumberFormatterConfig) {
     super((value: number) => this.format(value));

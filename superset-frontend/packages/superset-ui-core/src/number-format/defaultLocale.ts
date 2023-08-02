@@ -7,7 +7,26 @@ const formatLocale: FormatLocaleDefinition = {
   decimal: ',',
 };
 
-export const DEFALT_D3_FORMAT_PREFIXIES = {
+export interface FormatLocalePrefixies {
+  y: string;
+  z: string;
+  a: string;
+  f: string;
+  p: string;
+  n: string;
+  µ: string;
+  m: string;
+  '': string;
+  k: string;
+  M: string;
+  G: string;
+  T: string;
+  P: string;
+  E: string;
+  Z: string;
+  Y: string;
+}
+export const DEFALT_D3_FORMAT_PREFIXIES: FormatLocalePrefixies = {
   y: 'e-22',
   z: 'e-21',
   a: 'а',
