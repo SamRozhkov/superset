@@ -21,6 +21,9 @@ EMAIL_REPORTS_SUBJECT_PREFIX = 'Отчет'
 VKTEAM_API_TOKEN = '001.0728848750.2833988086:1000000015'
 VKTEAM_URL = 'https://api.vkteams.yanao.ru/bot/v1/'
 
+TELEGRAM_API_TOKEN = '6363410991:AAF_kPuvNgI5CsKVLz451q-CU4DHTN6oYEE'
+TELEGRAM_URL = 'https://api.telegram.org/bot'
+
 WEBDRIVER_TYPE = "chrome"
 WEBDRIVER_OPTION_ARGS = [
     "--force-device-scale-factor=2.0",
@@ -204,10 +207,10 @@ class CeleryConfig(object):
             "task": "reports.prune_log",
             "schedule": crontab(minute=10, hour=0),
         },
-        #'reports.scheduler': {
-        #    'task': 'reports.scheduler',
-        #    'schedule': crontab(minute='*', hour='*'),
-        #},
+        'reports.scheduler': {
+            'task': 'reports.scheduler',
+            'schedule': crontab(minute='*', hour='*'),
+        },
         'cache-warmup-hourly': {
             'task': 'cache-warmup',
             'schedule': crontab(minute="*/20", hour='*'),

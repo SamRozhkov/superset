@@ -20,6 +20,7 @@ from superset.reports.notifications.base import BaseNotification, NotificationCo
 from superset.reports.notifications.email import EmailNotification
 from superset.reports.notifications.slack import SlackNotification
 from superset.reports.notifications.vkteam import VkteamNotification
+from superset.reports.notifications.telegram import TelegramNotification
 
 def create_notification(
     recipient: ReportRecipients, notification_content: NotificationContent

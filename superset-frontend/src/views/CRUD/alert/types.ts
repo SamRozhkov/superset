@@ -117,4 +117,5 @@ export enum RecipientIconName {
   Email = 'Email',
   Slack = 'Slack',
   VKTeam = 'VKTeam',
+  Telegram = 'Telegram',
 }
