@@ -1,3 +1,4 @@
 python-ldap == 3.4.2
 trino
 clickhouse-connect == 0.5.14
+pymssql == 2.1.5
