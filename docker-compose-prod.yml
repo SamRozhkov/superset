@@ -49,7 +49,7 @@ services:
     restart: unless-stopped
     ports:
       - 8088:8088
-    #depends_on: *superset-depends-on
+    depends_on: *superset-depends-on
     volumes: *superset-volumes
 
   superset-init:
@@ -57,9 +57,11 @@ services:
     container_name: superset_init
     command: ["/app/docker/docker-init.sh"]
     env_file: docker/.env-prod
-    #depends_on: *superset-depends-on
+    depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
+    healthcheck:
+      disable: true
 
   superset-worker:
     image: *superset-image
@@ -67,9 +69,11 @@ services:
     command: ["/app/docker/docker-bootstrap.sh", "worker"]
     env_file: docker/.env-prod
     restart: unless-stopped
-    #depends_on: *superset-depends-on
+    depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A superset.tasks.celery_app:app inspect ping"]
 
   superset-worker-beat:
     image: *superset-image
@@ -77,9 +81,11 @@ services:
     command: ["/app/docker/docker-bootstrap.sh", "beat"]
     env_file: docker/.env-prod
     restart: unless-stopped
-    #depends_on: *superset-depends-on
+    depends_on: *superset-depends-on
     user: "root"
     volumes: *superset-volumes
+    healthcheck:
+      disable: true
 
 volumes:
   superset_home:
