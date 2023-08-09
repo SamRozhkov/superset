@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-apt-get update && apt-get install -y libldap2-dev libsasl2-dev
+#apt-get update && apt-get install -y libldap2-dev libsasl2-dev
 
 set -eo pipefail
 
@@ -37,7 +37,6 @@ else
 fi
 
 if [[ "${1}" == "worker" ]]; then
-  sh /app/docker/docker-worker-chrome-install.sh
   echo "Starting Celery worker..."
   celery --app=superset.tasks.celery_app:app worker -O fair -l INFO
 elif [[ "${1}" == "beat" ]]; then
