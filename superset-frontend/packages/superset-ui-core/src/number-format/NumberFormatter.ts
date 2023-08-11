@@ -87,7 +87,7 @@ class NumberFormatter extends ExtensibleFunction {
       const p = v.slice(v.length - 1, v.length);
       const replace_value = this.prefixies[p];
       if (replace_value) {
-        v = v.replace(p, replace_value);
+        v = v.replace(p, ` ${replace_value}`);
       }
     }
     return v;
