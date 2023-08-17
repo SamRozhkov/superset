@@ -1,7 +1,7 @@
 import os
 from typing import Optional
 
-#from superset.stats_logger import StatsdStatsLogger
+from superset.stats_logger import StatsdStatsLogger
 
 from flask_appbuilder.security.manager import AUTH_LDAP, AUTH_DB
 from celery.schedules import crontab
@@ -122,8 +122,7 @@ AUTH_LDAP_GROUP_FIELD = "memberOf"
 # AUTH_ROLES_SYNC_AT_LOGIN = True
 PERMANENT_SESSION_LIFETIME = 1800
 
-REDIS_HOST = 'redis'
-    #'10.12.4.253'
+REDIS_HOST = 'redis'#'10.12.4.253'
 REDIS_PORT = 6379
 
 CACHE_CONFIG = {
@@ -271,4 +270,4 @@ EXTRA_CATEGORICAL_COLOR_SCHEMES = [
     }]
 
 
-#STATS_LOGGER = StatsdStatsLogger(host='10.31.21.17', port=2015, prefix='superset')
+STATS_LOGGER = StatsdStatsLogger(host='10.12.3.150', port=8125, prefix='superset')
