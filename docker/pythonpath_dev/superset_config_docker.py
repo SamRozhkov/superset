@@ -92,11 +92,14 @@ MAPBOX_API_KEY = "pk.eyJ1IjoiaXRhcHBhcmF0IiwiYSI6ImNsMXVhOXJwMTA4YnczY21tczdmNG4
 DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
 #AUTH_TYPE = AUTH_LDAP
-# AUTH_TYPE = AUTH_DB
+AUTH_TYPE = AUTH_DB
 
 AUTH_LDAP_SERVER = "ldap://YG.LOC"
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public"
+RECAPTCHA_PUBLIC_KEY="reCAPTCHA_6LeeU8snAAAAAAsVR0_jYXvofgGdxNwmp01hI6N-"
+    #"6LeeU8snAAAAAAsVR0_jYXvofgGdxNwmp01hI6N-"
+    #"6LeeU8snAAAAAJ9BovO5y30eSpQK-yiZlHn948fP"
 AUTH_LDAP_BIND_USER = "CN=superset,OU=Сервис аккаунты,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
 AUTH_LDAP_SEARCH = "OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
 # AUTH_LDAP_UID_FIELD = "sAMAccountName"
