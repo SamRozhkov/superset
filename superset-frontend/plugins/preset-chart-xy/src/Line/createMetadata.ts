@@ -20,6 +20,8 @@
 import { t, ChartMetadata } from '@superset-ui/core';
 import thumbnail from './images/thumbnail.png';
 
+export const TS_REGEX = /(\d{4}-\d{2}-\d{2})[\sT](\d{2}:\d{2}:\d{2}\.?\d*).*/;
+
 export default function createMetadata(useLegacyApi = false) {
   return new ChartMetadata({
     description: '',

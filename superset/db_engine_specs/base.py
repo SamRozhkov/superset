@@ -354,8 +354,11 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     # This set will give the keywords for data limit statements
     # to consider for the engines with TOP SQL parsing
     top_keywords: Set[str] = {"TOP"}
-    # A set of disallowed connection query parameters
-    disallow_uri_query_params: Set[str] = set()
+    # A set of disallowed connection query parameters by driver name
+    disallow_uri_query_params: Dict[str, Set[str]] = {}
+    # A Dict of query parameters that will always be used on every connection
+    # by driver name
+    enforce_uri_query_params: Dict[str, Dict[str, Any]] = {}
 
     force_column_alias_quotes = False
     arraysize = 0
@@ -630,7 +633,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         time_grain_expressions.update(grain_addon_expressions.get(cls.engine, {}))
         denylist: List[str] = current_app.config["TIME_GRAIN_DENYLIST"]
         for key in denylist:
-            time_grain_expressions.pop(key)
+            time_grain_expressions.pop(key, None)
 
         return dict(
             sorted(
@@ -821,6 +824,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
                 if word.upper() in cls.select_keywords
             ]
             first_select = selects[0]
+            if tokens[first_select + 1].upper() == "DISTINCT":
+                first_select += 1
+
             tokens.insert(first_select + 1, "TOP")
             tokens.insert(first_select + 2, str(final_limit))
 
@@ -994,8 +1000,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
     def adjust_database_uri(  # pylint: disable=unused-argument
         cls,
         uri: URL,
-        selected_schema: Optional[str],
-    ) -> URL:
+        connect_args: Dict[str, Any],
+        selected_schema: Optional[str] = None,
+    ) -> Tuple[URL, Dict[str, Any]]:
         """
         Return a modified URL with a new database component.
 
@@ -1013,8 +1020,16 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
         Some database drivers like Presto accept '{catalog}/{schema}' in
         the database component of the URL, that can be handled here.
+
+        Currently, changing the catalog is not supported. The method accepts a catalog so
+        that when catalog support is added to Superset the interface remains the same.
+        This is important because DB engine specs can be installed from 3rd party
+        packages.
         """
-        return uri
+        return uri, {
+            **connect_args,
+            **cls.enforce_uri_query_params.get(uri.get_driver_name(), {}),
+        }
 
     @classmethod
     def patch(cls) -> None:
@@ -1153,7 +1168,7 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
         schema: Optional[str],
         database: Database,
         query: Select,
-        columns: Optional[List[Dict[str, str]]] = None,
+        columns: Optional[List[Dict[str, Any]]] = None,
     ) -> Optional[Select]:
         """
         Add a where clause to a query to reference only the most recent partition
@@ -1734,9 +1749,9 @@ class BaseEngineSpec:  # pylint: disable=too-many-public-methods
 
         :param sqlalchemy_uri:
         """
-        if existing_disallowed := cls.disallow_uri_query_params.intersection(
-            sqlalchemy_uri.query
-        ):
+        if existing_disallowed := cls.disallow_uri_query_params.get(
+            sqlalchemy_uri.get_driver_name(), set()
+        ).intersection(sqlalchemy_uri.query):
             raise ValueError(f"Forbidden query parameter(s): {existing_disallowed}")
 
 
