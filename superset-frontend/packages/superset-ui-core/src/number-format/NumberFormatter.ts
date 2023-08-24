@@ -84,10 +84,8 @@ class NumberFormatter extends ExtensibleFunction {
 
     let v = this.formatFunc(value);
     if (this.id.endsWith('s')) {
-
       const char_position = v.search('[a-zA-Z]');
       const p = v.charAt(char_position);
-
       const replace_value = this.prefixies[p];
       if (replace_value) {
         v = v.replace(p, ` ${replace_value}`);
