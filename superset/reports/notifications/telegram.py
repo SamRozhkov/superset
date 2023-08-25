@@ -43,10 +43,10 @@ class TelegramNotification(BaseNotification):  # pylint: disable=too-few-public-
                 users_string_list = re.split(r",|\s|;", to)
 
             for user in users_string_list:
-                requests.post(f'{url}{token}/sendDocument', params={
+                requests.post(f'{url}{token}/sendPhoto', params={
                     'chat_id': user,
-                    'caption': text
-                }, files={"document": self._content.screenshots[0]})
+                    'caption': text,
+                }, files={"photo": self._content.screenshots[0]})
 
             logger.info('Report sent to Telegram')
         except Exception as ex:
