@@ -1,5 +1,6 @@
 import os
-from typing import Optional
+from typing import Optional, Literal
+from datetime import timedelta
 
 from superset.stats_logger import StatsdStatsLogger
 
@@ -67,9 +68,9 @@ FEATURE_FLAGS = {
     "ENABLE_TEMPLATE_PROCESSING": True,
     "ENABLE_TEMPLATE_REMOVE_FILTERS": True,
     "DASHBOARD_CACHE": True,
-    "UX_BETA": False,
+    "UX_BETA": True,
     "TAGGING_SYSTEM": True,
-    # "GLOBAL_ASYNC_QUERIES": True,
+    "GLOBAL_ASYNC_QUERIES": True,
     "DASHBOARD_NATIVE_FILTERS_SET": True,
     "DASHBOARD_FILTERS_EXPERIMENTAL": True,
     "RLS_IN_SQLLAB": True,
@@ -186,7 +187,7 @@ class CeleryConfig(object):
     imports = (
         'superset.sql_lab',
         'superset.tasks',
-        'superset.tasks.thumbnails'
+        'superset.tasks.thumbnails',
     )
     result_backend = CACHE_CONFIG['CACHE_REDIS_URL']  # 'redis://localhost:6379/0'
     worker_log_level = 'DEBUG'
@@ -271,6 +272,35 @@ EXTRA_CATEGORICAL_COLOR_SCHEMES = [
                    '#A4A4A4', '#F8BEA4']
         # "colors":['#1C1D1C', '#4D4E4D', '#777777', '#A4A4A4', '#F26635', '#EF8050', '#F4A27C', '#F8BEA4']
     }]
+
+
+# Global async query config options.
+# Requires GLOBAL_ASYNC_QUERIES feature flag to be enabled.
+
+GLOBAL_ASYNC_QUERIES_REDIS_CONFIG = {
+    "port": 6379,
+    "host": "redis",
+    "password": "",
+    "db": 2,
+    "ssl": False,
+}
+
+GLOBAL_ASYNC_QUERIES_REDIS_STREAM_PREFIX = "async-events-"
+GLOBAL_ASYNC_QUERIES_REDIS_STREAM_LIMIT = 1000
+GLOBAL_ASYNC_QUERIES_REDIS_STREAM_LIMIT_FIREHOSE = 1000000
+GLOBAL_ASYNC_QUERIES_JWT_COOKIE_NAME = "async-token"
+GLOBAL_ASYNC_QUERIES_JWT_COOKIE_SECURE = False
+GLOBAL_ASYNC_QUERIES_JWT_COOKIE_SAMESITE: Optional[
+    Literal["None", "Lax", "Strict"]
+] = None
+GLOBAL_ASYNC_QUERIES_JWT_COOKIE_DOMAIN = None
+GLOBAL_ASYNC_QUERIES_JWT_SECRET = "sdcp471J60KDgN6p8dOqieTtqUDaBiwFnd59+JJYLK7vbaBMEo86kpOi"
+GLOBAL_ASYNC_QUERIES_TRANSPORT = "polling"
+    #"ws"
+GLOBAL_ASYNC_QUERIES_POLLING_DELAY = int(
+    timedelta(milliseconds=500).total_seconds() * 1000
+)
+GLOBAL_ASYNC_QUERIES_WEBSOCKET_URL = "ws://127.0.0.1:8080/"
 
 
 STATS_LOGGER = StatsdStatsLogger(host='10.12.3.150', port=8125, prefix='superset')
