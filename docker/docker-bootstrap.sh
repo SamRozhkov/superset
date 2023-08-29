@@ -38,7 +38,8 @@ fi
 
 if [[ "${1}" == "worker" ]]; then
   echo "Starting Celery worker..."
-  celery --app=superset.tasks.celery_app:app worker -O fair -l INFO
+  #--concurrency=10
+  celery --app=superset.tasks.celery_app:app worker --pool=prefork -O fair -l INFO
 elif [[ "${1}" == "beat" ]]; then
   echo "Starting Celery beat..."
   celery --app=superset.tasks.celery_app:app beat --pidfile /tmp/celerybeat.pid -l INFO -s "${SUPERSET_HOME}"/celerybeat-schedule
