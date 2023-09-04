@@ -83,6 +83,7 @@ import { PivotTableChartPlugin as PivotTableChartPluginV2 } from '@superset-ui/p
 import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
 import FilterBoxChartPlugin from '../FilterBox/FilterBoxChartPlugin';
 import TimeTableChartPlugin from '../TimeTable';
+import IndicatorChartPlugin from 'superset-indicator-chart'
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -170,6 +171,7 @@ export default class MainPreset extends Preset {
         new EchartsTreeChartPlugin().configure({ key: 'tree_chart' }),
         new EchartsSunburstChartPlugin().configure({ key: 'sunburst_v2' }),
         new HandlebarsChartPlugin().configure({ key: 'handlebars' }),
+        new IndicatorChartPlugin().configure({ key: 'indicator_chart' }),
         ...experimentalplugins,
       ],
     });
