@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 import logging
-from typing import Any, Dict
+from typing import Any
 
 from flask import request, Response
 from flask_appbuilder.api import expose, permission_name, protect, rison, safe
@@ -24,9 +24,6 @@ from flask_appbuilder.models.sqla.interface import SQLAInterface
 from flask_babel import ngettext
 from marshmallow import ValidationError
 
-from superset.annotation_layers.annotations.commands.bulk_delete import (
-    BulkDeleteAnnotationCommand,
-)
 from superset.annotation_layers.annotations.commands.create import (
     CreateAnnotationCommand,
 )
@@ -34,7 +31,6 @@ from superset.annotation_layers.annotations.commands.delete import (
     DeleteAnnotationCommand,
 )
 from superset.annotation_layers.annotations.commands.exceptions import (
-    AnnotationBulkDeleteFailedError,
     AnnotationCreateFailedError,
     AnnotationDeleteFailedError,
     AnnotationInvalidError,
@@ -127,7 +123,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
 
     @staticmethod
     def _apply_layered_relation_to_rison(  # pylint: disable=invalid-name
-        layer_id: int, rison_parameters: Dict[str, Any]
+        layer_id: int, rison_parameters: dict[str, Any]
     ) -> None:
         if "filters" not in rison_parameters:
             rison_parameters["filters"] = []
@@ -135,7 +131,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
             {"col": "layer", "opr": "rel_o_m", "value": layer_id}
         )
 
-    @expose("/<int:pk>/annotation/", methods=["GET"])
+    @expose("/<int:pk>/annotation/", methods=("GET",))
     @protect()
     @safe
     @permission_name("get")
@@ -196,7 +192,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
         self._apply_layered_relation_to_rison(pk, kwargs["rison"])
         return self.get_list_headless(**kwargs)
 
-    @expose("/<int:pk>/annotation/<int:annotation_id>", methods=["GET"])
+    @expose("/<int:pk>/annotation/<int:annotation_id>", methods=("GET",))
     @protect()
     @safe
     @permission_name("get")
@@ -253,7 +249,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
         self._apply_layered_relation_to_rison(pk, kwargs["rison"])
         return self.get_headless(annotation_id, **kwargs)
 
-    @expose("/<int:pk>/annotation/", methods=["POST"])
+    @expose("/<int:pk>/annotation/", methods=("POST",))
     @protect()
     @safe
     @statsd_metrics
@@ -321,7 +317,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
             )
             return self.response_422(message=str(ex))
 
-    @expose("/<int:pk>/annotation/<int:annotation_id>", methods=["PUT"])
+    @expose("/<int:pk>/annotation/<int:annotation_id>", methods=("PUT",))
     @protect()
     @safe
     @statsd_metrics
@@ -396,7 +392,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
             )
             return self.response_422(message=str(ex))
 
-    @expose("/<int:pk>/annotation/<int:annotation_id>", methods=["DELETE"])
+    @expose("/<int:pk>/annotation/<int:annotation_id>", methods=("DELETE",))
     @protect()
     @safe
     @statsd_metrics
@@ -438,7 +434,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
               $ref: '#/components/responses/500'
         """
         try:
-            DeleteAnnotationCommand(annotation_id).run()
+            DeleteAnnotationCommand([annotation_id]).run()
             return self.response(200, message="OK")
         except AnnotationNotFoundError:
             return self.response_404()
@@ -451,7 +447,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
             )
             return self.response_422(message=str(ex))
 
-    @expose("/<int:pk>/annotation/", methods=["DELETE"])
+    @expose("/<int:pk>/annotation/", methods=("DELETE",))
     @protect()
     @safe
     @statsd_metrics
@@ -495,7 +491,7 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
         """
         item_ids = kwargs["rison"]
         try:
-            BulkDeleteAnnotationCommand(item_ids).run()
+            DeleteAnnotationCommand(item_ids).run()
             return self.response(
                 200,
                 message=ngettext(
@@ -506,5 +502,5 @@ class AnnotationRestApi(BaseSupersetModelRestApi):
             )
         except AnnotationNotFoundError:
             return self.response_404()
-        except AnnotationBulkDeleteFailedError as ex:
+        except AnnotationDeleteFailedError as ex:
             return self.response_422(message=str(ex))

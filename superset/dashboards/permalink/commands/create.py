@@ -18,7 +18,7 @@ import logging
 
 from sqlalchemy.exc import SQLAlchemyError
 
-from superset.dashboards.dao import DashboardDAO
+from superset.daos.dashboard import DashboardDAO
 from superset.dashboards.permalink.commands.base import BaseDashboardPermalinkCommand
 from superset.dashboards.permalink.exceptions import DashboardPermalinkCreateFailedError
 from superset.dashboards.permalink.types import DashboardPermalinkState
@@ -49,9 +49,9 @@ class CreateDashboardPermalinkCommand(BaseDashboardPermalinkCommand):
     def run(self) -> str:
         self.validate()
         try:
-            DashboardDAO.get_by_id_or_slug(self.dashboard_id)
+            dashboard = DashboardDAO.get_by_id_or_slug(self.dashboard_id)
             value = {
-                "dashboardId": self.dashboard_id,
+                "dashboardId": str(dashboard.uuid),
                 "state": self.state,
             }
             user_id = get_user_id()

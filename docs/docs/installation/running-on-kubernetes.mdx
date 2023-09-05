@@ -1,13 +1,13 @@
 ---
-title: Running on Kubernetes
+title: Installing on Kubernetes
 hide_title: true
-sidebar_position: 12
+sidebar_position: 3
 version: 1
 ---
 
-## Running on Kubernetes
+## Installing on Kubernetes
 
-Running on Kubernetes is supported with the provided [Helm](https://helm.sh/) chart found in the official [Superset helm repository](https://apache.github.io/superset/index.yaml).
+Running Superset on Kubernetes is supported with the provided [Helm](https://helm.sh/) chart found in the official [Superset helm repository](https://apache.github.io/superset/index.yaml).
 
 ### Prerequisites
 
@@ -121,6 +121,10 @@ init:
       . {{ .Values.configMountPath }}/superset_init.sh
 ```
 
+:::note
+Superset uses [Scarf Gateway](https://about.scarf.sh/scarf-gateway) to collect telmetry data to better understand and support the need for patch versions of Sueprset. Scarf purges PII and provides aggregated statistics. Superset users can easily opt out of analytics in various ways documented [here](https://docs.scarf.sh/gateway/#do-not-track). However, if you wish to opt-out of this in your Helm-based installation, you can simply edit your `helm/superset/values.yaml` file and remove `apachesuperset.docker.scarf.sh/` from the `repository` field, so that it's simply pulling `apache/superset`
+:::
+
 #### Dependencies
 
 Install additional packages and do any other bootstrap configuration in the bootstrap script.
@@ -141,9 +145,8 @@ connect to those datasources in your Superset installation:
 ```yaml
 bootstrapScript: |
   #!/bin/bash
-  pip install psycopg2==2.9.1 \
-    redis==3.2.1 \
-    sqlalchemy-bigquery==1.5.0 \
+  pip install psycopg2==2.9.6 \
+    sqlalchemy-bigquery==1.6.1 \
     elasticsearch-dbapi==0.2.5 &&\
   if [ ! -f ~/bootstrap ]; then echo "Running Superset with uid {{ .Values.runAsUser }}" > ~/bootstrap; fi
 ```

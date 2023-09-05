@@ -220,6 +220,18 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'rowSubTotals',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show rows subtotal'),
+              default: false,
+              renderTrigger: true,
+              description: t('Display row level subtotal'),
+            },
+          },
+        ],
+        [
+          {
             name: 'colTotals',
             config: {
               type: 'CheckboxControl',
@@ -227,6 +239,18 @@ const config: ControlPanelConfig = {
               default: false,
               renderTrigger: true,
               description: t('Display column level total'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'colSubTotals',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Show columns subtotal'),
+              default: false,
+              renderTrigger: true,
+              description: t('Display column level subtotal'),
             },
           },
         ],
@@ -384,7 +408,7 @@ const config: ControlPanelConfig = {
               renderTrigger: true,
               label: t('Conditional formatting'),
               description: t('Apply conditional color formatting to metrics'),
-              mapStateToProps(explore) {
+              mapStateToProps(explore, _, chart) {
                 const values =
                   (explore?.controls?.metrics?.value as QueryFormMetric[]) ??
                   [];
@@ -393,6 +417,7 @@ const config: ControlPanelConfig = {
                 )
                   ? (explore?.datasource as Dataset)?.verbose_map
                   : explore?.datasource?.columns ?? {};
+                const chartStatus = chart?.chartStatus;
                 const metricColumn = values.map(value => {
                   if (typeof value === 'string') {
                     return { value, label: verboseMap[value] ?? value };
@@ -400,6 +425,7 @@ const config: ControlPanelConfig = {
                   return { value: value.label, label: value.label };
                 });
                 return {
+                  removeIrrelevantConditions: chartStatus === 'success',
                   columnOptions: metricColumn,
                   verboseMap,
                 };

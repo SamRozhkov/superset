@@ -16,8 +16,7 @@
 # under the License.
 # pylint: disable=invalid-name, redefined-outer-name, unused-argument, protected-access, too-many-lines
 
-import unittest
-from typing import Optional, Set
+from typing import Optional
 
 import pytest
 import sqlparse
@@ -40,7 +39,7 @@ from superset.sql_parse import (
 )
 
 
-def extract_tables(query: str) -> Set[Table]:
+def extract_tables(query: str) -> set[Table]:
     """
     Helper function to extract tables referenced in a query.
     """
@@ -1006,6 +1005,109 @@ SELECT
 FROM foo f"""
     )
     assert sql.is_select()
+
+
+def test_cte_is_select_lowercase() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+select
+  FLOOR(__time TO WEEK) AS "week",
+  name,
+  COUNT(DISTINCT user_id) AS "unique_users"
+FROM "druid"."my_table"
+GROUP BY 1,2
+)
+select
+  f.week,
+  f.name,
+  f.unique_users
+FROM foo f"""
+    )
+    assert sql.is_select()
+
+
+def test_cte_insert_is_not_select() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+        INSERT INTO foo (id) VALUES (1) RETURNING 1
+        ) select * FROM foo f"""
+    )
+    assert sql.is_select() is False
+
+
+def test_cte_delete_is_not_select() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+        DELETE FROM foo RETURNING *
+        ) select * FROM foo f"""
+    )
+    assert sql.is_select() is False
+
+
+def test_cte_is_not_select_lowercase() -> None:
+    """
+    Some CTEs with lowercase select are not correctly identified as SELECTS.
+    """
+    sql = ParsedQuery(
+        """WITH foo AS(
+        insert into foo (id) values (1) RETURNING 1
+        ) select * FROM foo f"""
+    )
+    assert sql.is_select() is False
+
+
+def test_cte_with_multiple_selects() -> None:
+    sql = ParsedQuery(
+        "WITH a AS ( select * from foo1 ), b as (select * from foo2) SELECT * FROM a;"
+    )
+    assert sql.is_select()
+
+
+def test_cte_with_multiple_with_non_select() -> None:
+    sql = ParsedQuery(
+        """WITH a AS (
+        select * from foo1
+        ), b as (
+        update foo2 set id=2
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+    sql = ParsedQuery(
+        """WITH a AS (
+         update foo2 set name=2
+         ),
+        b as (
+        select * from foo1
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+    sql = ParsedQuery(
+        """WITH a AS (
+         update foo2 set name=2
+         ),
+        b as (
+        update foo1 set name=2
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
+    sql = ParsedQuery(
+        """WITH a AS (
+        INSERT INTO foo (id) VALUES (1)
+        ),
+        b as (
+        select 1
+        ) SELECT * FROM a"""
+    )
+    assert sql.is_select() is False
 
 
 def test_unknown_select() -> None:

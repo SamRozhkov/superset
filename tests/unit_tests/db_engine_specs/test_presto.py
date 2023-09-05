@@ -15,7 +15,7 @@
 # specific language governing permissions and limitations
 # under the License.
 from datetime import datetime
-from typing import Any, Dict, Optional, Type
+from typing import Any, Optional
 from unittest import mock
 
 import pytest
@@ -24,6 +24,7 @@ from pyhive.sqlalchemy_presto import PrestoDialect
 from sqlalchemy import sql, text, types
 from sqlalchemy.engine.url import make_url
 
+from superset.superset_typing import ResultSetColumnType
 from superset.utils.core import GenericDataType
 from tests.unit_tests.db_engine_specs.utils import (
     assert_column_spec,
@@ -39,17 +40,17 @@ from tests.unit_tests.db_engine_specs.utils import (
         (
             "TIMESTAMP",
             datetime(2022, 1, 1, 1, 23, 45, 600000),
-            "TIMESTAMP '2022-01-01 01:23:45.600'",
+            "TIMESTAMP '2022-01-01 01:23:45.600000'",
         ),
         (
             "TIMESTAMP WITH TIME ZONE",
             datetime(2022, 1, 1, 1, 23, 45, 600000),
-            "TIMESTAMP '2022-01-01 01:23:45.600'",
+            "TIMESTAMP '2022-01-01 01:23:45.600000'",
         ),
         (
             "TIMESTAMP WITH TIME ZONE",
             datetime(2022, 1, 1, 1, 23, 45, 600000, tzinfo=pytz.UTC),
-            "TIMESTAMP '2022-01-01 01:23:45.600+00:00'",
+            "TIMESTAMP '2022-01-01 01:23:45.600000+00:00'",
         ),
     ],
 )
@@ -77,14 +78,37 @@ def test_convert_dttm(
 )
 def test_get_column_spec(
     native_type: str,
-    sqla_type: Type[types.TypeEngine],
-    attrs: Optional[Dict[str, Any]],
+    sqla_type: type[types.TypeEngine],
+    attrs: Optional[dict[str, Any]],
     generic_type: GenericDataType,
     is_dttm: bool,
 ) -> None:
     from superset.db_engine_specs.presto import PrestoEngineSpec as spec
 
     assert_column_spec(spec, native_type, sqla_type, attrs, generic_type, is_dttm)
+
+
+def test_get_schema_from_engine_params() -> None:
+    """
+    Test the ``get_schema_from_engine_params`` method.
+    """
+    from superset.db_engine_specs.presto import PrestoEngineSpec
+
+    assert (
+        PrestoEngineSpec.get_schema_from_engine_params(
+            make_url("presto://localhost:8080/hive/default"),
+            {},
+        )
+        == "default"
+    )
+
+    assert (
+        PrestoEngineSpec.get_schema_from_engine_params(
+            make_url("presto://localhost:8080/hive"),
+            {},
+        )
+        is None
+    )
 
 
 @mock.patch("superset.db_engine_specs.presto.PrestoEngineSpec.latest_partition")
@@ -98,10 +122,7 @@ def test_get_column_spec(
     ],
 )
 def test_where_latest_partition(
-    mock_latest_partition: Any,
-    column_type: Any,
-    column_value: str,
-    expected_value: str,
+    mock_latest_partition, column_type, column_value: Any, expected_value: str
 ) -> None:
     """
     Test the ``where_latest_partition`` method
@@ -111,7 +132,14 @@ def test_where_latest_partition(
     mock_latest_partition.return_value = (["partition_key"], [column_value])
 
     query = sql.select(text("* FROM table"))
-    columns = [{"name": "partition_key", "type": column_type}]
+    columns: list[ResultSetColumnType] = [
+        {
+            "column_name": "partition_key",
+            "name": "partition_key",
+            "type": column_type,
+            "is_dttm": False,
+        }
+    ]
 
     expected = f"""SELECT * FROM table \nWHERE "partition_key" = {expected_value}"""
     result = spec.where_latest_partition(

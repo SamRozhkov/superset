@@ -1,20 +1,7 @@
 {
   "name": "@superset-ui/legacy-preset-chart-nvd3",
-  "version": "2.1.0",
+  "version": "0.18.25",
   "description": "Superset Legacy Chart - NVD3",
-  "keywords": [
-    "superset"
-  ],
-  "homepage": "https://github.com/apache-superset/superset-ui#readme",
-  "bugs": {
-    "url": "https://github.com/apache-superset/superset-ui/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/apache-superset/superset-ui.git"
-  },
-  "license": "Apache-2.0",
-  "author": "Superset",
   "sideEffects": [
     "*.css"
   ],
@@ -24,6 +11,23 @@
     "esm",
     "lib"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/apache/superset.git",
+    "directory": "superset-frontend/packages/legacy-preset-chart-nvd3"
+  },
+  "keywords": [
+    "superset"
+  ],
+  "author": "Superset",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/apache/superset/issues"
+  },
+  "homepage": "https://github.com/apache/superset/tree/master/superset-frontend/plugins/legacy-preset-chart-nvd3#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@data-ui/xy-chart": "^0.0.84",
     "d3": "^3.5.17",
@@ -40,8 +44,5 @@
     "@superset-ui/chart-controls": "*",
     "@superset-ui/core": "*",
     "react": "^15 || ^16"
-  },
-  "publishConfig": {
-    "access": "public"
   }
 }

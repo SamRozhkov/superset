@@ -83,6 +83,7 @@ enable=
 # no Warning level messages displayed, use"--disable=all --enable=classes
 # --disable=W"
 disable=
+    no-member,  # re-enable once this no longer raises false positives. This will become redundant after the min required version is 3.11
     missing-docstring,
     duplicate-code,
     unspecified-encoding,
@@ -300,7 +301,7 @@ ignore-mixin-members=yes
 # (useful for modules/projects where namespaces are manipulated during runtime
 # and thus existing member attributes cannot be deduced by static analysis. It
 # supports qualified module names, as well as Unix pattern matching.
-ignored-modules=numpy,pandas,alembic.op,sqlalchemy,alembic.context,flask_appbuilder.security.sqla.PermissionView.role,flask_appbuilder.Model.metadata,flask_appbuilder.Base.metadata,distutils
+ignored-modules=numpy,pandas,alembic.op,sqlalchemy,alembic.context,flask_appbuilder.security.sqla.PermissionView.role,flask_appbuilder.Model.metadata,flask_appbuilder.Base.metadata
 
 # List of class names for which member attributes should not be checked (useful
 # for classes with dynamically set attributes). This supports the use of

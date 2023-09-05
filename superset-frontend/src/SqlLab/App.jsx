@@ -17,26 +17,25 @@
  * under the License.
  */
 import React from 'react';
-import { createStore, compose, applyMiddleware } from 'redux';
+import persistState from 'redux-localstorage';
 import { Provider } from 'react-redux';
-import thunkMiddleware from 'redux-thunk';
 import { hot } from 'react-hot-loader/root';
-import { ThemeProvider } from '@superset-ui/core';
-import { GlobalStyles } from 'src/GlobalStyles';
-import QueryProvider from 'src/views/QueryProvider';
 import {
+  FeatureFlag,
+  ThemeProvider,
   initFeatureFlags,
   isFeatureEnabled,
-  FeatureFlag,
-} from 'src/featureFlags';
+} from '@superset-ui/core';
+import { GlobalStyles } from 'src/GlobalStyles';
+import { setupStore } from 'src/views/store';
 import setupExtensions from 'src/setup/setupExtensions';
 import getBootstrapData from 'src/utils/getBootstrapData';
-import logger from 'src/middleware/loggerMiddleware';
+import { tableApiUtil } from 'src/hooks/apiResources/tables';
 import getInitialState from './reducers/getInitialState';
-import rootReducer from './reducers/index';
-import { initEnhancer } from '../reduxUtils';
+import { reducers } from './reducers/index';
 import App from './components/App';
 import {
+  emptyTablePersistData,
   emptyQueryResults,
   clearQueryEditors,
 } from './utils/reduxStateToLocalStorageHelper';
@@ -69,6 +68,7 @@ const sqlLabPersistStateConfig = {
         if (path === 'sqlLab') {
           subset[path] = {
             ...state[path],
+            tables: emptyTablePersistData(state[path].tables),
             queries: emptyQueryResults(state[path].queries),
             queryEditors: clearQueryEditors(state[path].queryEditors),
             unsavedQueryEditor: clearQueryEditors([
@@ -113,16 +113,39 @@ const sqlLabPersistStateConfig = {
   },
 };
 
-const store = createStore(
-  rootReducer,
+export const store = setupStore({
   initialState,
-  compose(
-    applyMiddleware(thunkMiddleware, logger),
-    initEnhancer(
-      !isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE),
-      sqlLabPersistStateConfig,
-    ),
-  ),
+  rootReducers: reducers,
+  ...(!isFeatureEnabled(FeatureFlag.SQLLAB_BACKEND_PERSISTENCE) && {
+    enhancers: [
+      persistState(
+        sqlLabPersistStateConfig.paths,
+        sqlLabPersistStateConfig.config,
+      ),
+    ],
+  }),
+});
+
+// Rehydrate server side persisted table metadata
+initialState.sqlLab.tables.forEach(
+  ({ name: table, schema, dbId, persistData }) => {
+    if (dbId && schema && table && persistData?.columns) {
+      store.dispatch(
+        tableApiUtil.upsertQueryData(
+          'tableMetadata',
+          { dbId, schema, table },
+          persistData,
+        ),
+      );
+      store.dispatch(
+        tableApiUtil.upsertQueryData(
+          'tableExtendedMetadata',
+          { dbId, schema, table },
+          {},
+        ),
+      );
+    }
+  },
 );
 
 // Highlight the navbar menu
@@ -138,15 +161,13 @@ if (sqlLabMenu) {
 }
 
 const Application = () => (
-  <QueryProvider>
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <GlobalStyles />
-        <SqlLabGlobalStyles />
-        <App />
-      </ThemeProvider>
-    </Provider>
-  </QueryProvider>
+  <Provider store={store}>
+    <ThemeProvider theme={theme}>
+      <GlobalStyles />
+      <SqlLabGlobalStyles />
+      <App />
+    </ThemeProvider>
+  </Provider>
 );
 
 export default hot(Application);

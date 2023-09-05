@@ -16,12 +16,13 @@
 # under the License.
 
 import json
-from typing import Any, Dict
+from typing import Any
 
 from sqlalchemy.orm import Session
 
 from superset import app, security_manager
 from superset.commands.exceptions import ImportFailedError
+from superset.databases.ssh_tunnel.models import SSHTunnel
 from superset.databases.utils import make_url_safe
 from superset.exceptions import SupersetSecurityException
 from superset.models.core import Database
@@ -30,7 +31,7 @@ from superset.security.analytics_db_safety import check_sqlalchemy_uri
 
 def import_database(
     session: Session,
-    config: Dict[str, Any],
+    config: dict[str, Any],
     overwrite: bool = False,
     ignore_permissions: bool = False,
 ) -> Database:
@@ -63,8 +64,15 @@ def import_database(
     # TODO (betodealmeida): move this logic to import_from_dict
     config["extra"] = json.dumps(config["extra"])
 
+    # Before it gets removed in import_from_dict
+    ssh_tunnel = config.pop("ssh_tunnel", None)
+
     database = Database.import_from_dict(session, config, recursive=False)
     if database.id is None:
         session.flush()
+
+    if ssh_tunnel:
+        ssh_tunnel["database_id"] = database.id
+        SSHTunnel.import_from_dict(session, ssh_tunnel, recursive=False)
 
     return database
