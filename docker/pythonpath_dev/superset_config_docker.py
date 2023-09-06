@@ -270,6 +270,13 @@ EXTRA_CATEGORICAL_COLOR_SCHEMES = [
         "colors": ['#1C1D1C', '#F26635', '#4D4E4D', '#EF8050', '#777777', '#F4A27C',
                    '#A4A4A4', '#F8BEA4']
         # "colors":['#1C1D1C', '#4D4E4D', '#777777', '#A4A4A4', '#F26635', '#EF8050', '#F4A27C', '#F8BEA4']
+    },{
+        "id": 'ATK Yamal',
+        "description": '',
+        "label": 'ATK Yamal Colors',
+        "isDefault": False,
+        "colors": ['#8DD7F7', '#C8C7C7', '#0065A3', '#0095CA', '#3A4859', '#E03838']
+        # "colors":['#1C1D1C', '#4D4E4D', '#777777', '#A4A4A4', '#F26635', '#EF8050', '#F4A27C', '#F8BEA4']
     }]
 
 
