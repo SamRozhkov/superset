@@ -32,13 +32,16 @@ services:
     volumes:
       - redis:/data
 
-  #db:
-  #  env_file: docker/.env-prod
-  #  image: postgres:14
-  #  container_name: superset_db
-  #  restart: unless-stopped
-  #  volumes:
-  #    - db_home:/var/lib/postgresql/data
+  db:
+    env_file: docker/.env-prod
+    image: postgres:14
+    container_name: superset_db
+    restart: unless-stopped
+    volumes:
+      - db_home:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    profiles: ['db']
 
   superset:
     env_file: docker/.env-prod
@@ -119,7 +122,7 @@ services:
 volumes:
   superset_home:
     external: false
-  #db_home:
-  #  external: false
+  db_home:
+    external: false
   redis:
     external: false
