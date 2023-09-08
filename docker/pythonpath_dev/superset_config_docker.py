@@ -278,6 +278,9 @@ TALISMAN_CONFIG = {
     }
 }
 
+#
+# Добавление цветовых схем в суперсет. Требует перезапуска контейнеров.
+#
 EXTRA_CATEGORICAL_COLOR_SCHEMES = [
     {
         "id": 'Yamal AUTODOR',
