@@ -38,7 +38,7 @@ fi
 case "${1}" in
   worker)
     echo "Starting Celery worker..."
-    celery --app=superset.tasks.celery_app:app worker -P eventlet -c 1000
+    celery --app=superset.tasks.celery_app:app worker -P eventlet -c 1000 -O fair -l INFO
     #--pool=prefork -O fair -l INFO
     ;;
   beat)
