@@ -178,7 +178,8 @@ function DashboardList(props: DashboardListProps) {
   const canExport =
     hasPerm('can_export') && isFeatureEnabled(FeatureFlag.VERSIONED_EXPORT);
 
-  const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];
+  // const initialSort = [{ id: 'changed_on_delta_humanized', desc: true }];
+  const initialSort = [{ id: 'dashboard_title', desc: false }];
 
   function openDashboardEditModal(dashboard: Dashboard) {
     setDashboardToEdit(dashboard);

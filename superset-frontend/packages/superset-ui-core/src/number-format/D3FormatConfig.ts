@@ -24,3 +24,43 @@ export const DEFAULT_D3_FORMAT: FormatLocaleDefinition = {
   grouping: [3],
   currency: ['$', ''],
 };
+
+export interface FormatLocalePrefixies {
+  y: string;
+  z: string;
+  a: string;
+  f: string;
+  p: string;
+  n: string;
+  µ: string;
+  m: string;
+  '': string;
+  k: string;
+  M: string;
+  G: string;
+  T: string;
+  P: string;
+  E: string;
+  Z: string;
+  Y: string;
+}
+
+export const DEFALT_D3_FORMAT_PREFIXIES: FormatLocalePrefixies = {
+  y: 'y',
+  z: 'z',
+  a: 'a',
+  f: 'f',
+  p: 'p',
+  n: 'n',
+  µ: 'µ',
+  m: 'm',
+  '': '',
+  k: 'тыс.',
+  M: 'млн',
+  G: 'млрд',
+  T: 'Т',
+  P: 'P',
+  E: 'E',
+  Z: 'Z',
+  Y: 'Y',
+};

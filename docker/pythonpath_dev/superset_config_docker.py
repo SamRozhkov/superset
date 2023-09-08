@@ -9,6 +9,10 @@ from celery.schedules import crontab
 from cachelib.redis import RedisCache
 from dateutil import tz
 
+from flask import Flask, redirect
+from flask_appbuilder import expose, IndexView
+from superset.superset_typing import FlaskResponse
+
 SMTP_HOST = os.environ.get('SMTP_HOST')
 SMTP_STARTTLS = os.environ.get('SMTP_STARTTLS')
 SMTP_SSL = os.environ.get('SMTP_SSL')
@@ -41,8 +45,6 @@ WEBDRIVER_OPTION_ARGS = [
     "--disable-extensions",
 ]
 
-WEBDRIVER_BASEURL = 'http://localhost:8088/'  # env('DASHBOARDS_BASE_URL')
-
 SCREENSHOT_LOCATE_WAIT = 1000
 SCREENSHOT_LOAD_WAIT = 6000
 
@@ -62,6 +64,12 @@ D3_FORMAT = {
      "thousands": "\u00a0",         # - group separator string (e.g., ",").
      "grouping": [3],          # - array of group sizes (e.g., [3]), cycled as needed.
      "currency": ["", "\u00a0\u20bd"]     # - currency prefix/suffix strings (e.g., ["$", ""])
+}
+
+D3_FORMAT_PREFIXIES = {
+  "k": 'тыс.',
+  "M": 'млн',
+  "G": 'млрд'
 }
 
 FEATURE_FLAGS = {
@@ -314,6 +322,13 @@ GLOBAL_ASYNC_QUERIES_POLLING_DELAY = int(
     timedelta(milliseconds=500).total_seconds() * 1000
 )
 GLOBAL_ASYNC_QUERIES_WEBSOCKET_URL = "ws://127.0.0.1:8080/"
+
+
+class SupersetDashboardIndexView(IndexView):
+    @expose("/")
+    def index(self) -> FlaskResponse:
+        return redirect("/dashboard/list/")
+FAB_INDEX_VIEW = f"{SupersetDashboardIndexView.__module__}.{SupersetDashboardIndexView.__name__}"
 
 
 STATS_LOGGER = StatsdStatsLogger(host='10.12.3.150', port=8125, prefix='superset')

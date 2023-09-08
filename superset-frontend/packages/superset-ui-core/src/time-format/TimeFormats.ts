@@ -25,6 +25,7 @@ const US_DATE = '%m/%d/%Y';
 const INTERNATIONAL_DATE = '%d/%m/%Y';
 const DATABASE_DATE = '%Y-%m-%d';
 const TIME = '%H:%M:%S';
+const RU_DATE = '%d.%m.%Y';
 
 const TimeFormats = {
   DATABASE_DATE,
@@ -33,6 +34,7 @@ const TimeFormats = {
   INTERNATIONAL_DATE,
   TIME,
   US_DATE,
+  RU_DATE,
 };
 
 export default TimeFormats;

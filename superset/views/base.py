@@ -451,6 +451,7 @@ def cached_common_bootstrap_data(user: User, locale: str) -> dict[str, Any]:
         "locale": locale,
         "language_pack": get_language_pack(locale),
         "d3_format": conf.get("D3_FORMAT"),
+        "d3_format_prefix": conf.get("D3_FORMAT_PREFIXIES"),
         "currencies": conf.get("CURRENCIES"),
         "feature_flags": get_feature_flags(),
         "extra_sequential_color_schemes": conf["EXTRA_SEQUENTIAL_COLOR_SCHEMES"],

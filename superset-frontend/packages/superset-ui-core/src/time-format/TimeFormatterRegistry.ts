@@ -16,6 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
+import { TimeLocaleDefinition } from 'd3-time-format';
 import { RegistryWithDefaultKey, OverwritePolicy } from '../models';
 import TimeFormats, { LOCAL_PREFIX } from './TimeFormats';
 import createD3TimeFormatter from './factories/createD3TimeFormatter';
@@ -47,7 +49,58 @@ export default class TimeFormatterRegistry extends RegistryWithDefaultKey<
     // Create new formatter if does not exist
     const useLocalTime = targetFormat.startsWith(LOCAL_PREFIX);
     const formatString = targetFormat.replace(LOCAL_PREFIX, '');
-    const formatter = createD3TimeFormatter({ formatString, useLocalTime });
+
+    const defaultLocale: TimeLocaleDefinition = {
+      dateTime: '%A, %e %B %Y г. %X',
+      date: '%d.%m.%Y',
+      time: '%H:%M:%S',
+      periods: ['AM', 'PM'],
+      days: [
+        'воскресенье',
+        'понедельник',
+        'вторник',
+        'среда',
+        'четверг',
+        'пятница',
+        'суббота',
+      ],
+      shortDays: ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб'],
+      months: [
+        'января',
+        'февраля',
+        'марта',
+        'апреля',
+        'мая',
+        'июня',
+        'июля',
+        'августа',
+        'сентября',
+        'октября',
+        'ноября',
+        'декабря',
+      ],
+      shortMonths: [
+        'янв',
+        'фев',
+        'мар',
+        'апр',
+        'май',
+        'июн',
+        'июл',
+        'авг',
+        'сен',
+        'окт',
+        'ноя',
+        'дек',
+      ],
+    };
+
+    const formatter = createD3TimeFormatter({
+      formatString,
+      useLocalTime,
+      locale: defaultLocale,
+    });
+    // const formatter = createD3TimeFormatter({ formatString, useLocalTime });
     this.registerValue(targetFormat, formatter);
 
     return formatter;

@@ -9,6 +9,7 @@ import {
 import { FormatLocaleDefinition } from 'd3-format';
 import { isPlainObject } from 'lodash';
 import { Languages } from 'src/features/home/LanguagePicker';
+import { FormatLocalePrefixies } from '@superset-ui/core/lib/number-format/defaultLocale';
 import { FlashMessage } from '../components/FlashProvider';
 
 /**
@@ -152,6 +153,7 @@ export interface CommonBootstrapData {
   theme_overrides: JsonObject;
   menu_data: MenuData;
   d3_format: Partial<FormatLocaleDefinition>;
+  d3_format_prefix: Partial<FormatLocalePrefixies>;
 }
 
 export interface BootstrapData {
