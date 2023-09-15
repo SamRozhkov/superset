@@ -95,6 +95,7 @@ FEATURE_FLAGS = {
     "RLS_FORM_QUERY_REL_FIELDS": True,
     "DASHBOARD_EDIT_CHART_IN_NEW_TAB": True,
     "DRILL_BY": True,
+    "CACHE_IMPERSONATION": True,
     #"EMBEDDABLE_CHARTS": True,
 }
 
@@ -335,3 +336,4 @@ FAB_INDEX_VIEW = f"{SupersetDashboardIndexView.__module__}.{SupersetDashboardInd
 
 
 STATS_LOGGER = StatsdStatsLogger(host='10.12.3.150', port=8125, prefix='superset')
+ENABLE_TIME_ROTATE = True
