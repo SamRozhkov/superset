@@ -195,6 +195,7 @@ function createAxisControl(axis: 'x' | 'y'): ControlSetRow[] {
         },
       },
     ],
+    ['currency_format'],
     [
       {
         name: 'logAxis',

@@ -247,7 +247,7 @@ msgstr "%s Erreur"
 #: superset-frontend/src/features/databases/DatabaseModal/index.tsx:1357
 #, fuzzy, python-format
 msgid "%s PASSWORD"
-msgstr "Mot de passe"
+msgstr "%s Mot de passe"
 
 #: superset-frontend/src/components/ImportModal/index.tsx:318
 #: superset-frontend/src/features/databases/DatabaseModal/index.tsx:1375
@@ -450,7 +450,7 @@ msgstr "jour"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/sections/advancedAnalytics.tsx:114
 msgid "1 day ago"
-msgstr ""
+msgstr "Il y a 1 jour"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/shared-controls/sharedControls.tsx:166
 #: superset-frontend/src/explore/controls.jsx:260
@@ -493,7 +493,7 @@ msgstr "semaine"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/sections/advancedAnalytics.tsx:115
 msgid "1 week ago"
-msgstr ""
+msgstr "Il y a 1 semaine"
 
 #: superset-frontend/plugins/legacy-preset-chart-nvd3/src/TimePivot/controlPanel.ts:62
 #, fuzzy
@@ -515,7 +515,7 @@ msgstr "année"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/sections/advancedAnalytics.tsx:119
 msgid "1 year ago"
-msgstr ""
+msgstr "Il y a 1 an"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/sections/advancedAnalytics.tsx:172
 #: superset-frontend/plugins/plugin-chart-echarts/src/BigNumber/BigNumberWithTrendline/controlPanel.tsx:248
@@ -606,7 +606,7 @@ msgstr "année"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/sections/advancedAnalytics.tsx:121
 msgid "2 years ago"
-msgstr ""
+msgstr "Il y a 2 ans"
 
 #: superset-frontend/plugins/plugin-chart-echarts/src/BoxPlot/controlPanel.ts:97
 msgid "2/98 percentiles"
@@ -650,7 +650,7 @@ msgstr "année"
 
 #: superset-frontend/packages/superset-ui-chart-controls/src/sections/advancedAnalytics.tsx:123
 msgid "3 years ago"
-msgstr ""
+msgstr "Il y a 3 ans"
 
 #: superset-frontend/plugins/legacy-plugin-chart-partition/src/controlPanel.tsx:318
 #: superset-frontend/plugins/legacy-plugin-chart-rose/src/controlPanel.tsx:200
@@ -1843,7 +1843,7 @@ msgstr ""
 #: superset-frontend/src/views/CRUD/hooks.ts:308
 #, fuzzy, python-format
 msgid "An error occurred while creating %ss: %s"
-msgstr "Une erreur s'est produite durant la récupération des jeux de données : %s"
+msgstr "Une erreur s'est produite durant la récupération des jeux de données %ss: %s"
 
 #: superset-frontend/src/SqlLab/actions/sqlLab.js:1437
 #: superset-frontend/src/SqlLab/actions/sqlLab.js:1459
@@ -1875,7 +1875,7 @@ msgstr ""
 #: superset-frontend/src/views/CRUD/hooks.ts:106
 #, fuzzy, python-format
 msgid "An error occurred while fetching %s info: %s"
-msgstr "Une erreur s'est produite durant la récupération des tableaux de bord : %s"
+msgstr "Une erreur s'est produite durant la récupération des tableaux de bord %s : %s"
 
 #: superset-frontend/src/views/CRUD/hooks.ts:174
 #: superset-frontend/src/views/CRUD/hooks.ts:265
@@ -15149,7 +15149,7 @@ msgstr ""
 #: superset/charts/post_processing.py:160
 #: superset/charts/post_processing.py:177
 msgid "Subtotal"
-msgstr ""
+msgstr "Sous-Total"
 
 #: superset-frontend/src/SqlLab/components/QueryTable/index.tsx:127
 #: superset-frontend/src/pages/AlertReportList/index.tsx:62
@@ -20383,7 +20383,7 @@ msgstr "Métriques"
 #: superset-frontend/src/explore/components/controls/FixedOrMetricControl/index.jsx:136
 #, fuzzy
 msgid "metric"
-msgstr "Métrique"
+msgstr "métrique"
 
 #: superset-frontend/plugins/legacy-plugin-chart-calendar/src/controlPanel.ts:63
 #: superset-frontend/plugins/legacy-plugin-chart-map-box/src/controlPanel.ts:188
@@ -20877,3 +20877,24 @@ msgstr "année"
 #: superset-frontend/plugins/plugin-chart-echarts/src/Timeseries/transformProps.ts:550
 msgid "zoom area"
 msgstr ""
+
+#: superset-frontend/plugins/plugin-chart-pivot-table/src/react-pivottable/TableRenderers.jsx:28
+#: superset-frontend/src/explore/components/controls/FixedOrMetricControl/index.jsx:136
+msgid "metric"
+msgstr "métrique"
+
+#: superset-frontend/src/dashboard/components/RefreshIntervalModal.tsx:29
+msgid "10 seconds"
+msgstr "10 secondes"
+
+#: superset-frontend/src/dashboard/components/RefreshIntervalModal.tsx:29
+msgid "6 hours"
+msgstr "6 heures"
+
+#: superset-frontend/src/dashboard/components/RefreshIntervalModal.tsx:29
+msgid "12 hours"
+msgstr "12 heures"
+
+#: superset-frontend/src/dashboard/components/RefreshIntervalModal.tsx:29
+msgid "24 hours"
+msgstr "24 heures"
