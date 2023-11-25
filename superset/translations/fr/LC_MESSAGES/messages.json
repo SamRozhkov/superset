@@ -5,7 +5,7 @@
       "22": [""],
       "": {
         "domain": "superset",
-        "plural_forms": "nplurals=2; plural=(n > 1)",
+        "plural_forms": "nplurals=2; plural=(n > 1);",
         "lang": "fr"
       },
       "\n                This filter was inherited from the dashboard's context.\n                It won't be saved when saving the chart.\n              ": [
@@ -38,9 +38,6 @@
       ],
       "%(prefix)s %(title)s": ["%(prefix)s %(title)s"],
       "%(rows)d rows returned": ["%(rows)d lignes retournées"],
-      "%(user)s was granted the role %(role)s that gives access to the %(datasource)s": [
-        "%(user)s a obtenu le profil %(role)s qui donne accès à %(datasource)s"
-      ],
       "%(user)s's profile": ["Le profil de %(user)s"],
       "%(validator)s was unable to check your query.\nPlease recheck your query.\nException: %(ex)s": [
         "%(validator)s n'a pas pu vérifier votre requête.\nMerci de vérifier à nouveau votre requête.\nException: %(ex)s"
@@ -194,10 +191,8 @@
       "AXIS TITLE MARGIN": [""],
       "About": ["A propos"],
       "Access": ["Accès"],
-      "Access requests": ["Requêtes d'accès"],
       "Access to user activity data is restricted": [""],
       "Access token": [""],
-      "Access was requested": ["Accès demandé"],
       "Action": ["Action"],
       "Action Log": ["Journaux d'actions"],
       "Actions": ["Actions"],
@@ -325,6 +320,9 @@
       ],
       "Allow Csv Upload": ["Autoriser le téléversement CSV"],
       "Allow DML": ["Autoriser DML"],
+      "Allow column names to be changed to case insensitive format, if supported (e.g. Oracle, Snowflake).": [
+        ""
+      ],
       "Allow columns to be rearranged": [""],
       "Allow creation of new tables based on queries": [
         "Autoriser la création de nouvelles tables basées sur des requêtes"
@@ -492,19 +490,12 @@
       "Annotation could not be updated.": [
         "L'annotation n'a pas pu être mise à jour."
       ],
-      "Annotation delete failed.": ["La suppression de l'annotation a échoué."],
       "Annotation layer": ["Couches d'annotations"],
       "Annotation layer could not be created.": [
         "La couche d'annotations n'a pas pu être créée."
       ],
-      "Annotation layer could not be deleted.": [
-        "La couche d'annotations n'a pas pu être supprimée."
-      ],
       "Annotation layer could not be updated.": [
         "La couche d'annotations n'a pas pu être mise à jour."
-      ],
-      "Annotation layer delete failed.": [
-        "La suppression de la couche d'annotations a échoué."
       ],
       "Annotation layer description columns": [
         "Colonnes de description de la couche d'annotations"
@@ -671,9 +662,6 @@
       "CSS Templates": ["Templates CSS"],
       "CSS applied to the chart": [""],
       "CSS template": ["Templates CSS"],
-      "CSS template could not be deleted.": [
-        "Le template CSS n'a pas pu être supprimé."
-      ],
       "CSS template name": ["Nom du template"],
       "CSS template not found.": ["Template CSS non trouvé."],
       "CSS templates": ["Templates CSS"],
@@ -790,7 +778,6 @@
         "Composant graphique sui vous laisse ajouter un filtre personnalisé dans votre tableau de bord. Quand elle est ajouteé au tableau de bord, une boîte de filtrage permet à l'utilisateur de choisir des valeurs ou plages spécifiques pour filtrer les graphiques. Les graphiques concernés par chaque filtre peuvent être réglés finement dans la vue Tableau de bord.\n\n    Notez que ce plugin est remplacé par la nouvelle fonction Filtres  qui est présente dans cette vue Tableau de bord. C'est plus facile à  utiliser et offre plus de possibilités !"
       ],
       "Chart could not be created.": ["Le graphique n'a pas pu être créé."],
-      "Chart could not be deleted.": ["Le graphique n'a pas pu être supprimé."],
       "Chart could not be updated.": [
         "Le graphique n'a pas pu être mis à jour."
       ],
@@ -808,7 +795,6 @@
       "Charts could not be deleted.": [
         "Les graphiques n'ont pas pu être supprimés."
       ],
-      "Check configuration": ["Vérifier la configuration"],
       "Check for sorting ascending": ["Cocher pour trier par ordre croissant"],
       "Check if the Rose Chart should use segment area instead of segment radius for proportioning": [
         ""
@@ -1057,9 +1043,6 @@
       "Could not load database driver": [
         "Le driver de la base de données n'a pas pu être chargé"
       ],
-      "Could not load database driver: %(driver_name)s": [
-        "Impossible de charger le driver de base de donnée: %(driver_name)s"
-      ],
       "Could not load database driver: {}": [
         "Ce driver de la base de données n'a pas pu être chargé : {}"
       ],
@@ -1079,7 +1062,6 @@
       "Create new filter set": ["Créer un nouvel ensemble de filtre"],
       "Create or select schema...": ["Créer ou sélectionner schéma ..."],
       "Created": ["Créé le"],
-      "Created On": ["Créé le"],
       "Created by": ["Créé par"],
       "Created content": ["Contenu créé"],
       "Created on": ["Créé le"],
@@ -1090,6 +1072,8 @@
       "Cross-filter will be applied to all of the charts that use this dataset.": [
         ""
       ],
+      "Currency prefix or suffix": [""],
+      "Currency symbol": [""],
       "Currently rendered: %s": [""],
       "Custom Plugin": ["Plugin custom"],
       "Custom Plugins": ["Plugins custom"],
@@ -1120,9 +1104,6 @@
       "Dashboard [{}] just got created and chart [{}] was added to it": [
         "Le tableau de bord [{}] a été créé et le graphique [{}] y a été ajouté"
       ],
-      "Dashboard could not be created.": [
-        "Le tableau de bord n'a pas pu être créé."
-      ],
       "Dashboard could not be deleted.": [
         "Le tableau de bord n'a pas pu être supprimé."
       ],
@@ -1138,9 +1119,6 @@
         ""
       ],
       "Dashboards": ["Tableaux de bord"],
-      "Dashboards could not be deleted.": [
-        "Les tableaux de bord n'ont pas pu être supprimés."
-      ],
       "Dashboards do not exist": ["Les tableaux de bord n'existent pas"],
       "Data": ["Données"],
       "Data URI is not allowed.": [""],
@@ -1171,7 +1149,6 @@
       "Database \"%(database_name)s\" schema \"%(schema_name)s\" is not allowed for excel uploads. Please contact your Superset Admin.": [
         "La base de données \"%(database_name)s\" schéma \"%(schema_name)s\" n'est pas autorisée pour les téléversements Excel. Contactez votre administrateur Superset."
       ],
-      "Database URL": ["URL de la base de données"],
       "Database could not be created.": [
         "La base de données n'a pas pu être créée."
       ],
@@ -1218,9 +1195,6 @@
       "Dataset could not be created.": [
         "Le jeu de données n'a pas pu être créé."
       ],
-      "Dataset could not be deleted.": [
-        "Le jeu de données n'a pas pu être supprimé."
-      ],
       "Dataset could not be updated.": [
         "Le jeu de données n'a pas pu être mis à jour."
       ],
@@ -1235,9 +1209,6 @@
         "Les paramètres du jeu de données sont invalides."
       ],
       "Dataset schema is invalid, caused by: %(error)s": [""],
-      "Dataset(s) could not be bulk deleted.": [
-        "Les jeux de données n'ont pas pu être supprimés par lot."
-      ],
       "Datasets": ["Jeux de données"],
       "Datasets can be created from database tables or SQL queries. Select a database table to the left or ": [
         ""
@@ -1402,11 +1373,13 @@
       ],
       "Disable embedding?": [""],
       "Display Name": ["Nom affiché"],
+      "Display column level subtotal": [""],
       "Display column level total": [""],
       "Display configuration": ["Configuration d'affichage"],
       "Display metrics side by side within each column, as opposed to each column being displayed side by side for each metric.": [
         ""
       ],
+      "Display row level subtotal": [""],
       "Display row level total": [""],
       "Displays connections between entities in a graph structure. Useful for mapping relationships and showing which nodes are important in a network. Graph charts can be configured to be force-directed or circulate. If your data has a geospatial component, try the deck.gl Arc chart.": [
         ""
@@ -1893,6 +1866,7 @@
       "Info": ["Info"],
       "Inner Radius": [""],
       "Inner radius of donut hole": [""],
+      "Input custom width in pixels": [""],
       "Input field supports custom rotation. e.g. 30 for 30°": [""],
       "Instant filtering": ["Filtrage instantané"],
       "Intensity Radius is the radius at which the weight is distributed": [""],
@@ -1903,9 +1877,6 @@
       "Interval start column": ["Première colonne de l'intervalle"],
       "Invalid JSON": ["JSON invalide"],
       "Invalid certificate": ["Certificat invalide"],
-      "Invalid connection string, a valid string usually follows:\n'DRIVER://USER:PASSWORD@DB-HOST/DATABASE-NAME'": [
-        "Chaine de connexion incorrecte, une chaine correcte s'écrit habituellement\n'DRIVER://USER:PASSWORD@DB-HOST/DATABASE-NAME'"
-      ],
       "Invalid connection string, a valid string usually follows:'DRIVER://USER:PASSWORD@DB-HOST/DATABASE-NAME'<p>Example:'postgresql://user:password@your-postgres-db/database'</p>": [
         "Chaîne de connexion invalide, une chaîne valide a généralement cette forme : DRIVER://USER:PASSWORD@DB-HOST/DATABASE-NAME'<p>Exemple : \" \"'postgresql://user:password@your-postgres-db/database'</p>"
       ],
@@ -1913,6 +1884,7 @@
       "Invalid cumulative operator: %(operator)s": [
         "Operateur cumulatif invalide: %(operator)s"
       ],
+      "Invalid currency code in saved metrics": [""],
       "Invalid date/timestamp format": ["Format date/timestamp invalide"],
       "Invalid filter configuration, please select a column": [
         "Configuration du filtre invalide, veuillez sélectionner une colonne"
@@ -2210,7 +2182,6 @@
       "Next": ["Suivant"],
       "No": ["Non"],
       "No %s yet": ["Pas encore de %s"],
-      "No Access!": ["Pas d'accès !"],
       "No Data": ["Pas de données"],
       "No annotation layers yet": ["Pas encore de couches d'annotations"],
       "No annotation yet": ["Pas encore d'annotations"],
@@ -2440,21 +2411,14 @@
       "Physical (table or view)": ["Physique (table ou vue)"],
       "Physical dataset": ["Jeu de données physique"],
       "Pick a dimension from which categorical colors are defined": [""],
-      "Pick a granularity in the Time section or uncheck 'Include Time'": [
-        "Choississez une granularité dans la section Temps ou décochez 'Inclure le temps'"
-      ],
       "Pick a metric for x, y and size": [
         "Choisissez une métrique pour x, y, taille"
       ],
       "Pick a metric to display": ["Choisissez une métrique à afficher"],
-      "Pick a metric!": ["Choisissez une métrique !"],
       "Pick a name to help you identify this database.": [
         "Choisissez un nom pour vous aider à identifier cette base de données."
       ],
       "Pick a set of deck.gl charts to layer on top of one another": [""],
-      "Pick a time granularity for your time series": [
-        "Choisissez une granularité pour vos séries temporelles"
-      ],
       "Pick a title for you annotation.": [
         "Choisissez un titre pour votre annotation."
       ],
@@ -2491,9 +2455,6 @@
       ],
       "Please check your query for syntax errors near \"%(server_error)s\". Then, try running your query again.": [
         "Veuillez corriger une erreur de syntaxe dans la requête près de \"%(server_error)s\". Puis essayez de relancer la requête."
-      ],
-      "Please choose different metrics on left and right axis": [
-        "Choisissez des métriques différentes pour les axes gauches et droits"
       ],
       "Please confirm": ["Veuillez confirmer"],
       "Please confirm the overwrite values.": [""],
@@ -2554,6 +2515,7 @@
       "Predicate applied when fetching distinct value to populate the filter control component. Supports jinja template syntax. Applies only when `Enable Filter Select` is on.": [
         "Prédicat appliqué à la récupération des valeurs distinctes pour remplir le filtre de contrôle des composants. Supporte la syntaxe Jinja. S'applique uniquement si `Activer le filtre` est coché."
       ],
+      "Prefix or suffix": [""],
       "Preview": ["Prévisualisation"],
       "Preview: `%s`": ["Prévisualisation : `%s`"],
       "Previous": ["Précédent"],
@@ -2661,9 +2623,6 @@
       "Report Schedule could not be created.": [
         "La planification de rapport n'a pas pu être créée."
       ],
-      "Report Schedule could not be deleted.": [
-        "La planification de rapport n'a pas pu être supprimée."
-      ],
       "Report Schedule could not be updated.": [
         "La planification de rapport n'a pas pu être mise à jour."
       ],
@@ -2709,7 +2668,6 @@
       "Report sent": ["Rapport envoyé"],
       "Reports": ["Rapports"],
       "Repulsion strength between nodes": [""],
-      "Request Permissions": ["Besoin de permissions"],
       "Request is incorrect: %(error)s": [
         "La requête est incorrecte : %(error)s"
       ],
@@ -2740,11 +2698,7 @@
         ""
       ],
       "Role": ["Profil"],
-      "Role %(r)s was extended to provide the access to the datasource %(ds)s": [
-        "Le profil %(r)s a été étendu pour donner l'accès à la source de données %(ds)s"
-      ],
       "Roles": ["Profils"],
-      "Roles to grant": ["Profils à donner"],
       "Rolling function": ["Fonction de fenêtre glissante"],
       "Rolling window": ["Fenêtre glissante"],
       "Root certificate": ["Certificat racine"],
@@ -2815,7 +2769,6 @@
       "Save (Overwrite)": ["Enregister (écrase)"],
       "Save as": ["Enregistrer sous"],
       "Save as new": ["Enregistrer comme nouveau"],
-      "Save as new chart": ["Enregistrer comme un nouveau graphique"],
       "Save as:": ["Enregistrer sous :"],
       "Save chart": ["Enregistrer un graphique"],
       "Save dashboard": ["Sauvegarder le Tableau de Bord"],
@@ -2860,6 +2813,7 @@
       ],
       "Scope": ["Périmètre"],
       "Scoping": ["Portée"],
+      "Screenshot width must be between %(min)spx and %(max)spx": [""],
       "Scroll": [""],
       "Scroll down to the bottom to enable overwriting changes. ": [""],
       "Search": ["Recherche"],
@@ -3141,6 +3095,7 @@
       "Submit": [""],
       "Subtotal": [""],
       "Success": ["Succès"],
+      "Suffix": [""],
       "Suffix to apply after the percentage display": [""],
       "Sum": [""],
       "Sum as Fraction of Columns": [""],
@@ -3184,7 +3139,6 @@
       ],
       "Table Exists": ["La table existe"],
       "Table Name": ["Nom de la table"],
-      "Table View": ["Vue en table"],
       "Table [%(table_name)s] could not be found, please double check your database connection, schema, and table name": [
         "La table [%(table_name)s] n'a pu être trouvée, vérifiez à nouveau votre connexion à votre base de données, le schéma et le nom de la table"
       ],
@@ -3235,9 +3189,6 @@
       "The X-axis is not on the filters list": [""],
       "The X-axis is not on the filters list which will prevent it from being used in\n            time range filters in dashboards. Would you like to add it to the filters list?": [
         ""
-      ],
-      "The access requests seem to have been deleted": [
-        "L'accée à cette requête semble avoir été effacé"
       ],
       "The annotation has been saved": ["Cette annotation a été sauvegardée"],
       "The annotation has been updated": ["Cette annotation a été modifiée"],
@@ -3410,9 +3361,6 @@
       "The port is closed.": ["Le port est fermé."],
       "The port number is invalid.": ["Le numéro de port est invalide."],
       "The primary metric is used to define the arc segment sizes": [""],
-      "The provided `rows` argument is not a valid integer.": [
-        "L'argument `rows` n'est pas un entier valide."
-      ],
       "The query associated with the results was deleted.": [
         "La requête associée aux résutlats a été supprimée."
       ],
@@ -3454,9 +3402,6 @@
         "Le schéma a été supprimé ou renommé dans la base de données."
       ],
       "The size of the square cell, in pixels": [""],
-      "The submitted URL is not considered safe, only use URLs with the same domain as Superset.": [
-        ""
-      ],
       "The submitted payload has the incorrect format.": [
         "Les données fournies sont dans un format incorrect."
       ],
@@ -3670,9 +3615,6 @@
       "This dashboard is ready to embed. In your application, pass the following id to the SDK:": [
         ""
       ],
-      "This dashboard was changed recently. Please reload dashboard to get latest version.": [
-        "Ce tableau de bord a été changé récemment. Merci de le recharger pour avoir la dernière version."
-      ],
       "This dashboard was saved successfully.": [
         "Ce Tableau de Bord a été sauvegardé avec succès."
       ],
@@ -3688,6 +3630,12 @@
       "This dataset is not used to power any charts.": [""],
       "This defines the element to be plotted on the chart": [
         "Ceci définit l'élément à tracer sur le graphique"
+      ],
+      "This field is used as a unique identifier to attach the calculated dimension to charts. It is also used as the alias in the SQL query.": [
+        ""
+      ],
+      "This field is used as a unique identifier to attach the metric to charts. It is also used as the alias in the SQL query.": [
+        ""
       ],
       "This fields acts a Superset view, meaning that Superset will run a query against this string as a subquery.": [
         "Ces champs agissent comme une vue Superset, i.e. Superset va lancer une requête pour cette expression comme une sous-requête."
@@ -3841,7 +3789,6 @@
       "Try applying different filters or ensuring your datasource has data": [
         ""
       ],
-      "Try selecting a different schema": [""],
       "Tuesday": ["Mardi"],
       "Type": ["Type"],
       "Type \"%s\" to confirm": ["Tapez \"%s\" pour confirmer"],
@@ -3984,7 +3931,6 @@
         ""
       ],
       "User": ["Utilisateur"],
-      "User Roles": ["Profils utilisateurs"],
       "User doesn't have the proper permissions.": [
         "L'utilisateur n'a pas les droits."
       ],
@@ -4120,7 +4066,6 @@
       "Week ending Saturday": ["Semaine terminant le samedi"],
       "Week starting Monday": ["Semaine débutant le lundi"],
       "Week starting Sunday": ["Semaine débutant le dimanche"],
-      "Week_ending Sunday": ["Semaine terminant le dimanche"],
       "Weekly Report for %s": [""],
       "Weekly seasonality": [""],
       "What should be shown on the label?": [""],
@@ -4258,8 +4203,6 @@
       "X bounds": [""],
       "X-Axis Sort By": [""],
       "Y 2 bounds": [""],
-      "Y AXIS TITLE MARGIN": [""],
-      "Y AXIS TITLE POSITION": [""],
       "Y Axis": ["Axe Y"],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
@@ -4287,9 +4230,6 @@
       "You are importing one or more saved queries that already exist. Overwriting might cause you to lose some of your work. Are you sure you want to overwrite?": [
         "Vous importez une ou plusieurs requêtes sauvegardées qui existent déjà. L'écrasement peut vous conduire à perdre une partie de votre travail. Etes-vous sûr de vouloir ce remplacement ?"
       ],
-      "You are not authorized to see this query. If you think this is an error, please reach out to your administrator.": [
-        "Vous n'avez pas le droit de voir cette requête. Contactez votre administrateur si vous pensez que c'est une erreur."
-      ],
       "You can add the components in the": [
         "Vous pouvez ajouter les composants via le"
       ],
@@ -4308,17 +4248,11 @@
         ""
       ],
       "You cannot use 45° tick layout along with the time range filter": [""],
-      "You cannot use [Columns] in combination with [Group By]/[Metrics]/[Percentage Metrics]. Please choose one or the other.": [
-        "Vous ne pouvez pas utiliser [Colonnes] en même temps que [Grouper par]/[Métriques]/[Métriques de Pourcentages]. Veuillez choisir l'un ou l'autre."
-      ],
       "You do not have permission to edit this chart": [
         "Vous n'avez pas les permission pour modifier ce graphique"
       ],
       "You do not have permission to edit this dashboard": [
         "Vous n'avez pas le droit de modifier ce tableau de bord"
-      ],
-      "You do not have permissions to access the datasource(s): %(name)s.": [
-        "Vous n'avez pas les permissions pour accéder à(aux) source(s) : %(name)s."
       ],
       "You do not have permissions to edit this dashboard.": [
         "Vous n'avez pas les droits pour modifier ce tableau de bord."
@@ -4331,9 +4265,6 @@
       ],
       "You don't have the rights to alter this title.": [
         "Vous n'avez pas les droits pour modifier ce titre."
-      ],
-      "You have no permission to approve this request": [
-        "Vous n'avez pas les permission pour approuver cette requête"
       ],
       "You have removed this filter.": ["Vous avez supprimé ce filtre."],
       "You have unsaved changes.": [
@@ -4389,9 +4320,6 @@
         "Les colonnes [Longitude] et [Latitude] doivent êtres définies"
       ],
       "[Missing Dataset]": ["[jeu de données manquant]"],
-      "[Superset] Access to the datasource %(name)s was granted": [
-        "[Superset] Accès à la source de données %(name)s accordé"
-      ],
       "[Untitled]": ["[Sans titre]"],
       "[dashboard name]": ["[nom du tableau de bord]"],
       "[desc]": [""],
@@ -4546,6 +4474,7 @@
         "percentiles doit être une liste ou un couple de 2 valeurs dont le premier est inférieur au second"
       ],
       "pixelated (Sharp)": [""],
+      "pixels": [""],
       "previous calendar month": ["mois calendaire précédent"],
       "previous calendar week": ["semaine calendaire précédente"],
       "previous calendar year": ["année calendaire précédente"],

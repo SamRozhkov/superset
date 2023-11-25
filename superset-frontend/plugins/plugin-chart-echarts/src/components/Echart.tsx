@@ -52,6 +52,7 @@ function Echart(
     refs.divRef = divRef;
   }
   const chartRef = useRef<ECharts>();
+
   const currentSelection = useMemo(
     () => Object.keys(selectedValues) || [],
     [selectedValues],

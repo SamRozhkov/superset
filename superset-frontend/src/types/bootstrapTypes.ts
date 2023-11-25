@@ -9,7 +9,7 @@ import {
 import { FormatLocaleDefinition } from 'd3-format';
 import { isPlainObject } from 'lodash';
 import { Languages } from 'src/features/home/LanguagePicker';
-import { FormatLocalePrefixies } from '@superset-ui/core/lib/number-format/defaultLocale';
+import { FormatLocalePrefixies } from '@superset-ui/core/src/number-format/D3FormatConfig';
 import { FlashMessage } from '../components/FlashProvider';
 
 /**

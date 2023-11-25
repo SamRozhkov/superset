@@ -51,6 +51,7 @@ const {
   zoomable,
   xAxisLabelRotation,
   orientation,
+  axisLine,
 } = DEFAULT_FORM_DATA;
 
 function createAxisTitleControl(axis: 'x' | 'y'): ControlSetRow[] {
@@ -324,6 +325,18 @@ const config: ControlPanelConfig = {
         ...richTooltipSection,
         [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],
         ...createAxisControl('y'),
+        [
+          {
+            name: 'axisLine',
+            config: {
+              type: 'CheckboxControl',
+              label: t('Axis Lines'),
+              default: axisLine,
+              renderTrigger: true,
+              description: t('Enable data Axis Lines'),
+            },
+          },
+        ],
       ],
     },
   ],

@@ -5,7 +5,7 @@
       "22": [""],
       "": {
         "domain": "superset",
-        "plural_forms": "nplurals=1; plural=0",
+        "plural_forms": "nplurals=1; plural=0;",
         "lang": "it"
       },
       "\n                This filter was inherited from the dashboard's context.\n                It won't be saved when saving the chart.\n              ": [
@@ -37,9 +37,6 @@
       "%(prefix)s %(title)s": [""],
       "%(rows)d rows returned": [""],
       "%(subtitle)s\nThis may be triggered by:\n %(issue)s": [""],
-      "%(user)s was granted the role %(role)s that gives access to the %(datasource)s": [
-        ""
-      ],
       "%(user)s's profile": [""],
       "%(validator)s was unable to check your query.\nPlease recheck your query.\nException: %(ex)s": [
         ""
@@ -183,10 +180,8 @@
       "AXIS TITLE MARGIN": [""],
       "About": [""],
       "Access": ["Nessun Accesso!"],
-      "Access requests": [""],
       "Access to user activity data is restricted": [""],
       "Access token": [""],
-      "Access was requested": [""],
       "Action": ["Azione"],
       "Action Log": [""],
       "Actions": ["Azione"],
@@ -290,6 +285,9 @@
       ],
       "Allow Csv Upload": [""],
       "Allow DML": ["Permetti DML"],
+      "Allow column names to be changed to case insensitive format, if supported (e.g. Oracle, Snowflake).": [
+        ""
+      ],
       "Allow columns to be rearranged": [""],
       "Allow creation of new tables based on queries": [""],
       "Allow creation of new views based on queries": [""],
@@ -439,16 +437,13 @@
       "Annotation Layers": [""],
       "Annotation could not be created.": [""],
       "Annotation could not be updated.": [""],
-      "Annotation delete failed.": [""],
       "Annotation layer": ["Azione"],
       "Annotation layer could not be created.": [
         "La tua query non può essere salvata"
       ],
-      "Annotation layer could not be deleted.": [""],
       "Annotation layer could not be updated.": [
         "La tua query non può essere salvata"
       ],
-      "Annotation layer delete failed.": [""],
       "Annotation layer has associated annotations.": [""],
       "Annotation layer name": ["La tua query non può essere salvata"],
       "Annotation layer not found.": [""],
@@ -577,7 +572,6 @@
       "CSS Templates": ["Template CSS"],
       "CSS applied to the chart": [""],
       "CSS template": ["Template CSS"],
-      "CSS template could not be deleted.": [""],
       "CSS template name": ["Template CSS"],
       "CSS template not found.": ["Template CSS"],
       "CSS templates": ["Template CSS"],
@@ -643,6 +637,7 @@
       "Changed By": ["Modificato da"],
       "Changed on": ["Cambiato il"],
       "Changes saved.": [""],
+      "Changing one or more of these dashboards is forbidden": [""],
       "Changing the dataset may break the chart if the chart relies on columns or metadata that does not exist in the target dataset": [
         ""
       ],
@@ -673,7 +668,6 @@
         ""
       ],
       "Chart could not be created.": ["La tua query non può essere salvata"],
-      "Chart could not be deleted.": ["La query non può essere caricata"],
       "Chart could not be updated.": ["La tua query non può essere salvata"],
       "Chart does not exist": [""],
       "Chart has no query context saved. Please save the chart again.": [""],
@@ -883,7 +877,6 @@
       "Could not fetch all saved charts": ["Non posso connettermi al server"],
       "Could not find viz object": [""],
       "Could not load database driver": ["Non posso connettermi al server"],
-      "Could not load database driver: %(driver_name)s": [""],
       "Could not load database driver: {}": ["Non posso connettermi al server"],
       "Could not resolve hostname: \"%(host)s\".": [""],
       "Count as Fraction of Columns": [""],
@@ -901,7 +894,6 @@
       "Create new chart": ["Creato il"],
       "Create or select schema...": [""],
       "Created": ["Creato il"],
-      "Created On": ["Creato il"],
       "Created by": ["Creato il"],
       "Created content": ["Creato il"],
       "Created on": ["Creato il"],
@@ -912,6 +904,8 @@
         ""
       ],
       "Cross-filtering is not enabled for this dashboard.": [""],
+      "Currency prefix or suffix": [""],
+      "Currency symbol": [""],
       "Currently rendered: %s": [""],
       "Custom": [""],
       "Custom Plugin": [""],
@@ -920,6 +914,7 @@
       "Custom SQL ad-hoc metrics are not enabled for this dataset": [""],
       "Custom SQL fields cannot contain sub-queries.": [""],
       "Custom time filter plugin": [""],
+      "Custom width of the screenshot in pixels": [""],
       "Customize": [""],
       "Customize Metrics": [""],
       "Cyclic dependency detected": [""],
@@ -942,9 +937,6 @@
       "Dashboard": ["Dashboard"],
       "Dashboard [%s] just got created and chart [%s] was added to it": [""],
       "Dashboard [{}] just got created and chart [{}] was added to it": [""],
-      "Dashboard could not be created.": [
-        "La tua query non può essere salvata"
-      ],
       "Dashboard could not be deleted.": [
         "La tua query non può essere salvata"
       ],
@@ -958,7 +950,6 @@
         ""
       ],
       "Dashboards": ["Elenco Dashboard"],
-      "Dashboards could not be deleted.": [""],
       "Dashboards do not exist": ["Elenco Dashboard"],
       "Data": ["Database"],
       "Data URI is not allowed.": [""],
@@ -985,7 +976,6 @@
       "Database \"%(database_name)s\" schema \"%(schema_name)s\" is not allowed for excel uploads. Please contact your Superset Admin.": [
         ""
       ],
-      "Database URL": ["URL del Database"],
       "Database could not be created.": ["La tua query non può essere salvata"],
       "Database could not be deleted.": [""],
       "Database could not be updated.": ["La tua query non può essere salvata"],
@@ -1005,14 +995,12 @@
       "Dataset": ["Database"],
       "Dataset %(name)s already exists": [""],
       "Dataset could not be created.": ["La tua query non può essere salvata"],
-      "Dataset could not be deleted.": [""],
       "Dataset could not be updated.": ["La tua query non può essere salvata"],
       "Dataset does not exist": ["Sorgente dati e tipo di grafico"],
       "Dataset metric delete failed.": [""],
       "Dataset name": ["Database"],
       "Dataset parameters are invalid.": [""],
       "Dataset schema is invalid, caused by: %(error)s": [""],
-      "Dataset(s) could not be bulk deleted.": [""],
       "Datasets": ["Basi di dati"],
       "Datasets can be created from database tables or SQL queries. Select a database table to the left or ": [
         ""
@@ -1141,11 +1129,13 @@
       ],
       "Disable embedding?": [""],
       "Discard": [""],
+      "Display column level subtotal": [""],
       "Display column level total": [""],
       "Display configuration": [""],
       "Display metrics side by side within each column, as opposed to each column being displayed side by side for each metric.": [
         ""
       ],
+      "Display row level subtotal": [""],
       "Display row level total": [""],
       "Displays connections between entities in a graph structure. Useful for mapping relationships and showing which nodes are important in a network. Graph charts can be configured to be force-directed or circulate. If your data has a geospatial component, try the deck.gl Arc chart.": [
         ""
@@ -1396,7 +1386,6 @@
       "Fill all required fields to enable \"Default Value\"": [""],
       "Fill method": [""],
       "Filter List": ["Filtri"],
-      "Filter box (deprecated)": [""],
       "Filter configuration": ["Controlli del filtro"],
       "Filter configuration for the filter box": [""],
       "Filter has default value": [""],
@@ -1535,7 +1524,7 @@
       "If table exists do one of the following: Fail (do nothing), Replace (drop and recreate table) or Append (insert data).": [
         ""
       ],
-      "Ignore cache when generating screenshot": [""],
+      "Ignore cache when generating report": [""],
       "Ignore null locations": [""],
       "Ignore time": [""],
       "Image (PNG) embedded in email": [""],
@@ -1566,6 +1555,7 @@
       "Info": [""],
       "Inner Radius": [""],
       "Inner radius of donut hole": [""],
+      "Input custom width in pixels": [""],
       "Input field supports custom rotation. e.g. 30 for 30°": [""],
       "Instant filtering": ["Cerca / Filtra"],
       "Intensity": [""],
@@ -1584,9 +1574,6 @@
       "Invalid JSON": [""],
       "Invalid advanced data type: %(advanced_data_type)s": [""],
       "Invalid certificate": [""],
-      "Invalid connection string, a valid string usually follows:\n'DRIVER://USER:PASSWORD@DB-HOST/DATABASE-NAME'": [
-        ""
-      ],
       "Invalid connection string, a valid string usually follows: backend+driver://user:password@database-host/database-name": [
         ""
       ],
@@ -1595,6 +1582,7 @@
       ],
       "Invalid cron expression": [""],
       "Invalid cumulative operator: %(operator)s": [""],
+      "Invalid currency code in saved metrics": [""],
       "Invalid date/timestamp format": [""],
       "Invalid filter configuration, please select a column": [""],
       "Invalid filter operation type: %(op)s": [""],
@@ -1682,7 +1670,6 @@
       "Leaf nodes that represent fewer than this number of events will be initially hidden in the visualization": [
         ""
       ],
-      "Left Axis Format": [""],
       "Left Margin": [""],
       "Left margin, in pixels, allowing for more room for axis labels": [""],
       "Left to Right": [""],
@@ -1893,7 +1880,6 @@
       "Next": [""],
       "No": [""],
       "No %s yet": [""],
-      "No Access!": ["Nessun Accesso!"],
       "No annotation layers yet": [""],
       "No annotation yet": [""],
       "No charts": ["Grafici"],
@@ -1993,9 +1979,6 @@
       ],
       "One or more parameters specified in the query are malformatted.": [""],
       "One or more parameters specified in the query are missing.": [""],
-      "One or more required fields are missing in the request. Please try again, and if the problem persists contact your administrator.": [
-        ""
-      ],
       "One ore more annotation layers failed loading.": [""],
       "Only SELECT statements are allowed against this database.": [""],
       "Only Total": [""],
@@ -2101,20 +2084,13 @@
       "Physical (table or view)": [""],
       "Physical dataset": ["Seleziona una destinazione"],
       "Pick a dimension from which categorical colors are defined": [""],
-      "Pick a granularity in the Time section or uncheck 'Include Time'": [
-        "Seleziona una granularità nella sezione tempo e deseleziona 'Includi Tempo'"
-      ],
       "Pick a metric for x, y and size": [
         "Seleziona una metrica per x, y e grandezza"
       ],
       "Pick a metric to display": ["Seleziona una metrica da visualizzare"],
-      "Pick a metric!": ["Seleziona una metrica!"],
       "Pick a name to help you identify this database.": [""],
       "Pick a nickname for how the database will display in Superset.": [""],
       "Pick a set of deck.gl charts to layer on top of one another": [""],
-      "Pick a time granularity for your time series": [
-        "Seleziona una granularità per la serie temporale"
-      ],
       "Pick a title for you annotation.": [""],
       "Pick at least one field for [Series]": [
         "Seleziona almeno un campo per [Series]"
@@ -2147,9 +2123,6 @@
       ],
       "Please check your template parameters for syntax errors and make sure they match across your SQL query and Set Parameters. Then, try running your query again.": [
         ""
-      ],
-      "Please choose different metrics on left and right axis": [
-        "Seleziona metriche differenti per gli assi destro e sinistro"
       ],
       "Please confirm": [""],
       "Please confirm the overwrite values.": [""],
@@ -2202,6 +2175,7 @@
       "Predicate applied when fetching distinct value to populate the filter control component. Supports jinja template syntax. Applies only when `Enable Filter Select` is on.": [
         "Predicato utilizzato quando si fornisce un valore univoco per popolare il componente di controllo del filtro. Supporta la sintassi del template jinja. È utilizzabile solo quando è abilitata l'opzione \"Abilita selezione filtro\"."
       ],
+      "Prefix or suffix": [""],
       "Preview": [""],
       "Preview: `%s`": [""],
       "Previous": [""],
@@ -2282,9 +2256,7 @@
       "Refresh frequency": [""],
       "Refresh interval": [""],
       "Refresh interval saved": [""],
-      "Refresh table list": [""],
       "Refresh the default values": [""],
-      "Regex": [""],
       "Regular": [""],
       "Regular filters add where clauses to queries if a user belongs to a role referenced in the filter, base filters apply filters to all queries except the roles defined in the filter, and can be used to define what users can see if no RLS filters within a filter group apply to them.": [
         ""
@@ -2303,9 +2275,6 @@
       "Rename tab": [""],
       "Replace": [""],
       "Report Schedule could not be created.": [
-        "La tua query non può essere salvata"
-      ],
-      "Report Schedule could not be deleted.": [
         "La tua query non può essere salvata"
       ],
       "Report Schedule could not be updated.": [
@@ -2330,7 +2299,6 @@
       "Report sent": ["Importa"],
       "Reports": ["Importa"],
       "Repulsion strength between nodes": [""],
-      "Request Permissions": ["Richiesta di Permessi"],
       "Request is incorrect: %(error)s": [""],
       "Request is not JSON": [""],
       "Request missing data field.": [""],
@@ -2358,9 +2326,6 @@
       "Right-click on a dimension value to drill to detail by that value.": [
         ""
       ],
-      "Role %(r)s was extended to provide the access to the datasource %(ds)s": [
-        ""
-      ],
       "Roles": ["Ruoli"],
       "Roles is a list which defines access to the dashboard. Granting a role access to a dashboard will bypass dataset level checks. If no roles are defined, regular access permissions apply.": [
         ""
@@ -2368,7 +2333,6 @@
       "Roles is a list which defines access to the dashboard. Granting a role access to a dashboard will bypass dataset level checks.If no roles are defined, regular access permissions apply.": [
         ""
       ],
-      "Roles to grant": ["Ruoli per l'accesso"],
       "Rolling function": ["Testa la Connessione"],
       "Rolling window": [""],
       "Root certificate": [""],
@@ -2440,7 +2404,6 @@
       "Save (Overwrite)": ["Query salvate"],
       "Save as": ["Salva come"],
       "Save as new": ["Salva una slice"],
-      "Save as new chart": [""],
       "Save as:": [""],
       "Save chart": ["Grafico a torta"],
       "Save dashboard": ["Salva e vai alla dashboard"],
@@ -2474,13 +2437,13 @@
       "Scheduled at (UTC)": [""],
       "Scheduled task executor not found": [""],
       "Schema": ["Schema"],
-      "Schema undefined": [""],
       "Schema, as used only in some databases like Postgres, Redshift and DB2": [
         "Schema, va utilizzato soltanto in alcuni database come Postgres, Redshift e DB2"
       ],
       "Schemas allowed for File upload": [""],
       "Scope": [""],
       "Scoping": [""],
+      "Screenshot width must be between %(min)spx and %(max)spx": [""],
       "Scroll": [""],
       "Scroll down to the bottom to enable overwriting changes. ": [""],
       "Search": ["Cerca"],
@@ -2522,6 +2485,7 @@
       "Select filter plugin using AntD": [""],
       "Select first filter value by default": [""],
       "Select or type a value": [""],
+      "Select or type currency symbol": [""],
       "Select or type dataset name": [""],
       "Select schema or type to search schemas": [""],
       "Select scheme": [""],
@@ -2744,6 +2708,7 @@
       "Submit": [""],
       "Subtotal": [""],
       "Success": [""],
+      "Suffix": [""],
       "Suffix to apply after the percentage display": [""],
       "Sum": [""],
       "Sum as Fraction of Columns": [""],
@@ -2781,7 +2746,6 @@
       "Table %(table)s wasn't found in the database %(db)s": [""],
       "Table Exists": [""],
       "Table Name": [""],
-      "Table View": ["Vista Tabella"],
       "Table [%(table_name)s] could not be found, please double check your database connection, schema, and table name": [
         ""
       ],
@@ -2834,7 +2798,6 @@
       "The X-axis is not on the filters list which will prevent it from being used in\n            time range filters in dashboards. Would you like to add it to the filters list?": [
         ""
       ],
-      "The access requests seem to have been deleted": [""],
       "The category of source nodes used to assign colors. If a node is associated with more than one category, only the first will be used.": [
         ""
       ],
@@ -2970,7 +2933,6 @@
       ],
       "The port number is invalid.": [""],
       "The primary metric is used to define the arc segment sizes": [""],
-      "The provided `rows` argument is not a valid integer.": [""],
       "The query associated with the results was deleted.": [""],
       "The query associated with these results could not be found. You need to re-run the original query.": [
         ""
@@ -3007,9 +2969,6 @@
       ],
       "The schema was deleted or renamed in the database.": [""],
       "The size of the square cell, in pixels": [""],
-      "The submitted URL is not considered safe, only use URLs with the same domain as Superset.": [
-        ""
-      ],
       "The submitted payload has the incorrect format.": [""],
       "The submitted payload has the incorrect schema.": [""],
       "The table \"%(table)s\" does not exist. A valid table must be used to run this query.": [
@@ -3068,7 +3027,6 @@
       "There is not enough space for this component. Try decreasing its width, or increasing the destination width.": [
         ""
       ],
-      "There was an error fetching tables": [""],
       "There was an error fetching the favorite status: %s": [""],
       "There was an error fetching your recent activity:": [""],
       "There was an error loading the dataset metadata": [""],
@@ -3156,9 +3114,6 @@
       "This dashboard is ready to embed. In your application, pass the following id to the SDK:": [
         ""
       ],
-      "This dashboard was changed recently. Please reload dashboard to get latest version.": [
-        ""
-      ],
       "This dashboard was saved successfully.": [""],
       "This database is managed externally, and can't be edited in Superset": [
         ""
@@ -3172,6 +3127,12 @@
       "This dataset is not used to power any charts.": [""],
       "This defines the element to be plotted on the chart": [""],
       "This defines the level of the hierarchy": [""],
+      "This field is used as a unique identifier to attach the calculated dimension to charts. It is also used as the alias in the SQL query.": [
+        ""
+      ],
+      "This field is used as a unique identifier to attach the metric to charts. It is also used as the alias in the SQL query.": [
+        ""
+      ],
       "This fields acts a Superset view, meaning that Superset will run a query against this string as a subquery.": [
         "Questo campo agisce come una vista Superset, il che vuol dire che Superset eseguirà una query su questa stringa come sotto-query."
       ],
@@ -3218,6 +3179,7 @@
       "Thursday": [""],
       "Time": ["Tempo"],
       "Time Grain": [""],
+      "Time Grain must be specified when using Time Shift.": [""],
       "Time Granularity": [""],
       "Time Lag": [""],
       "Time Range": [""],
@@ -3290,7 +3252,6 @@
       "Tooltip": [""],
       "Top": [""],
       "Top to Bottom": [""],
-      "Total": [""],
       "Total (%(aggfunc)s)": [""],
       "Total (%(aggregatorName)s)": [""],
       "Total: %s": [""],
@@ -3318,7 +3279,6 @@
         ""
       ],
       "Try different criteria to display results.": [""],
-      "Try selecting a different schema": [""],
       "Tuesday": [""],
       "Type": ["Tipo"],
       "Type \"%s\" to confirm": [""],
@@ -3405,6 +3365,7 @@
       "Use a log scale for the X-axis": [""],
       "Use a log scale for the Y-axis": [""],
       "Use an encrypted connection to the database": [""],
+      "Use an ssh tunnel connection to the database": [""],
       "Use another existing chart as a source for annotations and overlays.\n          Your chart must be one of these visualization types: [%s]": [
         ""
       ],
@@ -3427,11 +3388,11 @@
         ""
       ],
       "User": ["Utente"],
-      "User Roles": ["Ruoli Utente"],
       "User doesn't have the proper permissions.": [""],
       "User must select a value before applying the filter": [""],
       "User must select a value for this filter": [""],
       "User query": ["condividi query"],
+      "Users are not allowed to set a search path for security reasons.": [""],
       "Uses Gaussian Kernel Density Estimation to visualize spatial distribution of data": [
         ""
       ],
@@ -3548,9 +3509,9 @@
       "Web": [""],
       "Wednesday": [""],
       "Week ending Saturday": [""],
+      "Week ending Sunday": [""],
       "Week starting Monday": [""],
       "Week starting Sunday": [""],
-      "Week_ending Sunday": [""],
       "Weekly Report for %s": [""],
       "Weekly seasonality": [""],
       "What should be shown on the label?": [""],
@@ -3690,8 +3651,6 @@
       "X-axis": [""],
       "XScale Interval": [""],
       "Y 2 bounds": [""],
-      "Y AXIS TITLE MARGIN": [""],
-      "Y AXIS TITLE POSITION": [""],
       "Y Axis": [""],
       "Y Axis 2 Bounds": [""],
       "Y Axis Bounds": [""],
@@ -3724,9 +3683,6 @@
       "You are importing one or more saved queries that already exist. Overwriting might cause you to lose some of your work. Are you sure you want to overwrite?": [
         ""
       ],
-      "You are not authorized to see this query. If you think this is an error, please reach out to your administrator.": [
-        ""
-      ],
       "You can add the components in the": [""],
       "You can add the components in the edit mode.": [""],
       "You can also just click on the chart to apply cross-filter.": [""],
@@ -3744,16 +3700,10 @@
         ""
       ],
       "You cannot use 45° tick layout along with the time range filter": [""],
-      "You cannot use [Columns] in combination with [Group By]/[Metrics]/[Percentage Metrics]. Please choose one or the other.": [
-        ""
-      ],
       "You do not have permission to edit this chart": [
         "Non hai i permessi per accedere alla/e sorgente/i dati: %(name)s."
       ],
       "You do not have permission to edit this dashboard": [
-        "Non hai i permessi per accedere alla/e sorgente/i dati: %(name)s."
-      ],
-      "You do not have permissions to access the datasource(s): %(name)s.": [
         "Non hai i permessi per accedere alla/e sorgente/i dati: %(name)s."
       ],
       "You do not have permissions to edit this dashboard.": [
@@ -3762,7 +3712,6 @@
       "You don't have any favorites yet!": [""],
       "You don't have the rights to alter %(resource)s": [""],
       "You don't have the rights to alter this title.": [""],
-      "You have no permission to approve this request": [""],
       "You have removed this filter.": [""],
       "You have unsaved changes.": [""],
       "You have used all %(historyLength)s undo slots and will not be able to fully undo subsequent actions. You may save your current state to reset the history.": [
@@ -3801,11 +3750,7 @@
       "Zoom level of the map": [""],
       "[Longitude] and [Latitude] columns must be present in [Group By]": [""],
       "[Longitude] and [Latitude] must be set": [""],
-      "[Superset] Access to the datasource %(name)s was granted": [
-        "[Superset] Accesso al datasource $(name) concesso"
-      ],
       "[asc]": [""],
-      "[copy]": [""],
       "[dashboard name]": [""],
       "[desc]": [""],
       "[optional] this secondary metric is used to define the color as a ratio against the primary metric. When omitted, the color is categorical and based on labels": [
@@ -3936,7 +3881,6 @@
       "more than {max} {name}": [""],
       "must have a value": [""],
       "no SQL validator is configured": [""],
-      "no SQL validator is configured for {}": [""],
       "numeric type icon": [""],
       "nvd3": [""],
       "of parent": [""],
@@ -3958,6 +3902,7 @@
         ""
       ],
       "pixelated (Sharp)": [""],
+      "pixels": [""],
       "previous calendar month": [""],
       "previous calendar week": [""],
       "previous calendar year": [""],

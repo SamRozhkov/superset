@@ -34,6 +34,7 @@ import Echart from '../components/Echart';
 import { TimeseriesChartTransformedProps } from './types';
 import { formatSeriesName } from '../utils/series';
 import { ExtraControls } from '../components/ExtraControls';
+import {darkTheme} from "@visx/xychart";
 
 const TIMER_DURATION = 300;
 
@@ -59,6 +60,16 @@ export default function EchartsTimeseries({
 }: TimeseriesChartTransformedProps) {
   const { stack } = formData;
   const echartRef = useRef<EchartsHandler | null>(null);
+
+  const { axisLine } = formData;
+  echartOptions.yAxis.splitLine = { show: axisLine };
+  echartOptions.xAxis.splitLine = { show: axisLine };
+  echartOptions.xAxis.axisTick = { show: axisLine };
+  echartOptions.yAxis.axisTick = { show: axisLine };
+  echartOptions.yAxis.minorTick = { show: axisLine };
+  echartOptions.xAxis.axisLine = { show: axisLine };
+
+
   // eslint-disable-next-line no-param-reassign
   refs.echartRef = echartRef;
   const clickTimer = useRef<ReturnType<typeof setTimeout>>();

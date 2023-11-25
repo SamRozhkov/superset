@@ -88,6 +88,7 @@ export type EchartsTimeseriesFormData = QueryFormData & {
   onlyTotal: boolean;
   showExtraControls: boolean;
   percentageThreshold: number;
+  axisLine: boolean;
   orientation?: OrientationType;
 } & LegendFormData &
   TitleFormData;
