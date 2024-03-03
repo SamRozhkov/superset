@@ -51,6 +51,7 @@ import getDirectPathToTabIndex from 'src/dashboard/util/getDirectPathToTabIndex'
 import { URL_PARAMS } from 'src/constants';
 import { getUrlParam } from 'src/utils/urlUtils';
 import {
+  DashboardInfo,
   DashboardLayout,
   FilterBarOrientation,
   RootState,
@@ -450,6 +451,11 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const crossFiltersEnabled = isFeatureEnabled(
     FeatureFlag.DASHBOARD_CROSS_FILTERS,
   );
+
+  const dashboardInfo = useSelector<RootState, DashboardInfo>(
+    state => state.dashboardInfo,
+  );
+
   const filterBarOrientation = useSelector<RootState, FilterBarOrientation>(
     ({ dashboardInfo }) =>
       isFeatureEnabled(FeatureFlag.HORIZONTAL_FILTER_BAR)
@@ -531,7 +537,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     isFeatureEnabled(FeatureFlag.DASHBOARD_NATIVE_FILTERS);
 
   const showFilterBar =
-    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
+    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode && !dashboardInfo.metadata.hide_panel;
 
   const offset =
     FILTER_BAR_HEADER_HEIGHT +

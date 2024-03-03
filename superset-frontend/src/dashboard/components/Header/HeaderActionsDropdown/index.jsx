@@ -94,6 +94,7 @@ const MENU_KEYS = {
   TOGGLE_FULLSCREEN: 'toggle-fullscreen',
   MANAGE_EMBEDDED: 'manage-embedded',
   MANAGE_EMAIL_REPORT: 'manage-email-report',
+  HIDE_PANEL: 'hide-panel',
 };
 
 const SCREENSHOT_NODE_SELECTOR = '.dashboard';
@@ -380,13 +381,19 @@ class HeaderActionsDropdown extends React.PureComponent {
             isEmpty(dashboardInfo?.metadata?.filter_scopes)
           ) && (
             <Menu.Item key={MENU_KEYS.SET_FILTER_MAPPING}>
+              test
+            </Menu.Item>
+          )}
+        {
+          !dashboardInfo?.metadata?.hide_panel && (
+            <Menu.Item key={MENU_KEYS.HIDE_PANEL}>
               <FilterScopeModal
                 className="m-r-5"
                 triggerNode={t('Set filter mapping')}
               />
             </Menu.Item>
-          )}
-
+          )
+        }
         <Menu.Item key={MENU_KEYS.AUTOREFRESH_MODAL}>
           <RefreshIntervalModal
             addSuccessToast={this.props.addSuccessToast}

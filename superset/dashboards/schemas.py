@@ -139,6 +139,7 @@ class DashboardJSONMetadataSchema(Schema):
     remote_id = fields.Integer()
     filter_bar_orientation = fields.Str(allow_none=True)
     native_filter_migration = fields.Dict()
+    hide_panel = fields.Boolean(dump_default=False)
 
     @pre_load
     def remove_show_native_filters(  # pylint: disable=unused-argument, no-self-use
