@@ -17,6 +17,7 @@
 # pylint: disable=too-many-lines
 from __future__ import annotations
 
+import contextlib
 import logging
 import re
 import time
@@ -67,11 +68,8 @@ if TYPE_CHECKING:
     # prevent circular imports
     from superset.models.core import Database
 
-    # need try/catch because pyhive may not be installed
-    try:
+    with contextlib.suppress(ImportError):  # pyhive may not be installed
         from pyhive.presto import Cursor
-    except ImportError:
-        pass
 
 COLUMN_DOES_NOT_EXIST_REGEX = re.compile(
     "line (?P<location>.+?): .*Column '(?P<column_name>.+?)' cannot be resolved"
@@ -120,7 +118,9 @@ def get_children(column: ResultSetColumnType) -> list[ResultSetColumnType]:
         raise ValueError
     match = pattern.match(column["type"])
     if not match:
-        raise Exception(f"Unable to parse column type {column['type']}")
+        raise Exception(  # pylint: disable=broad-exception-raised
+            f"Unable to parse column type {column['type']}"
+        )
 
     group = match.groupdict()
     type_ = group["type"].upper()
@@ -156,7 +156,7 @@ def get_children(column: ResultSetColumnType) -> list[ResultSetColumnType]:
             columns.append(_column)
         return columns
 
-    raise Exception(f"Unknown type {type_}!")
+    raise Exception(f"Unknown type {type_}!")  # pylint: disable=broad-exception-raised
 
 
 class PrestoBaseEngineSpec(BaseEngineSpec, metaclass=ABCMeta):
@@ -622,13 +622,14 @@ class PrestoBaseEngineSpec(BaseEngineSpec, metaclass=ABCMeta):
                 msg = f"Field [{k}] is not part of the portioning key"
                 raise SupersetTemplateException(msg)
         if len(kwargs.keys()) != len(part_fields) - 1:
+            # pylint: disable=consider-using-f-string
             msg = (
                 "A filter needs to be specified for {} out of the " "{} fields."
             ).format(len(part_fields) - 1, len(part_fields))
             raise SupersetTemplateException(msg)
 
         for field in part_fields:
-            if field not in kwargs.keys():
+            if field not in kwargs:
                 field_to_return = field
 
         sql = cls._partition_query(
@@ -935,9 +936,7 @@ class PrestoEngineSpec(PrestoBaseEngineSpec):
                             )
                         else:  # otherwise this field is a basic data type
                             full_parent_path = cls._get_full_name(stack)
-                            column_name = "{}.{}".format(
-                                full_parent_path, field_info[0]
-                            )
+                            column_name = f"{full_parent_path}.{field_info[0]}"
                             result.append(
                                 cls._create_column_info(column_name, column_type)
                             )
@@ -982,7 +981,11 @@ class PrestoEngineSpec(PrestoBaseEngineSpec):
 
     @classmethod
     def get_columns(
-        cls, inspector: Inspector, table_name: str, schema: str | None
+        cls,
+        inspector: Inspector,
+        table_name: str,
+        schema: str | None,
+        options: dict[str, Any] | None = None,
     ) -> list[ResultSetColumnType]:
         """
         Get columns from a Presto data source. This includes handling row and
@@ -990,6 +993,7 @@ class PrestoEngineSpec(PrestoBaseEngineSpec):
         :param inspector: object that performs database schema inspection
         :param table_name: table name
         :param schema: schema name
+        :param options: Extra configuration options, not used by this backend
         :return: a list of results that contain column info
                 (i.e. column name and data type)
         """
@@ -1277,12 +1281,10 @@ class PrestoEngineSpec(PrestoBaseEngineSpec):
 
     @classmethod
     def get_tracking_url(cls, cursor: Cursor) -> str | None:
-        try:
+        with contextlib.suppress(AttributeError):
             if cursor.last_query_id:
                 # pylint: disable=protected-access, line-too-long
                 return f"{cursor._protocol}://{cursor._host}:{cursor._port}/ui/query.html?{cursor.last_query_id}"
-        except AttributeError:
-            pass
         return None
 
     @classmethod
@@ -1323,8 +1325,10 @@ class PrestoEngineSpec(PrestoBaseEngineSpec):
                 if total_splits and completed_splits:
                     progress = 100 * (completed_splits / total_splits)
                     logger.info(
-                        "Query {} progress: {} / {} "  # pylint: disable=logging-format-interpolation
-                        "splits".format(query_id, completed_splits, total_splits)
+                        "Query %s progress: %s / %s splits",
+                        query_id,
+                        completed_splits,
+                        total_splits,
                     )
                     if progress > query.progress:
                         query.progress = progress
@@ -1341,6 +1345,7 @@ class PrestoEngineSpec(PrestoBaseEngineSpec):
             and isinstance(ex.orig[0], dict)
         ):
             error_dict = ex.orig[0]
+            # pylint: disable=consider-using-f-string
             return "{} at {}: {}".format(
                 error_dict.get("errorName"),
                 error_dict.get("errorLocation"),

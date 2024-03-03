@@ -19,13 +19,12 @@ from __future__ import annotations
 import copy
 import logging
 import re
-from typing import Any, ClassVar, TYPE_CHECKING
+from typing import Any, ClassVar, TYPE_CHECKING, TypedDict
 
 import numpy as np
 import pandas as pd
 from flask_babel import gettext as _
 from pandas import DateOffset
-from typing_extensions import TypedDict
 
 from superset import app
 from superset.common.chart_data import ChartDataResultFormat
@@ -37,9 +36,9 @@ from superset.common.utils.time_range_utils import (
     get_since_until_from_query_object,
     get_since_until_from_time_range,
 )
-from superset.connectors.base.models import BaseDatasource
+from superset.connectors.sqla.models import BaseDatasource
 from superset.constants import CacheRegion, TimeGrain
-from superset.daos.annotation import AnnotationLayerDAO
+from superset.daos.annotation_layer import AnnotationLayerDAO
 from superset.daos.chart import ChartDAO
 from superset.exceptions import (
     InvalidPostProcessingError,
@@ -138,7 +137,7 @@ class QueryContextProcessor:
 
         if query_obj and cache_key and not cache.is_loaded:
             try:
-                invalid_columns = [
+                if invalid_columns := [
                     col
                     for col in get_column_names_from_columns(query_obj.columns)
                     + get_column_names_from_metrics(query_obj.metrics or [])
@@ -146,9 +145,7 @@ class QueryContextProcessor:
                         col not in self._qc_datasource.column_names
                         and col != DTTM_ALIAS
                     )
-                ]
-
-                if invalid_columns:
+                ]:
                     raise QueryObjectValidationError(
                         _(
                             "Columns missing in dataset: %(invalid_columns)s",
@@ -171,7 +168,7 @@ class QueryContextProcessor:
                 cache.error_message = str(ex)
                 cache.status = QueryStatus.FAILED
 
-        # the N-dimensional DataFrame has converteds into flat DataFrame
+        # the N-dimensional DataFrame has converted into flat DataFrame
         # by `flatten operator`, "comma" in the column is escaped by `escape_separator`
         # the result DataFrame columns should be unescaped
         label_map = {
@@ -603,7 +600,15 @@ class QueryContextProcessor:
             set_and_log_cache(
                 cache_manager.cache,
                 cache_key,
-                {"data": self._query_context.cache_values},
+                {
+                    "data": {
+                        # setting form_data into query context cache value as well
+                        # so that it can be used to reconstruct form_data field
+                        # for query context object when reading from cache
+                        "form_data": self._query_context.form_data,
+                        **self._query_context.cache_values,
+                    },
+                },
                 self.get_cache_timeout(),
             )
             return_value["cache_key"] = cache_key  # type: ignore
@@ -634,11 +639,6 @@ class QueryContextProcessor:
         return generate_cache_key(cache_dict, key_prefix)
 
     def get_annotation_data(self, query_obj: QueryObject) -> dict[str, Any]:
-        """
-        :param query_context:
-        :param query_obj:
-        :return:
-        """
         annotation_data: dict[str, Any] = self.get_native_annotation_data(query_obj)
         for annotation_layer in [
             layer
@@ -689,8 +689,8 @@ class QueryContextProcessor:
     def get_viz_annotation_data(
         annotation_layer: dict[str, Any], force: bool
     ) -> dict[str, Any]:
-        # pylint: disable=import-outside-toplevel,superfluous-parens
-        from superset.charts.data.commands.get_data_command import ChartDataCommand
+        # pylint: disable=import-outside-toplevel
+        from superset.commands.chart.data.get_data_command import ChartDataCommand
 
         if not (chart := ChartDAO.find_by_id(annotation_layer["value"])):
             raise QueryObjectValidationError(_("The chart does not exist"))

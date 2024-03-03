@@ -35,7 +35,7 @@ from superset.utils.core import (
 if TYPE_CHECKING:
     from sqlalchemy.orm import sessionmaker
 
-    from superset.connectors.base.models import BaseDatasource
+    from superset.connectors.sqla.models import BaseDatasource
     from superset.daos.datasource import DatasourceDAO
 
 
@@ -94,7 +94,7 @@ class QueryObjectFactory:  # pylint: disable=too-few-public-methods
             session=self._session_maker(),
         )
 
-    def _process_extras(  # pylint: disable=no-self-use
+    def _process_extras(
         self,
         extras: dict[str, Any] | None,
     ) -> dict[str, Any]:

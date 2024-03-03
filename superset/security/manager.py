@@ -48,7 +48,7 @@ from flask_login import AnonymousUserMixin, LoginManager
 from jwt.api_jwt import _jwt_global_obj
 from sqlalchemy import and_, inspect, or_
 from sqlalchemy.engine.base import Connection
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import eagerload, Session
 from sqlalchemy.orm.mapper import Mapper
 from sqlalchemy.orm.query import Query as SqlaQuery
 
@@ -78,10 +78,14 @@ from superset.utils.urls import get_url_host
 
 if TYPE_CHECKING:
     from superset.common.query_context import QueryContext
-    from superset.connectors.base.models import BaseDatasource
-    from superset.connectors.sqla.models import RowLevelSecurityFilter, SqlaTable
+    from superset.connectors.sqla.models import (
+        BaseDatasource,
+        RowLevelSecurityFilter,
+        SqlaTable,
+    )
     from superset.models.core import Database
     from superset.models.dashboard import Dashboard
+    from superset.models.slice import Slice
     from superset.models.sql_lab import Query
     from superset.sql_parse import Table
     from superset.viz import BaseViz
@@ -237,6 +241,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         ("can_execute_sql_query", "SQLLab"),
         ("can_estimate_query_cost", "SQL Lab"),
         ("can_export_csv", "SQLLab"),
+        ("can_read", "SQLLab"),
         ("can_sqllab_history", "Superset"),
         ("can_sqllab", "Superset"),
         ("can_test_conn", "Superset"),  # Deprecated permission remove on 3.0.0
@@ -284,7 +289,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             return self.get_guest_user_from_request(request)
         return None
 
-    def get_schema_perm(  # pylint: disable=no-self-use
+    def get_schema_perm(
         self, database: Union["Database", str], schema: Optional[str] = None
     ) -> Optional[str]:
         """
@@ -294,23 +299,21 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         :param schema: The Superset schema name
         :return: The database specific schema permission
         """
-
-        if schema:
-            return f"[{database}].[{schema}]"
-
-        return None
+        return f"[{database}].[{schema}]" if schema else None
 
     @staticmethod
-    def get_database_perm(database_id: int, database_name: str) -> str:
+    def get_database_perm(database_id: int, database_name: str) -> Optional[str]:
         return f"[{database_name}].(id:{database_id})"
 
     @staticmethod
-    def get_dataset_perm(dataset_id: int, dataset_name: str, database_name: str) -> str:
+    def get_dataset_perm(
+        dataset_id: int,
+        dataset_name: str,
+        database_name: str,
+    ) -> Optional[str]:
         return f"[{database_name}].[{dataset_name}](id:{dataset_id})"
 
-    def unpack_database_and_schema(  # pylint: disable=no-self-use
-        self, schema_permission: str
-    ) -> DatabaseAndSchema:
+    def unpack_database_and_schema(self, schema_permission: str) -> DatabaseAndSchema:
         # [database_name].[schema|table]
 
         schema_name = schema_permission.split(".")[1][1:-1]
@@ -420,7 +423,19 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
         return True
 
-    # pylint: disable=no-self-use
+    def can_access_chart(self, chart: "Slice") -> bool:
+        """
+        Return True if the user can access the specified chart, False otherwise.
+        :param chart: The chart
+        :return: Whether the user can access the chart
+        """
+        try:
+            self.raise_for_access(chart=chart)
+        except SupersetSecurityException:
+            return False
+
+        return True
+
     def get_dashboard_access_error_object(  # pylint: disable=invalid-name
         self,
         dashboard: "Dashboard",  # pylint: disable=unused-argument
@@ -435,6 +450,23 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         return SupersetError(
             error_type=SupersetErrorType.DASHBOARD_SECURITY_ACCESS_ERROR,
             message="You don't have access to this dashboard.",
+            level=ErrorLevel.ERROR,
+        )
+
+    def get_chart_access_error_object(
+        self,
+        dashboard: "Dashboard",  # pylint: disable=unused-argument
+    ) -> SupersetError:
+        """
+        Return the error object for the denied Superset dashboard.
+
+        :param dashboard: The denied Superset dashboard
+        :returns: The error object
+        """
+
+        return SupersetError(
+            error_type=SupersetErrorType.CHART_SECURITY_ACCESS_ERROR,
+            message="You don't have access to this chart.",
             level=ErrorLevel.ERROR,
         )
 
@@ -484,9 +516,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             },
         )
 
-    def get_table_access_error_msg(  # pylint: disable=no-self-use
-        self, tables: set["Table"]
-    ) -> str:
+    def get_table_access_error_msg(self, tables: set["Table"]) -> str:
         """
         Return the error message for the denied SQL tables.
 
@@ -515,7 +545,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             },
         )
 
-    def get_table_access_link(  # pylint: disable=unused-argument,no-self-use
+    def get_table_access_link(  # pylint: disable=unused-argument
         self, tables: set["Table"]
     ) -> Optional[str]:
         """
@@ -699,7 +729,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         Add the FAB permission/view-menu.
 
         :param permission_name: The FAB permission name
-        :param view_menu_names: The FAB view-menu name
+        :param view_menu_name: The FAB view-menu name
         :see: SecurityManager.add_permission_view_menu
         """
 
@@ -740,7 +770,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
         logger.info("Fetching a set of all perms to lookup which ones are missing")
         all_pvs = set()
-        for pv in self.get_session.query(self.permissionview_model).all():
+        for pv in self._get_all_pvms():
             if pv.permission and pv.view_menu:
                 all_pvs.add((pv.permission.name, pv.view_menu.name))
 
@@ -788,11 +818,13 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
         self.create_custom_permissions()
 
+        pvms = self._get_all_pvms()
+
         # Creating default roles
-        self.set_role("Admin", self._is_admin_pvm)
-        self.set_role("Alpha", self._is_alpha_pvm)
-        self.set_role("Gamma", self._is_gamma_pvm)
-        self.set_role("sql_lab", self._is_sql_lab_pvm)
+        self.set_role("Admin", self._is_admin_pvm, pvms)
+        self.set_role("Alpha", self._is_alpha_pvm, pvms)
+        self.set_role("Gamma", self._is_gamma_pvm, pvms)
+        self.set_role("sql_lab", self._is_sql_lab_pvm, pvms)
 
         # Configure public role
         if current_app.config["PUBLIC_ROLE_LIKE"]:
@@ -807,6 +839,20 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         # commit role and view menu updates
         self.get_session.commit()
         self.clean_perms()
+
+    def _get_all_pvms(self) -> list[PermissionView]:
+        """
+        Gets list of all PVM
+        """
+        pvms = (
+            self.get_session.query(self.permissionview_model)
+            .options(
+                eagerload(self.permissionview_model.permission),
+                eagerload(self.permissionview_model.view_menu),
+            )
+            .all()
+        )
+        return [p for p in pvms if p.permission and p.view_menu]
 
     def _get_pvms_from_builtin_role(self, role_name: str) -> list[PermissionView]:
         """
@@ -864,11 +910,13 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                 ):
                     role_from_permissions.append(permission_view)
         role_to.permissions = role_from_permissions
-        self.get_session.merge(role_to)
         self.get_session.commit()
 
     def set_role(
-        self, role_name: str, pvm_check: Callable[[PermissionView], bool]
+        self,
+        role_name: str,
+        pvm_check: Callable[[PermissionView], bool],
+        pvms: list[PermissionView],
     ) -> None:
         """
         Set the FAB permission/views for the role.
@@ -878,14 +926,11 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         """
 
         logger.info("Syncing %s perms", role_name)
-        pvms = self.get_session.query(PermissionView).all()
-        pvms = [p for p in pvms if p.permission and p.view_menu]
         role = self.add_role(role_name)
         role_pvms = [
             permission_view for permission_view in pvms if pvm_check(permission_view)
         ]
         role.permissions = role_pvms
-        self.get_session.merge(role)
         self.get_session.commit()
 
     def _is_admin_only(self, pvm: PermissionView) -> bool:
@@ -1159,6 +1204,8 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             .where(view_menu_table.c.id == db_pvm.view_menu_id)
             .values(name=new_view_menu_name)
         )
+        if not new_view_menu_name:
+            return None
         new_db_view_menu = self._find_view_menu_on_sqla_event(
             connection, new_view_menu_name
         )
@@ -1214,10 +1261,6 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                 .where(view_menu_table.c.name == old_dataset_vm_name)
                 .values(name=new_dataset_vm_name)
             )
-            # After update refresh
-            new_dataset_view_menu = self._find_view_menu_on_sqla_event(
-                connection, new_dataset_vm_name
-            )
 
             # Update dataset (SqlaTable perm field)
             connection.execute(
@@ -1234,8 +1277,18 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                 .where(chart_table.c.perm == old_dataset_vm_name)
                 .values(perm=new_dataset_vm_name)
             )
-            self.on_view_menu_after_update(mapper, connection, new_dataset_view_menu)
-            updated_view_menus.append(new_dataset_view_menu)
+            if new_dataset_vm_name:
+                # After update refresh
+                new_dataset_view_menu = self._find_view_menu_on_sqla_event(
+                    connection,
+                    new_dataset_vm_name,
+                )
+                self.on_view_menu_after_update(
+                    mapper,
+                    connection,
+                    new_dataset_view_menu,
+                )
+                updated_view_menus.append(new_dataset_view_menu)
         return updated_view_menus
 
     def dataset_after_insert(
@@ -1261,7 +1314,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         )
 
         try:
-            dataset_perm = target.get_perm()
+            dataset_perm: Optional[str] = target.get_perm()
             database = target.database
         except DatasetInvalidPermissionEvaluationException:
             logger.warning(
@@ -1347,7 +1400,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         from superset.connectors.sqla.models import SqlaTable
 
         # Check if watched fields have changed
-        table = SqlaTable.__table__
+        table = SqlaTable.__table__  # pylint: disable=no-member
         current_dataset = connection.execute(
             table.select().where(table.c.id == target.id)
         ).one()
@@ -1797,15 +1850,18 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         return []
 
     def raise_for_access(
-        # pylint: disable=too-many-arguments,too-many-branches,too-many-locals
+        # pylint: disable=too-many-arguments,too-many-branches,too-many-locals,too-many-statements
         self,
         dashboard: Optional["Dashboard"] = None,
+        chart: Optional["Slice"] = None,
         database: Optional["Database"] = None,
         datasource: Optional["BaseDatasource"] = None,
         query: Optional["Query"] = None,
         query_context: Optional["QueryContext"] = None,
         table: Optional["Table"] = None,
         viz: Optional["BaseViz"] = None,
+        sql: Optional[str] = None,
+        schema: Optional[str] = None,
     ) -> None:
         """
         Raise an exception if the user cannot access the resource.
@@ -1816,6 +1872,8 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         :param query_context: The query context
         :param table: The Superset table (requires database)
         :param viz: The visualization
+        :param sql: The SQL string (requires database)
+        :param schema: Optional schema name
         :raises SupersetSecurityException: If the user cannot access the resource
         """
 
@@ -1824,7 +1882,19 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         from superset.connectors.sqla.models import SqlaTable
         from superset.models.dashboard import Dashboard
         from superset.models.slice import Slice
+        from superset.models.sql_lab import Query
         from superset.sql_parse import Table
+        from superset.utils.core import shortid
+
+        if sql and database:
+            query = Query(
+                database=database,
+                sql=sql,
+                schema=schema,
+                client_id=shortid()[:10],
+                user_id=get_user_id(),
+            )
+            self.get_session.expunge(query)
 
         if database and table or query:
             if query:
@@ -1839,7 +1909,10 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
                 default_schema = database.get_default_schema_for_query(query)
                 tables = {
                     Table(table_.table, table_.schema or default_schema)
-                    for table_ in sql_parse.ParsedQuery(query.sql).tables
+                    for table_ in sql_parse.ParsedQuery(
+                        query.sql,
+                        engine=database.db_engine_spec.engine,
+                    ).tables
                 }
             elif table:
                 tables = {table}
@@ -1866,6 +1939,30 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             if denied:
                 raise SupersetSecurityException(
                     self.get_table_access_error_object(denied)
+                )
+
+        if self.is_guest_user() and query_context:
+            # Guest users MUST not modify the payload so it's requesting a different
+            # chart or different ad-hoc metrics from what's saved.
+            form_data = query_context.form_data
+            stored_chart = query_context.slice_
+
+            if (
+                form_data is None
+                or stored_chart is None
+                or form_data.get("slice_id") != stored_chart.id
+                or form_data.get("metrics", []) != stored_chart.params_dict["metrics"]
+                or any(
+                    query.metrics != stored_chart.params_dict["metrics"]
+                    for query in query_context.queries
+                )
+            ):
+                raise SupersetSecurityException(
+                    SupersetError(
+                        error_type=SupersetErrorType.DASHBOARD_SECURITY_ACCESS_ERROR,
+                        message=_("Guest user cannot modify chart payload"),
+                        level=ErrorLevel.ERROR,
+                    )
                 )
 
         if datasource or query_context or viz:
@@ -1953,31 +2050,43 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             if self.is_admin() or self.is_owner(dashboard):
                 return
 
-            # RBAC and legacy (datasource inferred) access controls.
+            # TODO: Once a better sharing flow is in place, we should move the
+            # dashboard.published check here so that it's applied to both
+            # regular RBAC and DASHBOARD_RBAC
+
+            # DASHBOARD_RBAC logic - Manage dashboard access through roles.
+            # Only applicable in case the dashboard has roles set.
             if is_feature_enabled("DASHBOARD_RBAC") and dashboard.roles:
                 if dashboard.published and {role.id for role in dashboard.roles} & {
                     role.id for role in self.get_user_roles()
                 }:
                     return
-            elif (
-                # To understand why we rely on status and give access to draft dashboards
-                # without roles take a look at:
-                #
-                #   - https://github.com/apache/superset/pull/24350#discussion_r1225061550
-                #   - https://github.com/apache/superset/pull/17511#issuecomment-975870169
-                #
-                not dashboard.published
-                or not dashboard.datasources
-                or any(
-                    self.can_access_datasource(datasource)
-                    for datasource in dashboard.datasources
-                )
+
+            # REGULAR RBAC logic
+            # User can only acess the dashboard in case:
+            #    It doesn't have any datasets; OR
+            #    They have access to at least one dataset used.
+            # We currently don't check if the dashboard is published,
+            # to allow creators to share a WIP dashboard with a viewer
+            # to collect feedback.
+            elif not dashboard.datasources or any(
+                self.can_access_datasource(datasource)
+                for datasource in dashboard.datasources
             ):
                 return
 
             raise SupersetSecurityException(
                 self.get_dashboard_access_error_object(dashboard)
             )
+
+        if chart:
+            if self.is_admin() or self.is_owner(chart):
+                return
+
+            if chart.datasource and self.can_access_datasource(chart.datasource):
+                return
+
+            raise SupersetSecurityException(self.get_chart_access_error_object(chart))
 
     def get_user_by_username(
         self, username: str, session: Session = None
@@ -1994,7 +2103,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             .one_or_none()
         )
 
-    def get_anonymous_user(self) -> User:  # pylint: disable=no-self-use
+    def get_anonymous_user(self) -> User:
         return AnonymousUserMixin()
 
     def get_user_roles(self, user: Optional[User] = None) -> list[Role]:
@@ -2131,10 +2240,10 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
     @staticmethod
     def validate_guest_token_resources(resources: GuestTokenResources) -> None:
         # pylint: disable=import-outside-toplevel
-        from superset.daos.dashboard import EmbeddedDashboardDAO
-        from superset.embedded_dashboard.commands.exceptions import (
+        from superset.commands.dashboard.embedded.exceptions import (
             EmbeddedDashboardNotFoundError,
         )
+        from superset.daos.dashboard import EmbeddedDashboardDAO
         from superset.models.dashboard import Dashboard
 
         for resource in resources:
@@ -2169,8 +2278,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             "aud": audience,
             "type": "guest",
         }
-        token = self.pyjwt_for_guest_token.encode(claims, secret, algorithm=algo)
-        return token
+        return self.pyjwt_for_guest_token.encode(claims, secret, algorithm=algo)
 
     def get_guest_user_from_request(self, req: Request) -> Optional[GuestUser]:
         """
@@ -2202,8 +2310,8 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
             # We don't need to send a special error message.
             logger.warning("Invalid guest token", exc_info=True)
             return None
-        else:
-            return self.get_guest_user_from_token(cast(GuestToken, token))
+
+        return self.get_guest_user_from_token(cast(GuestToken, token))
 
     def get_guest_user_from_token(self, token: GuestToken) -> GuestUser:
         return self.guest_user_cls(
@@ -2236,9 +2344,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         return hasattr(user, "is_guest_user") and user.is_guest_user
 
     def get_current_guest_user_if_guest(self) -> Optional[GuestUser]:
-        if self.is_guest_user():
-            return g.user
-        return None
+        return g.user if self.is_guest_user() else None
 
     def has_guest_access(self, dashboard: "Dashboard") -> bool:
         user = self.get_current_guest_user_if_guest()
@@ -2270,7 +2376,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
 
         Note admins are deemed owners of all resources.
 
-        :param resource: The dashboard, dataste, chart, etc. resource
+        :param resource: The dashboard, dataset, chart, etc. resource
         :raises SupersetSecurityException: If the current user is not an owner
         """
 
@@ -2299,8 +2405,8 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         """
         Returns True if the current user is an owner of the resource, False otherwise.
 
-        :param resource: The dashboard, dataste, chart, etc. resource
-        :returns: Whethe the current user is an owner of the resource
+        :param resource: The dashboard, dataset, chart, etc. resource
+        :returns: Whether the current user is an owner of the resource
         """
 
         try:
@@ -2314,7 +2420,7 @@ class SupersetSecurityManager(  # pylint: disable=too-many-public-methods
         """
         Returns True if the current user is an admin user, False otherwise.
 
-        :returns: Whehther the current user is an admin user
+        :returns: Whether the current user is an admin user
         """
 
         return current_app.config["AUTH_ROLE_ADMIN"] in [

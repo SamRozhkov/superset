@@ -16,6 +16,7 @@
 # under the License.
 from __future__ import annotations
 
+import contextlib
 import logging
 import threading
 import time
@@ -23,24 +24,30 @@ from typing import Any, TYPE_CHECKING
 
 import simplejson as json
 from flask import current_app
+from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.engine.url import URL
+from sqlalchemy.exc import NoSuchTableError
 from sqlalchemy.orm import Session
 
 from superset.constants import QUERY_CANCEL_KEY, QUERY_EARLY_CANCEL_KEY, USER_AGENT
 from superset.databases.utils import make_url_safe
 from superset.db_engine_specs.base import BaseEngineSpec
-from superset.db_engine_specs.exceptions import SupersetDBAPIConnectionError
+from superset.db_engine_specs.exceptions import (
+    SupersetDBAPIConnectionError,
+    SupersetDBAPIDatabaseError,
+    SupersetDBAPIOperationalError,
+    SupersetDBAPIProgrammingError,
+)
 from superset.db_engine_specs.presto import PrestoBaseEngineSpec
 from superset.models.sql_lab import Query
+from superset.superset_typing import ResultSetColumnType
 from superset.utils import core as utils
 
 if TYPE_CHECKING:
     from superset.models.core import Database
 
-    try:
+    with contextlib.suppress(ImportError):  # trino may not be installed
         from trino.dbapi import Cursor
-    except ImportError:
-        pass
 
 logger = logging.getLogger(__name__)
 
@@ -146,12 +153,10 @@ class TrinoEngineSpec(PrestoBaseEngineSpec):
         try:
             return cursor.info_uri
         except AttributeError:
-            try:
+            with contextlib.suppress(AttributeError):
                 conn = cursor.connection
                 # pylint: disable=protected-access, line-too-long
                 return f"{conn.http_scheme}://{conn.host}:{conn.port}/ui/query.html?{cursor._query.query_id}"
-            except AttributeError:
-                pass
         return None
 
     @classmethod
@@ -330,7 +335,110 @@ class TrinoEngineSpec(PrestoBaseEngineSpec):
     def get_dbapi_exception_mapping(cls) -> dict[type[Exception], type[Exception]]:
         # pylint: disable=import-outside-toplevel
         from requests import exceptions as requests_exceptions
+        from trino import exceptions as trino_exceptions
 
-        return {
+        static_mapping: dict[type[Exception], type[Exception]] = {
             requests_exceptions.ConnectionError: SupersetDBAPIConnectionError,
         }
+
+        class _CustomMapping(dict[type[Exception], type[Exception]]):
+            def get(  # type: ignore[override]
+                self, item: type[Exception], default: type[Exception] | None = None
+            ) -> type[Exception] | None:
+                if static := static_mapping.get(item):
+                    return static
+                if issubclass(item, trino_exceptions.InternalError):
+                    return SupersetDBAPIDatabaseError
+                if issubclass(item, trino_exceptions.OperationalError):
+                    return SupersetDBAPIOperationalError
+                if issubclass(item, trino_exceptions.ProgrammingError):
+                    return SupersetDBAPIProgrammingError
+                return default
+
+        return _CustomMapping()
+
+    @classmethod
+    def _expand_columns(cls, col: ResultSetColumnType) -> list[ResultSetColumnType]:
+        """
+        Expand the given column out to one or more columns by analysing their types,
+        descending into ROWS and expanding out their inner fields recursively.
+
+        We can only navigate named fields in ROWs in this way, so we can't expand out
+        MAP or ARRAY types, nor fields in ROWs which have no name (in fact the trino
+        library doesn't correctly parse unnamed fields in ROWs). We won't be able to
+        expand ROWs which are nested underneath any of those types, either.
+
+        Expanded columns are named foo.bar.baz and we provide a query_as property to
+        instruct the base engine spec how to correctly query them: instead of quoting
+        the whole string they have to be quoted like "foo"."bar"."baz" and we then
+        alias them to the full dotted string for ease of reference.
+        """
+        # pylint: disable=import-outside-toplevel
+        from trino.sqlalchemy import datatype
+
+        cols = [col]
+        col_type = col.get("type")
+
+        if not isinstance(col_type, datatype.ROW):
+            return cols
+
+        for inner_name, inner_type in col_type.attr_types:
+            outer_name = col["name"]
+            name = ".".join([outer_name, inner_name])
+            query_name = ".".join([f'"{piece}"' for piece in name.split(".")])
+            column_spec = cls.get_column_spec(str(inner_type))
+            is_dttm = column_spec.is_dttm if column_spec else False
+
+            inner_col = ResultSetColumnType(
+                name=name,
+                column_name=name,
+                type=inner_type,
+                is_dttm=is_dttm,
+                query_as=f'{query_name} AS "{name}"',
+            )
+            cols.extend(cls._expand_columns(inner_col))
+
+        return cols
+
+    @classmethod
+    def get_columns(
+        cls,
+        inspector: Inspector,
+        table_name: str,
+        schema: str | None,
+        options: dict[str, Any] | None = None,
+    ) -> list[ResultSetColumnType]:
+        """
+        If the "expand_rows" feature is enabled on the database via
+        "schema_options", expand the schema definition out to show all
+        subfields of nested ROWs as their appropriate dotted paths.
+        """
+        base_cols = super().get_columns(inspector, table_name, schema, options)
+        if not (options or {}).get("expand_rows"):
+            return base_cols
+
+        return [col for base_col in base_cols for col in cls._expand_columns(base_col)]
+
+    @classmethod
+    def get_indexes(
+        cls,
+        database: Database,
+        inspector: Inspector,
+        table_name: str,
+        schema: str | None,
+    ) -> list[dict[str, Any]]:
+        """
+        Get the indexes associated with the specified schema/table.
+
+        Trino dialect raises NoSuchTableError in get_indexes if table is empty.
+
+        :param database: The database to inspect
+        :param inspector: The SQLAlchemy inspector
+        :param table_name: The table to inspect
+        :param schema: The schema to inspect
+        :returns: The indexes
+        """
+        try:
+            return super().get_indexes(database, inspector, table_name, schema)
+        except NoSuchTableError:
+            return []

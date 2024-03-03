@@ -105,10 +105,7 @@ const SouthPane = ({
   defaultQueryLimit,
 }: SouthPaneProps) => {
   const dispatch = useDispatch();
-  const user = useSelector(
-    ({ sqlLab }: SqlLabRootState) => sqlLab.user,
-    shallowEqual,
-  );
+  const user = useSelector(({ user }: SqlLabRootState) => user, shallowEqual);
   const { databases, offline, queries, tables } = useSelector(
     ({ sqlLab: { databases, offline, queries, tables } }: SqlLabRootState) => ({
       databases,
@@ -135,7 +132,7 @@ const SouthPane = ({
             queries[dataPreviewQueryId],
         )
         .map(({ name, dataPreviewQueryId }) => ({
-          ...queries[dataPreviewQueryId],
+          ...queries[dataPreviewQueryId || ''],
           tableName: name,
         })),
     [queries, queryEditorId, tables],
@@ -192,6 +189,8 @@ const SouthPane = ({
             database={databases[latestQuery.dbId]}
             displayLimit={displayLimit}
             defaultQueryLimit={defaultQueryLimit}
+            showSql
+            showSqlInline
           />
         );
       }

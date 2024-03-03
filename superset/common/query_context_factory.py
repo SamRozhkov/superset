@@ -29,7 +29,7 @@ from superset.models.slice import Slice
 from superset.utils.core import DatasourceDict, DatasourceType, is_adhoc_column
 
 if TYPE_CHECKING:
-    from superset.connectors.base.models import BaseDatasource
+    from superset.connectors.sqla.models import BaseDatasource
 
 config = app.config
 
@@ -93,7 +93,6 @@ class QueryContextFactory:  # pylint: disable=too-few-public-methods
             cache_values=cache_values,
         )
 
-    # pylint: disable=no-self-use
     def _convert_to_model(self, datasource: DatasourceDict) -> BaseDatasource:
         return DatasourceDAO.get_datasource(
             session=db.session,

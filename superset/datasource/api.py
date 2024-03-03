@@ -50,7 +50,7 @@ class DatasourceRestApi(BaseSupersetApi):
     def get_column_values(
         self, datasource_type: str, datasource_id: int, column_name: str
     ) -> FlaskResponse:
-        """Get possible values for a datasource column
+        """Get possible values for a datasource column.
         ---
         get:
           summary: Get possible values for a datasource column
@@ -115,9 +115,12 @@ class DatasourceRestApi(BaseSupersetApi):
             return self.response(403, message=ex.message)
 
         row_limit = apply_max_row_limit(app.config["FILTER_SELECT_ROW_LIMIT"])
+        denormalize_column = not datasource.normalize_columns
         try:
             payload = datasource.values_for_column(
-                column_name=column_name, limit=row_limit
+                column_name=column_name,
+                limit=row_limit,
+                denormalize_column=denormalize_column,
             )
             return self.response(200, result=payload)
         except KeyError:

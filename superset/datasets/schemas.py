@@ -24,9 +24,23 @@ from marshmallow.validate import Length
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 
 from superset.datasets.models import Dataset
+from superset.exceptions import SupersetMarshmallowValidationError
 
 get_delete_ids_schema = {"type": "array", "items": {"type": "integer"}}
 get_export_ids_schema = {"type": "array", "items": {"type": "integer"}}
+
+openapi_spec_methods_override = {
+    "get": {"get": {"summary": "Get a dataset detail information"}},
+    "get_list": {
+        "get": {
+            "summary": "Get a list of datasets",
+            "description": "Gets a list of datasets, use Rison or JSON query "
+            "parameters for filtering, sorting, pagination and "
+            " for selecting specific columns and metadata.",
+        }
+    },
+    "info": {"get": {"summary": "Get metadata information about this API resource"}},
+}
 
 
 def validate_python_date_format(value: str) -> None:
@@ -86,6 +100,7 @@ class DatasetPostSchema(Schema):
     is_managed_externally = fields.Boolean(allow_none=True, dump_default=False)
     external_url = fields.String(allow_none=True)
     normalize_columns = fields.Boolean(load_default=False)
+    always_filter_main_dttm = fields.Boolean(load_default=False)
 
 
 class DatasetPutSchema(Schema):
@@ -98,6 +113,7 @@ class DatasetPutSchema(Schema):
     description = fields.String(allow_none=True)
     main_dttm_col = fields.String(allow_none=True)
     normalize_columns = fields.Boolean(allow_none=True, dump_default=False)
+    always_filter_main_dttm = fields.Boolean(load_default=False)
     offset = fields.Integer(allow_none=True)
     default_endpoint = fields.String(allow_none=True)
     cache_timeout = fields.Integer(allow_none=True)
@@ -109,6 +125,17 @@ class DatasetPutSchema(Schema):
     extra = fields.String(allow_none=True)
     is_managed_externally = fields.Boolean(allow_none=True, dump_default=False)
     external_url = fields.String(allow_none=True)
+
+    def handle_error(
+        self,
+        error: ValidationError,
+        data: dict[str, Any],
+        **kwargs: Any,
+    ) -> None:
+        """
+        Return SIP-40 error.
+        """
+        raise SupersetMarshmallowValidationError(error, data)
 
 
 class DatasetDuplicateSchema(Schema):
@@ -151,7 +178,7 @@ class DatasetRelatedObjectsResponse(Schema):
 
 
 class ImportV1ColumnSchema(Schema):
-    # pylint: disable=no-self-use, unused-argument
+    # pylint: disable=unused-argument
     @pre_load
     def fix_extra(self, data: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         """
@@ -177,7 +204,7 @@ class ImportV1ColumnSchema(Schema):
 
 
 class ImportV1MetricSchema(Schema):
-    # pylint: disable=no-self-use, unused-argument
+    # pylint: disable=unused-argument
     @pre_load
     def fix_extra(self, data: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         """
@@ -200,7 +227,7 @@ class ImportV1MetricSchema(Schema):
 
 
 class ImportV1DatasetSchema(Schema):
-    # pylint: disable=no-self-use, unused-argument
+    # pylint: disable=unused-argument
     @pre_load
     def fix_extra(self, data: dict[str, Any], **kwargs: Any) -> dict[str, Any]:
         """
@@ -237,6 +264,7 @@ class ImportV1DatasetSchema(Schema):
     is_managed_externally = fields.Boolean(allow_none=True, dump_default=False)
     external_url = fields.String(allow_none=True)
     normalize_columns = fields.Boolean(load_default=False)
+    always_filter_main_dttm = fields.Boolean(load_default=False)
 
 
 class GetOrCreateDatasetSchema(Schema):
@@ -253,6 +281,7 @@ class GetOrCreateDatasetSchema(Schema):
         metadata={"description": "Template params for the table"}
     )
     normalize_columns = fields.Boolean(load_default=False)
+    always_filter_main_dttm = fields.Boolean(load_default=False)
 
 
 class DatasetSchema(SQLAlchemyAutoSchema):

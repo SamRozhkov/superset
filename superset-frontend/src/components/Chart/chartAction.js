@@ -35,16 +35,14 @@ import {
   getQuerySettings,
   getChartDataUri,
 } from 'src/explore/exploreUtils';
-import { requiresQuery } from 'src/modules/AnnotationTypes';
-
 import { addDangerToast } from 'src/components/MessageToasts/actions';
 import { logEvent } from 'src/logger/actions';
 import { Logger, LOG_ACTIONS_LOAD_CHART } from 'src/logger/LogUtils';
 import { getClientErrorObject } from 'src/utils/getClientErrorObject';
-import { safeStringify } from 'src/utils/safeStringify';
 import { allowCrossDomain as domainShardingEnabled } from 'src/utils/hostNamesConfig';
 import { updateDataMask } from 'src/dataMask/actions';
 import { waitForAsyncData } from 'src/middleware/asyncEvent';
+import { safeStringify } from 'src/utils/safeStringify';
 
 export const CHART_UPDATE_STARTED = 'CHART_UPDATE_STARTED';
 export function chartUpdateStarted(queryController, latestQueryFormData, key) {
@@ -267,13 +265,16 @@ export function runAnnotationQuery({
       ...(formData || getState().charts[sliceKey].latestQueryFormData),
     };
 
-    if (!requiresQuery(annotation.sourceType)) {
+    if (!annotation.sourceType) {
       return Promise.resolve();
     }
 
-    const granularity = fd.time_grain_sqla || fd.granularity;
-    fd.time_grain_sqla = granularity;
-    fd.granularity = granularity;
+    // In the original formData the `granularity` attribute represents the time grain (eg
+    // `P1D`), but in the request payload it corresponds to the name of the column where
+    // the time grain should be applied (eg, `Date`), so we need to move things around.
+    fd.time_grain_sqla = fd.time_grain_sqla || fd.granularity;
+    fd.granularity = fd.granularity_sqla;
+
     const overridesKeys = Object.keys(annotation.overrides);
     if (overridesKeys.includes('since') || overridesKeys.includes('until')) {
       annotation.overrides = {
@@ -373,6 +374,29 @@ export function addChart(chart, key) {
   return { type: ADD_CHART, chart, key };
 }
 
+export function handleChartDataResponse(response, json, useLegacyApi) {
+  if (isFeatureEnabled(FeatureFlag.GlobalAsyncQueries)) {
+    // deal with getChartDataRequest transforming the response data
+    const result = 'result' in json ? json.result : json;
+    switch (response.status) {
+      case 200:
+        // Query results returned synchronously, meaning query was already cached.
+        return Promise.resolve(result);
+      case 202:
+        // Query is running asynchronously and we must await the results
+        if (useLegacyApi) {
+          return waitForAsyncData(result[0]);
+        }
+        return waitForAsyncData(result);
+      default:
+        throw new Error(
+          `Received unexpected response status (${response.status}) while fetching chart data`,
+        );
+    }
+  }
+  return json.result;
+}
+
 export function exploreJSON(
   formData,
   force = false,
@@ -408,31 +432,11 @@ export function exploreJSON(
 
     dispatch(chartUpdateStarted(controller, formData, key));
 
+    const [useLegacyApi] = getQuerySettings(formData);
     const chartDataRequestCaught = chartDataRequest
-      .then(({ response, json }) => {
-        if (isFeatureEnabled(FeatureFlag.GLOBAL_ASYNC_QUERIES)) {
-          // deal with getChartDataRequest transforming the response data
-          const result = 'result' in json ? json.result : json;
-          const [useLegacyApi] = getQuerySettings(formData);
-          switch (response.status) {
-            case 200:
-              // Query results returned synchronously, meaning query was already cached.
-              return Promise.resolve(result);
-            case 202:
-              // Query is running asynchronously and we must await the results
-              if (useLegacyApi) {
-                return waitForAsyncData(result[0]);
-              }
-              return waitForAsyncData(result);
-            default:
-              throw new Error(
-                `Received unexpected response status (${response.status}) while fetching chart data`,
-              );
-          }
-        }
-
-        return json.result;
-      })
+      .then(({ response, json }) =>
+        handleChartDataResponse(response, json, useLegacyApi),
+      )
       .then(queriesResponse => {
         queriesResponse.forEach(resultItem =>
           dispatch(
@@ -491,7 +495,6 @@ export function exploreJSON(
       });
 
     // only retrieve annotations when calling the legacy API
-    const [useLegacyApi] = getQuerySettings(formData);
     const annotationLayers = useLegacyApi
       ? formData.annotation_layers || []
       : [];
@@ -573,18 +576,27 @@ export function postChartFormData(
   );
 }
 
-export function redirectSQLLab(formData) {
+export function redirectSQLLab(formData, history) {
   return dispatch => {
     getChartDataRequest({ formData, resultFormat: 'json', resultType: 'query' })
       .then(({ json }) => {
-        const redirectUrl = '/superset/sqllab/';
+        const redirectUrl = '/sqllab/';
         const payload = {
           datasourceKey: formData.datasource,
           sql: json.result[0].query,
         };
-        SupersetClient.postForm(redirectUrl, {
-          form_data: safeStringify(payload),
-        });
+        if (history) {
+          history.push({
+            pathname: redirectUrl,
+            state: {
+              requestedQuery: payload,
+            },
+          });
+        } else {
+          SupersetClient.postForm(redirectUrl, {
+            form_data: safeStringify(payload),
+          });
+        }
       })
       .catch(() =>
         dispatch(addDangerToast(t('An error occurred while loading the SQL'))),

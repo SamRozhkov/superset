@@ -2088,7 +2088,6 @@
       "Manage email report": [""],
       "Manage your databases": [""],
       "Mandatory": [""],
-      "Mangle Duplicate Columns": [""],
       "Manually set min/max values for the y-axis.": [""],
       "Map": [""],
       "Map Style": [""],
@@ -2394,7 +2393,7 @@
       "One or more parameters needed to configure a database are missing.": [
         ""
       ],
-      "One or more parameters specified in the query are malformatted.": [""],
+      "One or more parameters specified in the query are malformed.": [""],
       "One or more parameters specified in the query are missing.": [""],
       "One ore more annotation layers failed loading.": [""],
       "Only SELECT statements are allowed against this database.": [""],

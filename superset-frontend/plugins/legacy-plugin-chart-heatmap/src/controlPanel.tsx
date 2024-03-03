@@ -271,6 +271,17 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'time_format',
+            config: {
+              ...sharedControls.x_axis_time_format,
+              default: '%d/%m/%Y',
+              description: `${D3_TIME_FORMAT_DOCS}.`,
+            },
+          },
+        ],
+        ['currency_format'],
+        [
+          {
             name: 'sort_x_axis',
             config: {
               type: 'SelectControl',

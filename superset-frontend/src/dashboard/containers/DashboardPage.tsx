@@ -39,7 +39,6 @@ import {
 import { hydrateDashboard } from 'src/dashboard/actions/hydrate';
 import { setDatasources } from 'src/dashboard/actions/datasources';
 import injectCustomCss from 'src/dashboard/util/injectCustomCss';
-import setupPlugins from 'src/setup/setupPlugins';
 
 import { LocalStorageKeys, setItem } from 'src/utils/localStorageHelpers';
 import { URL_PARAMS } from 'src/constants';
@@ -65,7 +64,6 @@ import SyncDashboardState, {
 
 export const DashboardPageIdContext = React.createContext('');
 
-setupPlugins();
 const DashboardBuilder = React.lazy(
   () =>
     import(
@@ -90,7 +88,6 @@ export const DashboardPage: FC<PageProps> = ({ idOrSlug }: PageProps) => {
     ({ dashboardInfo }) =>
       dashboardInfo && Object.keys(dashboardInfo).length > 0,
   );
-
   const { addDangerToast } = useToasts();
   const { result: dashboard, error: dashboardApiError } =
     useDashboard(idOrSlug);

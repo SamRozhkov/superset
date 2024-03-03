@@ -27,6 +27,7 @@ import React, {
 import { useDispatch } from 'react-redux';
 import querystring from 'query-string';
 
+import { Table } from 'src/SqlLab/types';
 import {
   queryEditorSetDb,
   addTable,
@@ -45,16 +46,16 @@ import Icons from 'src/components/Icons';
 import { TableSelectorMultiple } from 'src/components/TableSelector';
 import { IconTooltip } from 'src/components/IconTooltip';
 import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
-import { DatabaseObject } from 'src/components/DatabaseSelector';
+import type { DatabaseObject } from 'src/components/DatabaseSelector';
 import { emptyStateComponent } from 'src/components/EmptyState';
 import {
   getItem,
   LocalStorageKeys,
   setItem,
 } from 'src/utils/localStorageHelpers';
-import TableElement, { Table } from '../TableElement';
+import TableElement from '../TableElement';
 
-interface ExtendedTable extends Table {
+export interface ExtendedTable extends Table {
   expanded: boolean;
 }
 
@@ -62,7 +63,7 @@ interface SqlEditorLeftBarProps {
   queryEditorId: string;
   height?: number;
   tables?: ExtendedTable[];
-  database: DatabaseObject;
+  database?: DatabaseObject;
   setEmptyState: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -133,7 +134,9 @@ const SqlEditorLeftBar = ({
     if (bool && userSelected) {
       setUserSelected(userSelected);
       setItem(LocalStorageKeys.db, null);
-    } else setUserSelected(database);
+    } else if (database) {
+      setUserSelected(database);
+    }
   }, [database]);
 
   const onEmptyResults = (searchText?: string) => {

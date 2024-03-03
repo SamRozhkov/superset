@@ -24,7 +24,7 @@ import json
 import logging
 import textwrap
 from ast import literal_eval
-from contextlib import closing, contextmanager, nullcontext
+from contextlib import closing, contextmanager, nullcontext, suppress
 from copy import deepcopy
 from datetime import datetime
 from functools import lru_cache
@@ -59,8 +59,8 @@ from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.sql import ColumnElement, expression, Select
 
 from superset import app, db_engine_specs
+from superset.commands.database.exceptions import DatabaseInvalidError
 from superset.constants import LRU_CACHE_MAX_SIZE, PASSWORD_MASK
-from superset.databases.commands.exceptions import DatabaseInvalidError
 from superset.databases.utils import make_url_safe
 from superset.db_engine_specs.base import MetricType, TimeGrain
 from superset.extensions import (
@@ -226,7 +226,6 @@ class Database(
     @property
     def allows_virtual_table_explore(self) -> bool:
         extra = self.get_extra()
-
         return bool(extra.get("allows_virtual_table_explore", True))
 
     @property
@@ -236,9 +235,12 @@ class Database(
     @property
     def disable_data_preview(self) -> bool:
         # this will prevent any 'trash value' strings from going through
-        if self.get_extra().get("disable_data_preview", False) is not True:
-            return False
-        return True
+        return self.get_extra().get("disable_data_preview", False) is True
+
+    @property
+    def schema_options(self) -> dict[str, Any]:
+        """Additional schema display config for engines with complex schemas"""
+        return self.get_extra().get("schema_options", {})
 
     @property
     def data(self) -> dict[str, Any]:
@@ -251,6 +253,7 @@ class Database(
             "allows_cost_estimate": self.allows_cost_estimate,
             "allows_virtual_table_explore": self.allows_virtual_table_explore,
             "explore_database_id": self.explore_database_id,
+            "schema_options": self.schema_options,
             "parameters": self.parameters,
             "disable_data_preview": self.disable_data_preview,
             "parameters_schema": self.parameters_schema,
@@ -286,11 +289,8 @@ class Database(
         masked_uri = make_url_safe(self.sqlalchemy_uri)
         encrypted_config = {}
         if (masked_encrypted_extra := self.masked_encrypted_extra) is not None:
-            try:
+            with suppress(TypeError, json.JSONDecodeError):
                 encrypted_config = json.loads(masked_encrypted_extra)
-            except (TypeError, json.JSONDecodeError):
-                pass
-
         try:
             # pylint: disable=useless-suppression
             parameters = self.db_engine_spec.get_parameters_from_uri(  # type: ignore
@@ -376,7 +376,7 @@ class Database(
         :return: The effective username
         """
 
-        return (  # pylint: disable=used-before-assignment
+        return (
             username
             if (username := get_username())
             else object_url.username
@@ -499,7 +499,7 @@ class Database(
                     source = utils.QuerySource.DASHBOARD
                 elif "/explore/" in request.referrer:
                     source = utils.QuerySource.CHART
-                elif "/superset/sqllab" in request.referrer:
+                elif "/sqllab/" in request.referrer:
                     source = utils.QuerySource.SQL_LAB
 
             sqlalchemy_url, params = DB_CONNECTION_MUTATOR(
@@ -551,7 +551,7 @@ class Database(
 
     @property
     def quote_identifier(self) -> Callable[[str], str]:
-        """Add quotes to potential identifiter expressions if needed"""
+        """Add quotes to potential identifier expressions if needed"""
         return self.get_dialect().identifier_preparer.quote
 
     def get_reserved_words(self) -> set[str]:
@@ -693,7 +693,7 @@ class Database(
         """
         try:
             with self.get_inspector_with_context() as inspector:
-                tables = {
+                return {
                     (table, schema)
                     for table in self.db_engine_spec.get_table_names(
                         database=self,
@@ -701,7 +701,6 @@ class Database(
                         schema=schema,
                     )
                 }
-                return tables
         except Exception as ex:
             raise self.db_engine_spec.get_dbapi_mapped_exception(ex)
 
@@ -845,7 +844,9 @@ class Database(
         self, table_name: str, schema: str | None = None
     ) -> list[ResultSetColumnType]:
         with self.get_inspector_with_context() as inspector:
-            return self.db_engine_spec.get_columns(inspector, table_name, schema)
+            return self.db_engine_spec.get_columns(
+                inspector, table_name, schema, self.schema_options
+            )
 
     def get_metrics(
         self,
@@ -973,7 +974,7 @@ class Database(
         """
         label_expected = label or sqla_col.name
         # add quotes to tables
-        if self.db_engine_spec.allows_alias_in_select:
+        if self.db_engine_spec.get_allows_alias_in_select(self):
             label = self.db_engine_spec.make_label_compatible(label_expected)
             sqla_col = sqla_col.label(label)
         sqla_col.key = label_expected
@@ -986,7 +987,6 @@ sqla.event.listen(Database, "after_delete", security_manager.database_after_dele
 
 
 class Log(Model):  # pylint: disable=too-few-public-methods
-
     """ORM object used to log Superset actions to the database"""
 
     __tablename__ = "logs"

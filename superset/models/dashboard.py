@@ -47,8 +47,12 @@ from sqlalchemy.sql import join, select
 from sqlalchemy.sql.elements import BinaryExpression
 
 from superset import app, db, is_feature_enabled, security_manager
-from superset.connectors.base.models import BaseDatasource
-from superset.connectors.sqla.models import SqlaTable, SqlMetric, TableColumn
+from superset.connectors.sqla.models import (
+    BaseDatasource,
+    SqlaTable,
+    SqlMetric,
+    TableColumn,
+)
 from superset.daos.datasource import DatasourceDAO
 from superset.extensions import cache_manager
 from superset.models.filter_set import FilterSet
@@ -191,6 +195,9 @@ class Dashboard(Model, AuditMixinNullable, ImportExportMixin):
         "description",
         "css",
         "slug",
+        "certified_by",
+        "certification_details",
+        "published",
     ]
     extra_import_fields = ["is_managed_externally", "external_url"]
 
@@ -203,7 +210,7 @@ class Dashboard(Model, AuditMixinNullable, ImportExportMixin):
 
     @staticmethod
     def get_url(id_: int, slug: str | None = None) -> str:
-        # To be able to generate URL's without instanciating a Dashboard object
+        # To be able to generate URL's without instantiating a Dashboard object
         return f"/superset/dashboard/{slug or id_}/"
 
     @property
