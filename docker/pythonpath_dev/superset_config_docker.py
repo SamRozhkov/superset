@@ -2,9 +2,9 @@ import os
 from typing import Optional, Literal
 from datetime import timedelta
 
-from superset.stats_logger import StatsdStatsLogger
+#from superset.stats_logger import StatsdStatsLogger
 
-from flask_appbuilder.security.manager import AUTH_LDAP, AUTH_DB
+from flask_appbuilder.security.manager import AUTH_LDAP, AUTH_DB, AUTH_OAUTH
 from celery.schedules import crontab
 from cachelib.redis import RedisCache
 from dateutil import tz
@@ -72,6 +72,7 @@ D3_FORMAT_PREFIXIES = {
   "G": 'млрд'
 }
 
+
 FEATURE_FLAGS = {
     "ALERT_REPORTS": True,
     "DASHBOARD_CROSS_FILTERS": True,
@@ -95,6 +96,7 @@ FEATURE_FLAGS = {
     "RLS_FORM_QUERY_REL_FIELDS": True,
     "DASHBOARD_EDIT_CHART_IN_NEW_TAB": True,
     "DRILL_BY": True,
+    "CACHE_QUERY_BY_USER": True,
     #"EMBEDDABLE_CHARTS": True,
 }
 
@@ -109,22 +111,26 @@ APP_ICON = "/static/assets/images/superset-logo-horiz-beta.png"
 DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
 #AUTH_TYPE = AUTH_LDAP
-AUTH_TYPE = AUTH_DB
+#AUTH_TYPE = AUTH_DB
+AUTH_TYPE = AUTH_OAUTH
 
-AUTH_LDAP_SERVER = "ldap://YG.LOC"
+PUBLIC_ROLE_LIKE='public'
+
+AUTH_LDAP_SERVER = "ldap://192.168.0.200"
 AUTH_USER_REGISTRATION = True
 AUTH_USER_REGISTRATION_ROLE = "Public"
 RECAPTCHA_PUBLIC_KEY = os.environ.get('RECAPTCHA_PUBLIC_KEY')
 #f"reCAPTCHA_{os.environ.get('RECAPTCHA_PUBLIC_KEY')}"
 
-AUTH_LDAP_BIND_USER = "CN=superset,OU=Сервис аккаунты,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
-AUTH_LDAP_SEARCH = "OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc"
-# AUTH_LDAP_UID_FIELD = "sAMAccountName"
-AUTH_LDAP_UID_FIELD = "mail"
+AUTH_LDAP_BIND_USER = "UID=superset,CN=users,CN=accounts,DC=home,DC=local"
+AUTH_LDAP_SEARCH = "cn=users,cn=accounts,dc=home,dc=local"
+    #"CN=users,CN=accounts,DC=home,DC=local"
+#AUTH_LDAP_UID_FIELD = "sAMAccountName"
+AUTH_LDAP_UID_FIELD = "uid"
 AUTH_LDAP_FIRSTNAME_FIELD = "givenName"
 AUTH_LDAP_LASTNAME_FIELD = "sn"
 AUTH_LDAP_EMAIL_FIELD = "mail"
-AUTH_LDAP_BIND_PASSWORD = os.environ.get("AUTH_LDAP_BIND_PASSWORD")
+AUTH_LDAP_BIND_PASSWORD = "superset" #os.environ.get("AUTH_LDAP_BIND_PASSWORD")
 
 # AUTH_LDAP_USERNAME_FORMAT = ""
 # AUTH_LDAP_SEARCH_FILTER = ""
@@ -132,15 +138,42 @@ AUTH_ROLE_ADMIN = 'Admin'
 AUTH_ROLE_PUBLIC = 'Public'
 # AUTH_USER_REGISTRATION_ROLE = "Public_LDAP"
 
-AUTH_ROLES_MAPPING = {
-    "CN=Пользователи,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": [
-        "User"],
-    "CN=supersetadmin,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": [
-        "Admin"],
-}
+#AUTH_ROLES_MAPPING = {
+#    "CN=Пользователи,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": [
+#        "User"],
+#    "CN=supersetadmin,OU=Groups,OU=Аппарат Губернатора ЯНАО,OU=ИОГВ,DC=yg,DC=loc": [
+#        "Admin"],
+#}
 AUTH_LDAP_GROUP_FIELD = "memberOf"
-# AUTH_ROLES_SYNC_AT_LOGIN = True
-PERMANENT_SESSION_LIFETIME = 1800
+AUTH_ROLES_SYNC_AT_LOGIN = False
+#PERMANENT_SESSION_LIFETIME = 1800
+
+#-------------- OAUTH -----------------#
+
+AUTH_USER_REGISTRATION_ROLE = "Gamma"
+LOGOUT_REDIRECT_URL='http://192.168.0.201:8080/realms/superset/protocol/openid-connect/logout'
+# OAuth provider configuration for Keycloak
+OAUTH_PROVIDERS = [
+  {
+    'name': 'keycloak',
+    'icon': 'fa-key',
+    'token_key': 'access_token', # Keycloak uses 'access_token' for the access token
+    'remote_app': {
+      'client_id': 'superset-ui',
+      'client_secret': 'GFCWqktlceYz5Cuza1Ct6Yg1iAQ6VO0T',
+      'client_kwargs': {
+        'scope': 'openid profile email',
+      },
+      'server_metadata_url': 'http://192.168.0.26:28080/realms/superset/.well-known/openid-configuration',
+      'api_base_url': 'http://192.168.0.26:28080/realms/superset/protocol/',
+      #'server_metadata_url': 'http://192.168.0.201:8080/realms/superset/.well-known/openid-configuration',
+      #'api_base_url': 'http://192.168.0.201:8080/realms/superset/protocol/',
+    },
+  }
+  ]
+
+
+#--------------------------------------#
 
 REDIS_HOST = 'redis'#'10.12.4.253'
 REDIS_PORT = 6379
@@ -334,4 +367,4 @@ class SupersetDashboardIndexView(IndexView):
 FAB_INDEX_VIEW = f"{SupersetDashboardIndexView.__module__}.{SupersetDashboardIndexView.__name__}"
 
 
-STATS_LOGGER = StatsdStatsLogger(host='10.12.3.150', port=8125, prefix='superset')
+#STATS_LOGGER = StatsdStatsLogger(host='10.12.3.150', port=8125, prefix='superset')

@@ -34,7 +34,6 @@ import Echart from '../components/Echart';
 import { TimeseriesChartTransformedProps } from './types';
 import { formatSeriesName } from '../utils/series';
 import { ExtraControls } from '../components/ExtraControls';
-import {darkTheme} from "@visx/xychart";
 
 const TIMER_DURATION = 300;
 
@@ -62,13 +61,24 @@ export default function EchartsTimeseries({
   const echartRef = useRef<EchartsHandler | null>(null);
 
   const { axisLine } = formData;
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
   echartOptions.yAxis.splitLine = { show: axisLine };
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
   echartOptions.xAxis.splitLine = { show: axisLine };
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
   echartOptions.xAxis.axisTick = { show: axisLine };
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
   echartOptions.yAxis.axisTick = { show: axisLine };
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
   echartOptions.yAxis.minorTick = { show: axisLine };
+  // @ts-ignore
+  // eslint-disable-next-line no-param-reassign
   echartOptions.xAxis.axisLine = { show: axisLine };
-
 
   // eslint-disable-next-line no-param-reassign
   refs.echartRef = echartRef;

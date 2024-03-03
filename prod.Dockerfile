@@ -25,6 +25,14 @@ ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
 FROM --platform=${BUILDPLATFORM} node:16-slim AS superset-node
 
 ARG NPM_BUILD_CMD="build"
+
+RUN apt-get update -q \
+    && apt-get install -yq --no-install-recommends \
+        python3 \
+        make \
+        gcc \
+        g++
+
 ENV BUILD_CMD=${NPM_BUILD_CMD}
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 

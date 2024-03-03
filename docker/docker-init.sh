@@ -50,6 +50,9 @@ echo_step "1" "Starting" "Applying DB migrations"
 superset db upgrade
 echo_step "1" "Complete" "Applying DB migrations"
 
+echo_step "1" "Starting" "Init database keycloak"
+/app/docker/keycloak-initdb.sh
+
 # Create an admin user
 echo_step "2" "Starting" "Setting up admin user ( admin / $ADMIN_PASSWORD )"
 superset fab create-admin \
