@@ -110,9 +110,7 @@ APP_ICON = "/static/assets/images/superset-logo-horiz-beta.png"
 
 DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
-#AUTH_TYPE = AUTH_LDAP
-#AUTH_TYPE = AUTH_DB
-AUTH_TYPE = AUTH_OAUTH
+AUTH_TYPE = os.environ.get('AUTH_TYPE')
 
 PUBLIC_ROLE_LIKE='public'
 
