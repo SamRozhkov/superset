@@ -22,16 +22,17 @@ ARG PY_VER=3.9-slim-bookworm
 
 # if BUILDPLATFORM is null, set it to 'amd64' (or leave as is otherwise).
 ARG BUILDPLATFORM=${BUILDPLATFORM:-amd64}
-FROM --platform=${BUILDPLATFORM} node:16-slim AS superset-node
+FROM --platform=${BUILDPLATFORM} node:16-bookworm-slim AS superset-node
 
 ARG NPM_BUILD_CMD="build"
 
-RUN apt-get update -q \
+RUN apt-get update -qq \
     && apt-get install -yq --no-install-recommends \
         python3 \
         make \
         gcc \
-        g++
+        g++ \
+        build-essential
 
 ENV BUILD_CMD=${NPM_BUILD_CMD}
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
@@ -39,13 +40,21 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 # NPM ci first, as to NOT invalidate previous steps except for when package.json changes
 WORKDIR /app/superset-frontend
 
-COPY ./docker/frontend-mem-nag.sh /
 
-RUN /frontend-mem-nag.sh
+RUN --mount=type=bind,target=/frontend-mem-nag.sh,src=./docker/frontend-mem-nag.sh \
+    /frontend-mem-nag.sh
 
-COPY superset-frontend/package*.json ./
+RUN --mount=type=bind,target=./package.json,src=./superset-frontend/package.json \
+    --mount=type=bind,target=./package-lock.json,src=./superset-frontend/package-lock.json \
+    npm ci
 
-RUN npm ci
+#COPY ./docker/frontend-mem-nag.sh /
+
+#RUN /frontend-mem-nag.sh
+
+#COPY superset-frontend/package*.json ./
+
+#RUN npm ci
 
 COPY ./superset-frontend ./
 
@@ -65,9 +74,11 @@ ENV LANG=C.UTF-8 \
     PYTHONPATH="/app/pythonpath" \
     SUPERSET_HOME="/app/superset_home" \
     SUPERSET_PORT=8088 \
-    CHROME_VERSION=109.0.5414.74
+    CHROME_VERSION=114.0.5735.90
 
-RUN mkdir -p ${PYTHONPATH} \
+RUN --mount=target=/var/lib/apt/lists,type=cache \
+    --mount=target=/var/cache/apt,type=cache \
+        mkdir -p ${PYTHONPATH} \
         && useradd --user-group -d ${SUPERSET_HOME} -m --no-log-init --shell /bin/bash superset \
         && apt-get update -y \
         && apt-get install -y --no-install-recommends \
@@ -85,8 +96,11 @@ RUN mkdir -p ${PYTHONPATH} \
             unzip
         #&& rm -rf /var/lib/apt/lists/*
 
+COPY --chown=superset:superset setup.py MANIFEST.in README.md ./
+
+RUN apt-get update
 RUN wget http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
-RUN apt-get install -y --no-install-recommends ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
+RUN apt-get install -y ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
 RUN wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
 RUN unzip -uo chromedriver_linux64.zip
 RUN chmod +x chromedriver
@@ -126,7 +140,7 @@ CMD ["/usr/bin/run-server.sh"]
 ######################################################################
 FROM lean AS dev
 ARG GECKODRIVER_VERSION=v0.32.0
-ARG FIREFOX_VERSION=106.0.3
+ARG FIREFOX_VERSION=117.0.1
 
 USER root
 

@@ -405,6 +405,14 @@ def cached_common_bootstrap_data(  # pylint: disable=unused-argument
             ReportRecipientType.EMAIL,
         ]
 
+    if conf.get("VKTEAM_API_TOKEN"):
+        frontend_config["ALERT_REPORTS_NOTIFICATION_METHODS"].append(
+            ReportRecipientType.VKTEAM)
+
+    if conf.get("TELEGRAM_API_TOKEN"):
+        frontend_config["ALERT_REPORTS_NOTIFICATION_METHODS"].append(
+            ReportRecipientType.TELEGRAM)
+
     # verify client has google sheets installed
     available_specs = get_available_engine_specs()
     frontend_config["HAS_GSHEETS_INSTALLED"] = bool(available_specs[GSheetsEngineSpec])

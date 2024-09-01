@@ -44,6 +44,7 @@ const initialState: { dashboardInfo: DashboardInfo } = {
       label_colors: {},
       shared_label_colors: {},
       cross_filters_enabled: false,
+      hide_panel: false,
     },
     json_metadata: '',
     dash_edit_perm: true,
