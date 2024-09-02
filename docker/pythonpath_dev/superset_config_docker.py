@@ -112,7 +112,7 @@ DRUID_TZ = tz.gettz('Asia/Yekaterinburg')
 
 #AUTH_TYPE = AUTH_LDAP
 #AUTH_TYPE = AUTH_DB
-AUTH_TYPE = AUTH_OAUTH
+#AUTH_TYPE = AUTH_OAUTH
 
 PUBLIC_ROLE_LIKE='public'
 

@@ -99,12 +99,15 @@ RUN --mount=target=/var/lib/apt/lists,type=cache \
 COPY --chown=superset:superset setup.py MANIFEST.in README.md ./
 
 RUN apt-get update
-RUN wget http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
-RUN apt-get install -y ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
-RUN wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
-RUN unzip -uo chromedriver_linux64.zip
-RUN chmod +x chromedriver
-RUN mv -u chromedriver /usr/bin
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+#RUN wget http://dl.google.com/linux/chrome/deb/pool/main/g/google-chrome-stable/google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
+#RUN apt-get install -y ./google-chrome-stable_${CHROME_VERSION}-1_amd64.deb
+RUN apt-get install -y --no-install-recommends ./google-chrome-stable_current_amd64.deb
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/128.0.6613.119/linux64/chromedriver-linux64.zip
+#RUN wget https://chromedriver.storage.googleapis.com/${CHROME_VERSION}/chromedriver_linux64.zip
+RUN unzip -uo chromedriver-linux64.zip
+RUN chmod +x ./chromedriver-linux64/chromedriver
+RUN mv -u ./chromedriver-linux64/chromedriver /usr/bin
 RUN rm -f google-chrome-stable_current_amd64.deb chromedriver_linux64.zip
 
 RUN rm -rf /var/lib/apt/lists/*
