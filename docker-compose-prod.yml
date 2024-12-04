@@ -133,6 +133,22 @@ services:
    restart: unless-stopped
    profiles: ['kc']
 
+  grafana:
+    container_name: grafana
+    image: grafana/grafana
+    volumes: 
+      - 'metrics:/var/lib/grafana'
+    ports:
+      - "3000:3000"
+
+  graphite:
+    container_name: graphite
+    image: graphiteapp/graphite-statsd
+    ports:
+      - "8080:80"
+    volumes:
+      - 'metrics:/opt/graphite/storage'
+
 
 volumes:
   superset_home:
@@ -140,4 +156,6 @@ volumes:
   db_home:
     external: false
   redis:
+    external: false
+  metrics:
     external: false

@@ -17,10 +17,10 @@
  * under the License.
  */
 import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
-
-/*class ChartPropsGant extends ChartProps {
-  start_date
-}*/
+import { Color } from '@amcharts/amcharts5';
+import { useMemo } from 'react';
+import { Category } from '../types';
+import { object } from 'prop-types';
 
 export default function transformProps(chartProps: ChartProps) {
   /**
@@ -52,11 +52,64 @@ export default function transformProps(chartProps: ChartProps) {
    * function during development with hot reloading, changes won't
    * be seen until restarting the development server.
    */
-  const { width, height, formData, queriesData } = chartProps;
-  const { boldText, headerFontSize, headerText, startDate, endDate, cols } = formData;
+  const {
+    width,
+    height,
+    formData,
+    queriesData,
+    filterState,
+    emitCrossFilters,
+    hooks,
+  } = chartProps;
+
+  const { onContextMenu, setDataMask } = hooks;
+
+  const {
+    boldText,
+    headerFontSize,
+    headerText,
+    startDate,
+    endDate,
+    cols,
+    grane,
+    template,
+    mainColor,
+    customize,
+  } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
-  console.log('formData via TransformProps.ts', formData);
+  const categories: Set<Category> = Object.assign([
+    ...Array.from(new Set(data.map(name => name[cols])), v => ({
+      category: v,
+    })),
+  ]);
+
+  let start = '';
+  let end = '';
+
+  if (typeof startDate === 'object') {
+    start = startDate.label;
+  } else {
+    start = startDate;
+  }
+
+  if (typeof endDate === 'object') {
+    end = endDate.label;
+  } else {
+    end = endDate;
+  }
+
+  const dataChart = data.map(v => ({
+    category: v[cols],
+    // @ts-ignore
+    start: new Date(v[start]).getTime(),
+    // @ts-ignore
+    end: new Date(v[end]).getTime(),
+    ...v,
+    columnSettings: {
+      fill: Color.fromRGB(mainColor.r, mainColor.g, mainColor.b),
+    },
+  }));
 
   return {
     width,
@@ -65,15 +118,18 @@ export default function transformProps(chartProps: ChartProps) {
     startDate,
     endDate,
     cols,
-    /*data: data.map(item => ({
-      ...item,
-      // convert epoch to native Date
-      // eslint-disable-next-line no-underscore-dangle
-      __timestamp: new Date(item.__timestamp as number),
-    })),*/
-    // and now your control data, manipulated as needed, and passed through as props!
     boldText,
     headerFontSize,
     headerText,
+    grane,
+    template,
+    filterState,
+    emitCrossFilters,
+    onContextMenu,
+    setDataMask,
+    mainColor,
+    categories,
+    dataChart,
+    customize,
   };
 }

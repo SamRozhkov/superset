@@ -411,8 +411,10 @@ class SavedQuery(
         secondary="tagged_object",
         overlaps="tags",
         primaryjoin="and_(SavedQuery.id == TaggedObject.object_id)",
-        secondaryjoin="and_(TaggedObject.tag_id == Tag.id, "
-        "TaggedObject.object_type == 'query')",
+        #secondaryjoin="and_(TaggedObject.tag_id == Tag.id, "
+        #"TaggedObject.object_type == 'query')",
+        secondaryjoin="TaggedObject.tag_id == Tag.id",
+        viewonly=True,  # cascading deletion already handled by superset.tags.models.ObjectUpdater.after_delete
     )
 
     export_parent = "database"

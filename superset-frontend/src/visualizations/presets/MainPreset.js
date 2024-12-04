@@ -79,6 +79,7 @@ import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
 import { PopKPIPlugin } from '@superset-ui/plugin-chart-period-over-period-kpi';
 import { FilterPlugins } from 'src/constants';
 import { SupersetPluginGant } from '@superset-ui/plugin-gant';
+import { SupersetPluginPivot } from '@superset-ui/plugin-pivot';
 import TimeTableChartPlugin from '../TimeTable';
 
 export default class MainPreset extends Preset {
@@ -169,6 +170,7 @@ export default class MainPreset extends Preset {
         new HandlebarsChartPlugin().configure({ key: 'handlebars' }),
         new EchartsBubbleChartPlugin().configure({ key: 'bubble_v2' }),
         new SupersetPluginGant().configure({ key: 'gant' }),
+        new SupersetPluginPivot().configure({ key: 'superset-plugin-pivot' }),
         ...experimentalPlugins,
       ],
     });

@@ -105,8 +105,10 @@ class Slice(  # pylint: disable=too-many-public-methods
         secondary="tagged_object",
         overlaps="objects,tag,tags",
         primaryjoin="and_(Slice.id == TaggedObject.object_id)",
-        secondaryjoin="and_(TaggedObject.tag_id == Tag.id, "
-        "TaggedObject.object_type == 'chart')",
+        #secondaryjoin="and_(TaggedObject.tag_id == Tag.id, "
+        #"TaggedObject.object_type == 'chart')",
+        secondaryjoin="TaggedObject.tag_id == Tag.id",
+        viewonly=True,  # cascading deletion already handled by superset.tags.models.ObjectUpdater.after_delete
     )
     table = relationship(
         "SqlaTable",

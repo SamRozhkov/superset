@@ -19,7 +19,7 @@
 import { t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
-  //sections,
+  sections,
   sharedControls,
 } from '@superset-ui/chart-controls';
 
@@ -100,22 +100,21 @@ const config: ControlPanelConfig = {
 
   // For control input types, see: superset-frontend/src/explore/components/controls/index.js
   controlPanelSections: [
-    //sections.legacyTimeseriesTime,
-    {
-      label: 'Временной интервал',
-      expanded: true,
-      controlSetRows: [
-          [
-            {
-              name: 'grane',
-              config: {
-                ...sharedControls.granularity,
-                label: 'Гранулярность',
-              },
-            },
-          ]
-      ]
-    },
+    // {
+    //   label: 'Временной интервал',
+    //   expanded: true,
+    //   controlSetRows: [
+    //     [
+    //       {
+    //         name: 'grane',
+    //         config: {
+    //           ...sharedControls.granularity,
+    //           label: 'Гранулярность',
+    //         },
+    //       },
+    //     ],
+    //   ],
+    // },
     {
       label: t('Query'),
       expanded: true,
@@ -138,8 +137,8 @@ const config: ControlPanelConfig = {
               ...sharedControls.entity,
               label: t('Дата начала'),
               validators: [validateNonEmpty],
-            }
-          }
+            },
+          },
         ],
         [
           {
@@ -148,21 +147,36 @@ const config: ControlPanelConfig = {
               ...sharedControls.entity,
               label: t('Дата окончания'),
               validators: [validateNonEmpty],
-            }
-          }
-        ],
-        /*
-        [
-          {
-            name: 'metrics',
-            config: {
-              ...sharedControls.metrics,
-              // it's possible to add validators to controls if
-              // certain selections/types need to be enforced
-              validators: [validateNonEmpty],
             },
           },
-        ],*/
+        ],
+        [
+          {
+            name: 'fields_template',
+            config: {
+              ...sharedControls.columns,
+              label: t('Template'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'template',
+            config: {
+              type: 'TextControl',
+              label: t('Template'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'query_formatter',
+            config: {
+              type: 'CollectionControl',
+              label: t('Условное форматирование'),
+            },
+          },
+        ],
         ['adhoc_filters'],
         [
           {
@@ -178,7 +192,7 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         [
           {
-            name: 'header_text',
+            name: 'customize',
             config: {
               type: 'TextControl',
               default: 'Hello, World!',
@@ -186,6 +200,17 @@ const config: ControlPanelConfig = {
               // ^ this makes it apply instantaneously, without triggering a "run query" button
               label: t('Header Text'),
               description: t('The text you want to see in the header'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'main_color',
+            config: {
+              type: 'ColorPickerControl',
+              renderTrigger: true,
+              label: 'Основной цвет',
+              default: '#253577',
             },
           },
         ],

@@ -1,5 +1,5 @@
 {
-  "compilerOptions": {
+  /*"compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "lib",
@@ -32,6 +32,11 @@
     "typeRoots": [
       "./node_modules/@types"
     ]
+  },*/
+  "compilerOptions": {
+    "declarationDir": "lib",
+    "outDir": "lib",
+    "rootDir": "src"
   },
   "exclude": [
     "lib",
@@ -39,6 +44,16 @@
   ],
   "include": [
     "src/**/*",
-    "types/**/*"
-  ]
+    "types/**/*",
+    "../../types/**/*"
+  ],
+  "references": [
+    {
+      "path": "../../packages/superset-ui-chart-controls"
+    },
+    {
+      "path": "../../packages/superset-ui-core"
+    }
+  ],
+  "extends": "../../tsconfig.json"
 }
