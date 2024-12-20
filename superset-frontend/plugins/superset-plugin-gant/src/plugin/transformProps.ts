@@ -21,6 +21,7 @@ import { Color } from '@amcharts/amcharts5';
 import { useMemo } from 'react';
 import { Category } from '../types';
 import { object } from 'prop-types';
+import { forEach, result } from 'lodash';
 
 export default function transformProps(chartProps: ChartProps) {
   /**
@@ -75,6 +76,7 @@ export default function transformProps(chartProps: ChartProps) {
     template,
     mainColor,
     customize,
+    condition,
   } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
@@ -99,6 +101,30 @@ export default function transformProps(chartProps: ChartProps) {
     end = endDate;
   }
 
+  var operators = {
+    ">": function(a: number | string, b: number | string) { return a > b; },
+    "<": function(a: number | string, b: number | string) { return a < b; },
+    "=": function(a: number | string, b: number | string) { return a = b; },
+  };
+
+  function cond(d, cond, mainColor) {
+    let resultColor = Color.fromRGB(mainColor.r, mainColor.g, mainColor.b);
+    const l = cond.forEach(c => {
+      const { column, operator, targetValue, colorScheme } = c;
+      
+      var operatorFunction = operators[operator];
+      if (operatorFunction) {
+        var result = operatorFunction(d[column], targetValue);
+        if result {
+          resultColor =  Color.fromRGB(colorScheme.r, colorScheme.g, colorScheme.b)
+        }
+      }
+
+    });
+
+    return resultColor;
+  }
+
   const dataChart = data.map(v => ({
     category: v[cols],
     // @ts-ignore
@@ -107,7 +133,10 @@ export default function transformProps(chartProps: ChartProps) {
     end: new Date(v[end]).getTime(),
     ...v,
     columnSettings: {
-      fill: Color.fromRGB(mainColor.r, mainColor.g, mainColor.b),
+      fill:
+        Array.isArray(condition) && condition.length > 0
+          ? cond(v, condition, mainColor)
+          : Color.fromRGB(mainColor.r, mainColor.g, mainColor.b),
     },
   }));
 

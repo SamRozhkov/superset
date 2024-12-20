@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { t, validateNonEmpty } from '@superset-ui/core';
+import { GenericDataType, t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
   sections,
   sharedControls,
+  Dataset,
 } from '@superset-ui/chart-controls';
+import ConditionalFormattingControl from '../ConditionalFormattingControl';
+import { array } from 'prop-types';
+import { values } from 'lodash';
 
 const config: ControlPanelConfig = {
   /**
@@ -124,9 +128,10 @@ const config: ControlPanelConfig = {
             name: 'cols',
             config: {
               ...sharedControls.entity,
-              label: t('Columns'),
-              description: t('Columns to group by'),
+              label: t('Category'),
+              description: t('Columns for categories'),
               validators: [validateNonEmpty],
+              renderTrigger: true,
             },
           },
         ],
@@ -135,8 +140,21 @@ const config: ControlPanelConfig = {
             name: 'start_date',
             config: {
               ...sharedControls.entity,
-              label: t('Дата начала'),
+              label: t('Start date'),
               validators: [validateNonEmpty],
+              renderTrigger: true,
+              shouldMapStateToProps() {
+                return true;
+              },
+              mapStateToProps(state, controlState, chartState) {
+                const timeColumns = state?.datasource?.columns.filter(
+                  e => e.is_dttm === true,
+                );
+                return {
+                  options: timeColumns,
+                  controlState,
+                };
+              },
             },
           },
         ],
@@ -145,8 +163,17 @@ const config: ControlPanelConfig = {
             name: 'end_date',
             config: {
               ...sharedControls.entity,
-              label: t('Дата окончания'),
+              label: t('End date'),
               validators: [validateNonEmpty],
+              renderTrigger: true,
+              mapStateToProps(state, controlState, chartState) {
+                const timeColumns = state?.datasource?.columns.filter(
+                  e => e.is_dttm === true,
+                );
+                return {
+                  options: timeColumns,
+                };
+              },
             },
           },
         ],
@@ -154,8 +181,10 @@ const config: ControlPanelConfig = {
           {
             name: 'fields_template',
             config: {
-              ...sharedControls.columns,
               label: t('Template'),
+              ...sharedControls.columns,
+              description: t('Select columns for Template'),
+              renderTrigger: true,
             },
           },
         ],
@@ -165,15 +194,6 @@ const config: ControlPanelConfig = {
             config: {
               type: 'TextControl',
               label: t('Template'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'query_formatter',
-            config: {
-              type: 'CollectionControl',
-              label: t('Условное форматирование'),
             },
           },
         ],
@@ -210,6 +230,7 @@ const config: ControlPanelConfig = {
               type: 'ColorPickerControl',
               renderTrigger: true,
               label: 'Основной цвет',
+              // eslint-disable-next-line theme-colors/no-literal-colors
               default: '#253577',
             },
           },
@@ -245,6 +266,28 @@ const config: ControlPanelConfig = {
               ],
               renderTrigger: true,
               description: t('The size of your header font'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'condition',
+            config: {
+              type: ConditionalFormattingControl,
+              label: t('Condition'),
+              shouldMapStateToProps() {
+                return true;
+              },
+              mapStateToProps(state, controlState, chartState) {
+                const columns =
+                  state?.controls?.fields_template?.value?.map(e => ({ 
+                    label: e,
+                    value: e,
+                  })) ?? {};
+                return {
+                  columnOptions: columns,
+                };
+              },
             },
           },
         ],

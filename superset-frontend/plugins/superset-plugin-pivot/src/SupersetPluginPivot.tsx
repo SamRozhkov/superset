@@ -25,7 +25,6 @@ import {
   SupersetPluginPivotProps,
   SupersetPluginPivotStylesProps,
 } from './types';
-import { Header } from 'antd/lib/layout/layout';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -82,9 +81,9 @@ export default function SupersetPluginPivot(props: SupersetPluginPivotProps) {
     const tabs: any = toolbar.getTabs();
     // eslint-disable-next-line no-param-reassign
     toolbar.getTabs = function () {
-      delete tabs[0];
-      delete tabs[1];
-      delete tabs[2];
+      //delete tabs[0];
+      //delete tabs[1];
+      //delete tabs[2];
       //delete tabs[3];
       //delete tabs[4];
       //delete tabs[5];

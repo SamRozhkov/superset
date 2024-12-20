@@ -81,6 +81,7 @@ import { FilterPlugins } from 'src/constants';
 import { SupersetPluginGant } from '@superset-ui/plugin-gant';
 import { SupersetPluginPivot } from '@superset-ui/plugin-pivot';
 import TimeTableChartPlugin from '../TimeTable';
+import { TestPlugins } from '@superset-ui/test_plugins';
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -171,6 +172,7 @@ export default class MainPreset extends Preset {
         new EchartsBubbleChartPlugin().configure({ key: 'bubble_v2' }),
         new SupersetPluginGant().configure({ key: 'gant' }),
         new SupersetPluginPivot().configure({ key: 'superset-plugin-pivot' }),
+        new TestPlugins().configure({ key: 'test_plugin' }),
         ...experimentalPlugins,
       ],
     });

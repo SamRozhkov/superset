@@ -31,7 +31,10 @@
     "types": ["jest"],
     "typeRoots": [
       "./node_modules/@types"
-    ]
+    ],
+    "paths": {
+      "Form": ["src/components/Form"]
+    }
   },
   "exclude": [
     "lib",
@@ -40,15 +43,15 @@
   "include": [
     "src/**/*",
     "types/**/*",
-    "../../types/**/*"
+    "../../types/**/*",
   ],
+  "extends": "../../tsconfig.json",
   "references": [
-    {
-      "path": "../../packages/superset-ui-chart-controls"
-    },
-    {
-      "path": "../../packages/superset-ui-core"
-    }
-  ],
-  "extends": "../../tsconfig.json"
+  {
+    "path": "../../packages/superset-ui-chart-controls"
+  },
+  {
+    "path": "../../packages/superset-ui-core"
+  },
+  ]
 }

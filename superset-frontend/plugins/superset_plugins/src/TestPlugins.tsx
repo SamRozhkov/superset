@@ -18,6 +18,8 @@
  */
 import React, { useEffect, createRef } from 'react';
 import { styled } from '@superset-ui/core';
+import { GanttChart } from 'smart-webcomponents-react/ganttchart';
+import 'smart-webcomponents-react/source/styles/smart.default.css';
 import { TestPluginsProps, TestPluginsStylesProps } from './types';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
@@ -28,28 +30,22 @@ import { TestPluginsProps, TestPluginsStylesProps } from './types';
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 
 const Styles = styled.div<TestPluginsStylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
-  padding: ${({ theme }) => theme.gridUnit * 4}px;
-  border-radius: ${({ theme }) => theme.gridUnit * 2}px;
-  height: ${({ height }) => height}px;
-  width: ${({ width }) => width}px;
+	.label {
+		color: black;
+		font-weght: bold;
+	}
+	.smart-timeline-task-fill {
+		border-radius: 5px;
+	}
 
-  h3 {
-    /* You can use your props to control CSS! */
-    margin-top: 0;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
-    font-size: ${({ theme, headerFontSize }) =>
-      theme.typography.sizes[headerFontSize]}px;
-    font-weight: ${({ theme, boldText }) =>
-      theme.typography.weights[boldText ? 'bold' : 'normal']};
-  }
+	#--smart-gantt-chart-task-color: red;
 
-  pre {
-    height: ${({ theme, headerFontSize, height }) =>
-      height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
-  }
+	.smart-gantt-chart .task .smart-timeline-task-fill {
+		border-radius: 5px;
+	}
 `;
 
+//<a href="https://www.htmlelements.com/" id="watermark" style="position: absolute; right: 5px; bottom: 5px; color: rgb(255, 255, 255); padding: 20px; border-radius: 5px; background: rgb(12, 61, 120); cursor: pointer; z-index: 999999; display: block; font-size: 24px; text-decoration: none; font-weight: bold; opacity: 1; transition: opacity 0.35s ease-in-out;">https://www.htmlelements.com/</a>
 /**
  * ******************* WHAT YOU CAN BUILD HERE *******************
  *  In essence, a chart is given a few key ingredients to work with:
@@ -65,6 +61,91 @@ export default function TestPlugins(props: TestPluginsProps) {
 
   const rootElem = createRef<HTMLDivElement>();
 
+  const treeSize = '30%';
+	const durationUnit = 'hour';
+
+	const taskColumns = [{
+		label: 'Tasks',
+		value: 'label',
+		size: '100%'
+	}
+	];
+
+	const dataSource = [
+		{
+			label: 'Project 1',
+			dateStart: '2023-03-10T12:30:00',
+			dateEnd: '2024-06-10T3:59:00',
+			type: 'project',
+			expanded: true,
+			connections: [
+				{
+					target: 1,
+					type: 0,
+					lag: 2 * 24 * 60 * 60 * 1000 //2 days lag
+				}
+			],
+			tasks: [
+				{
+					label: 'Task 1.1',
+					dateStart: '2023-02-10',
+					dateEnd: '2024-01-10',
+					type: 'task',
+					connections: [
+						{
+							target: 2,
+							type: 1,
+							lag: -5 * 24 * 60 * 60 * 1000 // -5 days lag
+						},
+						{
+							target: 4,
+							type: 1
+						}
+					]
+				},
+				{
+					label: 'Task 1.2',
+					dateStart: '2023-10-10',
+					dateEnd: '2024-2-31',
+					type: 'task',
+					connections: [
+						{
+							target: 3,
+							type: 1,
+							lag: 15 * 24 * 60 * 60 * 1000 // 15 days lag
+						}
+					]
+				}
+			]
+		},
+		{
+			label: 'Task 2',
+			dateStart: '2023-03-10T15:30:00',
+			dateEnd: '2024-08-10',
+			type: 'task'
+		},
+		{
+			label: 'Milestone 1',
+			dateEnd: '2024-05-24',
+			type: 'milestone',
+			connections: [
+				{
+					target: 5,
+					type: 1,
+					lag: 5 * 24 * 60 * 60 * 1000 //5 days lag
+				}
+			]
+		},
+		{
+			label: 'Task 3',
+			dateStart: '2024-02-05',
+			dateEnd: '2024-07-08',
+			progress: 0,
+			type: 'task'
+		}
+	];
+
+
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
   useEffect(() => {
@@ -75,15 +156,18 @@ export default function TestPlugins(props: TestPluginsProps) {
   console.log('Plugin props', props);
 
   return (
-    <Styles
-      ref={rootElem}
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <h3>{props.headerText}</h3>
-      <pre>${JSON.stringify(data, null, 2)}</pre>
+    <Styles height={0} width={0} headerFontSize={'s'} boldText={false}>
+      <GanttChart
+        view="month"
+        locale="ru"
+        dataSource={dataSource}
+        taskColumns={taskColumns}
+        treeSize={150}
+        durationUnit={durationUnit}
+        id="gantt"
+        disableSegmentDrag
+        disableTaskDrag
+      />
     </Styles>
   );
 }
