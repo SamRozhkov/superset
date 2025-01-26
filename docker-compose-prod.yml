@@ -140,6 +140,7 @@ services:
       - 'metrics:/var/lib/grafana'
     ports:
       - "3000:3000"
+    profiles: ['metric']
 
   graphite:
     container_name: graphite
@@ -148,6 +149,7 @@ services:
       - "8080:80"
     volumes:
       - 'metrics:/opt/graphite/storage'
+    profiles: ['metric']
 
 
 volumes:
