@@ -274,13 +274,15 @@ const config: ControlPanelConfig = {
             name: 'condition',
             config: {
               type: ConditionalFormattingControl,
+              renderTrigger: true,
               label: t('Condition'),
               shouldMapStateToProps() {
                 return true;
               },
               mapStateToProps(state, controlState, chartState) {
                 const columns =
-                  state?.controls?.fields_template?.value?.map(e => ({ 
+                //@ts-ignore
+                  state?.controls?.fields_template?.value?.map(e => ({
                     label: e,
                     value: e,
                   })) ?? {};
