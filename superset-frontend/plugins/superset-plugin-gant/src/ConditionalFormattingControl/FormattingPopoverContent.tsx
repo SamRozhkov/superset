@@ -27,7 +27,7 @@ import {
 import { Form, FormItem, FormProps } from 'src/components/Form';
 import Select from 'src/components/Select/Select';
 import { Col, Row } from 'src/components';
-import { InputNumber } from 'src/components/Input';
+import { InputNumber, Input } from 'src/components/Input';
 import Button from 'src/components/Button';
 import Checkbox from 'src/components/Checkbox';
 import ColorPickerControl from 'src/explore/components/controls/ColorPickerControl';
@@ -36,6 +36,11 @@ import { ConditionalFormattingConfig } from './types';
 const FullWidthInputNumber = styled(InputNumber)`
   width: 100%;
 `;
+
+const FullWidthInput = styled(Input)`
+  width: 100%;
+`;
+
 
 const JustifyEnd = styled.div`
   display: flex;

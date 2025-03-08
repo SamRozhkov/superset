@@ -1,5 +1,5 @@
 {
-  /*"compilerOptions": {
+  "compilerOptions": {
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "declarationDir": "lib",
@@ -32,12 +32,12 @@
     "typeRoots": [
       "./node_modules/@types"
     ]
-  },*/
-  "compilerOptions": {
+  },
+  /*"compilerOptions": {
     "declarationDir": "lib",
     "outDir": "lib",
     "rootDir": "src"
-  },
+  },*/
   "exclude": [
     "lib",
     "test__"

@@ -280,7 +280,7 @@ const config: ControlPanelConfig = {
               },
               mapStateToProps(state, controlState, chartState) {
                 const columns =
-                  state?.controls?.fields_template?.value?.map(e => ({ 
+                  state?.controls?.fields_template?.value?.map(e => ({
                     label: e,
                     value: e,
                   })) ?? {};
