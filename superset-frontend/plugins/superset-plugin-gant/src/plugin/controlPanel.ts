@@ -274,6 +274,7 @@ const config: ControlPanelConfig = {
             name: 'condition',
             config: {
               type: ConditionalFormattingControl,
+              renderTrigger: true,
               label: t('Condition'),
               shouldMapStateToProps() {
                 return true;
