@@ -92,7 +92,7 @@ COPY --chown=superset:superset setup.py MANIFEST.in README.md ./
 RUN apt-get update
 RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
 RUN apt-get install -y --no-install-recommends ./google-chrome-stable_current_amd64.deb
-RUN wget https://storage.googleapis.com/chrome-for-testing-public/130.0.6723.116/linux64/chromedriver-linux64.zip
+RUN wget https://storage.googleapis.com/chrome-for-testing-public/$(/usr/bin/google-chrome --version | awk '{print $3}')/linux64/chromedriver-linux64.zip
 RUN unzip -uo chromedriver-linux64.zip
 RUN chmod +x ./chromedriver-linux64/chromedriver
 RUN mv -u ./chromedriver-linux64/chromedriver /usr/bin
