@@ -105,6 +105,9 @@ export default function transformProps(chartProps: ChartProps) {
     ">": function(a: number | string, b: number | string) { return a > b; },
     "<": function(a: number | string, b: number | string) { return a < b; },
     "=": function(a: number | string, b: number | string) { return a = b; },
+    "≥": function(a: number | string, b: number | string) { return a >= b; },
+    "≤": function(a: number | string, b: number | string) { return a <= b; },
+    "≠": function(a: number | string, b: number | string) { return a != b; },
   };
 
   function cond(d, cond, mainColor) {

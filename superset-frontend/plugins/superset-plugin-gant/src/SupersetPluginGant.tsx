@@ -35,15 +35,13 @@ import {
 // imported from @superset-ui/core. For variables available, please visit
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 // @ts-ignore
-/*const Styles = styled.div<SupersetPluginGantStylesProps>`
-  background-color: ${({ theme }) => theme.colors.secondary.light2};
+const Styles = styled.div<SupersetPluginGantStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
 
   h3 {
-
     margin-top: 0;
     margin-bottom: ${({ theme }) => theme.gridUnit * 3}px;
     font-size: ${({ theme, headerFontSize }) =>
@@ -56,7 +54,7 @@ import {
     height: ${({ theme, headerFontSize, height }) =>
       height - theme.gridUnit * 12 - theme.typography.sizes[headerFontSize]}px;
   }
-`;*/
+`;
 
 /**
  * ******************* WHAT YOU CAN BUILD HERE *******************
@@ -94,6 +92,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
   const chartRef = useRef(am5xy.XYChart);
   const yAxesRef = useRef(am5xy.CategoryAxis<am5xy.AxisRenderer>);
   const seriesRef = useRef(am5xy.ColumnSeries);
+  //const labelRef = useRef(am5.Label);
 
   const handleClick = source => {
     if (!emitCrossFilters) {
@@ -192,9 +191,13 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     //chartRef?.current?.appear(1000, 100);
   }, [categories, dataChart]);
 
+  /*useEffect(() => {
+    labelRef?.current?.set('text', customize);
+  }, [customize]);*/
+
   useEffect(() => {
-    //chartRef.current.topAxesContainer.children?.set('Label', customize);
-  }, [customize]);
+    seriesRef?.current?.columns.template.set('tooltipText', template);
+  }, [template]);
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -234,15 +237,17 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       }),
     );
 
-    chart.topAxesContainer.children.push(
-      am5.Label.new(gant_chart, {
-        text: customize,
-        fontSize: 20,
-        fontWeight: '400',
-        x: am5.p50,
-        centerX: am5.p50,
-      }),
-    );
+    /*const amLabel: am5.Label = am5.Label.new(gant_chart, {
+      text: customize,
+      fontSize: 20,
+      fontWeight: '400',
+      x: am5.p50,
+      centerX: am5.p50,
+    });
+
+    chart.topAxesContainer.children.push(amLabel); */
+    //labelRef.current = amLabel;
+
 
     const colors = chart.get('colors');
     const arrCategory = [...categories];
@@ -376,7 +381,15 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     //};
   }, []);
 
-  console.log('Plugin props', props);
-
-  return <div ref={rootElem} style={{ width, height }} />;
+  return(
+    <Styles
+      boldText={props.boldText}
+      headerFontSize={props.headerFontSize}
+      height={height}
+      width={width}
+    >
+      <h3>{customize}</h3>
+      <div ref={rootElem} style={{ width, height }} />
+    </Styles>
+  );
 }

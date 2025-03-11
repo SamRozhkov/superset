@@ -193,7 +193,9 @@ const config: ControlPanelConfig = {
             name: 'template',
             config: {
               type: 'TextControl',
+              renderTrigger: true,
               label: t('Template'),
+              description: 'Вывод всплывающей подсказки. Подробнее https://www.amcharts.com/docs/v5/concepts/formatters/',
             },
           },
         ],

@@ -41,7 +41,6 @@ const FullWidthInput = styled(Input)`
   width: 100%;
 `;
 
-
 const JustifyEnd = styled.div`
   display: flex;
   justify-content: flex-end;
@@ -64,10 +63,10 @@ const operatorOptions = [
   { value: Comparator.LessOrEqual, label: '≤' },
   { value: Comparator.Equal, label: '=' },
   { value: Comparator.NotEqual, label: '≠' },
-  { value: Comparator.Between, label: '< x <' },
+  /*{ value: Comparator.Between, label: '< x <' },
   { value: Comparator.BetweenOrEqual, label: '≤ x ≤' },
   { value: Comparator.BetweenOrLeftEqual, label: '≤ x <' },
-  { value: Comparator.BetweenOrRightEqual, label: '< x ≤' },
+  { value: Comparator.BetweenOrRightEqual, label: '< x ≤' },*/
 ];
 
 const targetValueValidator =
