@@ -16,12 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, createRef, useLayoutEffect, useRef } from 'react';
-import { logging, styled } from '@superset-ui/core';
+import React, { useEffect, createRef, useLayoutEffect, useRef, useState } from 'react';
+import { styled } from '@superset-ui/core';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
 import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5locales_ru_RU from '@amcharts/amcharts5/locales/ru_RU';
+import { ColumnSeries, XYChart } from '@amcharts/amcharts5/xy';
 import {
   Category,
   SupersetPluginGantProps,
@@ -68,31 +69,29 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
   // height and width are the height and width of the DOM element as it exists in the dashboard.
   // There is also a `data` prop, which is, of course, your DATA 🎉
   const {
-    data,
     height,
     width,
-    startDate,
-    endDate,
     cols,
     template,
-    grane,
     emitCrossFilters,
     filterState,
     setDataMask,
     onContextMenu,
-    mainColor,
     categories,
     dataChart,
-    customize,
+    //customize,
   } = props;
 
   let selectedValue = Object.values({});
 
   const rootElem = createRef<HTMLDivElement>();
-  const chartRef = useRef(am5xy.XYChart);
+  const chartRef = useRef(XYChart);
   const yAxesRef = useRef(am5xy.CategoryAxis<am5xy.AxisRenderer>);
-  const seriesRef = useRef(am5xy.ColumnSeries);
+  const seriesRef = useRef(ColumnSeries);
+  const [selectCol, setSelectCol] = useState(null);
   //const labelRef = useRef(am5.Label);
+
+  const [selectValue, setSelectValue] = useState({});
 
   const handleClick = source => {
     if (!emitCrossFilters) {
@@ -147,20 +146,30 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       return undefined;
     }
     
-    const fill: am5.Color = source.target.get('fill');
+    //const fill: am5.Color = source.target.get('fill');
+    setSelectValue(source.target.dataItem?.dataContext?.category);
     let values;
     if (selectedValue.includes(category)) {
       values = [];
       selectedValue = [];
-      source.target.states.apply('focused');
-      source.target.set('fill', am5.Color.fromRGB(mainColor.r, mainColor.g, mainColor.b));
+      selectCol?.set('active', false);
+      setSelectCol(null);
+      //source.target.states.apply('focused');
+      //source.target.set('fill', am5.Color.fromRGB(mainColor.r, mainColor.g, mainColor.b));
+      //source.target.states.apply("default");
       //source.target.set('strokeWidth', 1);
     } else {
+      setSelectCol(source.target);
+      //selectCol = source.target;
       values = [category];
       selectedValue = [category];
-      source.target.set('fill', am5.Color.brighten(am5.color(fill), -0.5));
+      //source.target.set('fill', am5.Color.brighten(am5.color(fill), -0.5));
       //source.target.set('stroke', am5.Color.lighten(am5.color(fill), 0.5));
+
+      //source.target.states.apply("highlight");
+      
       //source.target.set('strokeWidth', 3);
+      //source.target.set('scale', 1.2);
     }
 
     return {
@@ -188,7 +197,6 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
   useEffect(() => {
     yAxesRef?.current?.data.setAll(categories);
     seriesRef?.current?.data.setAll(dataChart);
-    //chartRef?.current?.appear(1000, 100);
   }, [categories, dataChart]);
 
   /*useEffect(() => {
@@ -207,7 +215,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     gant_chart.locale = am5locales_ru_RU;
     gant_chart.dateFormatter.setAll({
       dateFormat: 'yyyy-MM-dd',
-      dateFields: ['valueX', 'openValueX'],
+      dateFields: ['start', 'end'],
     });
 
     // Set themes
@@ -281,6 +289,13 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     });
     yRenderer.grid.template.set('location', 1);
     yRenderer.labels.template.set('fontSize', '1em');
+    yRenderer.labels.template.states.create('hover', {
+      fontWeight: 'bold',
+    });
+    //yRenderer.labels.template.set('fontWeight', 'bold');
+    yRenderer.labels.template.states.create('active', {
+      fontWeight: 'bold',
+    });
 
     const yAxis = chart.yAxes.push(
       am5xy.CategoryAxis.new(gant_chart, {
@@ -316,7 +331,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
 
     // Add series
     // https://www.amcharts.com/docs/v5/charts/xy-chart/series/
-    const series = chart.series.push(
+    const series: ColumnSeries = chart.series.push(
       am5xy.ColumnSeries.new(gant_chart, {
         xAxis,
         yAxis,
@@ -331,10 +346,28 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       templateField: 'columnSettings',
       strokeOpacity: 0,
       tooltipText: template, //'{task}:\n[bold]{openValueX}[/] - [bold]{valueX}[/]',
+      interactive: true,
+      //toggleKey: 'active',
     });
+
+    const linePattern = am5.LinePattern.new(gant_chart, {
+      color: am5.color(0xffffff),
+      colorOpacity: 0.5,
+      rotation: 45,
+      width: 200,
+      height: 200,
+    });
+
+    series.columns.template.states.create('hover', {
+      fillPattern: linePattern,
+    });
+    series.columns.template.states.create('hoverActive', {});
+
+    series.columns.template.states.create('active', {});
 
     series.columns.template.events.on('click', handleClick);
     series.columns.template.events.on('rightclick', handleContextMenu);
+
     series.data.setAll(dataChart);
     seriesRef.current = series;
 
@@ -381,15 +414,5 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     //};
   }, []);
 
-  return(
-    <Styles
-      boldText={props.boldText}
-      headerFontSize={props.headerFontSize}
-      height={height}
-      width={width}
-    >
-      <h3>{customize}</h3>
-      <div ref={rootElem} style={{ width, height }} />
-    </Styles>
-  );
+  return <div ref={rootElem} style={{ width, height }} />;
 }

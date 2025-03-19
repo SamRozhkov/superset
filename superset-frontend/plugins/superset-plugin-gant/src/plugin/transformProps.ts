@@ -18,10 +18,7 @@
  */
 import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 import { Color } from '@amcharts/amcharts5';
-import { useMemo } from 'react';
 import { Category } from '../types';
-import { object } from 'prop-types';
-import { forEach, result } from 'lodash';
 
 export default function transformProps(chartProps: ChartProps) {
   /**
