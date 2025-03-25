@@ -393,6 +393,9 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   const canEdit = useSelector<RootState, boolean>(
     ({ dashboardInfo }) => dashboardInfo.dash_edit_perm,
   );
+  const enableFilters = useSelector<RootState, boolean>(
+    ({ dashboardInfo }) => dashboardInfo.metadata.enable_filters,
+  );
   const dashboardIsSaving = useSelector<RootState, boolean>(
     ({ dashboardState }) => dashboardState.dashboardIsSaving,
   );
@@ -479,7 +482,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
   });
 
   const showFilterBar =
-    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode;
+    (crossFiltersEnabled || nativeFiltersEnabled) && !editMode && enableFilters;
 
   const offset =
     FILTER_BAR_HEADER_HEIGHT +
@@ -494,7 +497,8 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
         dashboardFiltersOpen ||
         editMode ||
         !nativeFiltersEnabled ||
-        filterBarOrientation === FilterBarOrientation.Horizontal
+        filterBarOrientation === FilterBarOrientation.Horizontal ||
+        !enableFilters
           ? 0
           : -32,
     }),
@@ -503,6 +507,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       editMode,
       filterBarOrientation,
       nativeFiltersEnabled,
+      enableFilters,
     ],
   );
 
@@ -575,6 +580,7 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
       isReport,
       topLevelTabs,
       uiConfig.hideNav,
+      enableFilters,
     ],
   );
 
@@ -582,7 +588,8 @@ const DashboardBuilder: FC<DashboardBuilderProps> = () => {
     !dashboardFiltersOpen &&
     !editMode &&
     nativeFiltersEnabled &&
-    filterBarOrientation !== FilterBarOrientation.Horizontal
+    filterBarOrientation !== FilterBarOrientation.Horizontal &&
+    enableFilters
       ? 0
       : theme.gridUnit * 8;
 

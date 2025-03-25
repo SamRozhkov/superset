@@ -37,6 +37,7 @@ import {
 } from 'src/logger/LogUtils';
 import Icons from 'src/components/Icons';
 import Button from 'src/components/Button';
+import { Switch } from 'src/components/Switch';
 import { AntdButton } from 'src/components/';
 import { findPermission } from 'src/utils/findPermission';
 import { Tooltip } from 'src/components/Tooltip';
@@ -57,6 +58,7 @@ import setPeriodicRunner, {
 import { PageHeaderWithActions } from 'src/components/PageHeaderWithActions';
 import DashboardEmbedModal from '../EmbeddedModal';
 import OverwriteConfirm from '../OverwriteConfirm';
+import { theme } from 'src/preamble';
 
 const extensionsRegistry = getExtensionsRegistry();
 
@@ -167,6 +169,10 @@ const saveBtnStyle = theme => css`
 const discardBtnStyle = theme => css`
   min-width: ${theme.gridUnit * 22}px;
   height: ${theme.gridUnit * 8}px;
+`;
+
+const showFilterStyle = theme => css`
+  margin-right: ${theme.gridUnit * 2}px;
 `;
 
 class Header extends React.PureComponent {
@@ -620,6 +626,17 @@ class Header extends React.PureComponent {
               ) : (
                 <div css={actionButtonsStyle}>
                   {NavExtension && <NavExtension />}
+                  {userCanEdit && (
+                    <Switch
+                      checked={dashboardInfo.metadata.enable_filters}
+                      onChange={(value) => {
+                        this.props.dashboardInfo.metadata.enable_filters = value;
+                        this.overwriteDashboard();
+                      }}
+                      title="Show filter"
+                      css={showFilterStyle}
+                    />
+                  )}
                   {userCanEdit && (
                     <Button
                       buttonStyle="secondary"
