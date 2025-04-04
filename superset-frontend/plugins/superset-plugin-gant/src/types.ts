@@ -21,11 +21,11 @@ import {
   QueryFormData,
   supersetTheme,
   TimeseriesDataRecord,
-  QueryFormColumn,
   SetDataMaskHook,
   HandlerFunction,
   FilterState,
 } from '@superset-ui/core';
+import { Ref } from 'react';
 
 export interface SupersetPluginGantStylesProps {
   height: number;
@@ -39,8 +39,6 @@ interface SupersetPluginGantCustomizeProps {
 }
 
 export type CrossFilterTransformedProps = {
-  groupby: QueryFormColumn[];
-  labelMap: Record<string, string[]>;
   setControlValue?: HandlerFunction;
   setDataMask: SetDataMaskHook;
   selectedValues: Record<number, string>;
@@ -66,6 +64,7 @@ export type SupersetPluginGantProps = SupersetPluginGantStylesProps &
     categories: any;
     dataChart: any;
     customize: string;
+    rootElem: Ref<HTMLDivElement>;
     // add typing here for the props you pass in from transformProps.ts!
   };
 

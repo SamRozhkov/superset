@@ -19,6 +19,8 @@
 import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 import { Color } from '@amcharts/amcharts5';
 import { Category } from '../types';
+import { createRef, Ref, useMemo } from 'react';
+import { bool } from 'prop-types';
 
 export default function transformProps(chartProps: ChartProps) {
   /**
@@ -60,7 +62,7 @@ export default function transformProps(chartProps: ChartProps) {
     hooks,
   } = chartProps;
 
-  const { onContextMenu, setDataMask } = hooks;
+  const { onContextMenu, setDataMask = () => {} } = hooks;
 
   const {
     boldText,
@@ -75,33 +77,25 @@ export default function transformProps(chartProps: ChartProps) {
     customize,
     condition,
   } = formData;
+
+  const rootElem = createRef<HTMLDivElement>();
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
+  const selectedValues = filterState.selectedValues;
+
   const categories: Set<Category> = Object.assign([
-    ...Array.from(new Set(data.map(name => name[cols])), v => ({
+      ...Array.from(new Set(data.map(name => name[cols])), v => ({
       category: v,
     })),
   ]);
 
-  let start = '';
-  let end = '';
-
-  if (typeof startDate === 'object') {
-    start = startDate.label;
-  } else {
-    start = startDate;
-  }
-
-  if (typeof endDate === 'object') {
-    end = endDate.label;
-  } else {
-    end = endDate;
-  }
+  const start = chartProps.datasource.verboseMap?.start_date
+  const end = chartProps.datasource.verboseMap?.end_date;
 
   var operators = {
     ">": function(a: number | string, b: number | string) { return a > b; },
     "<": function(a: number | string, b: number | string) { return a < b; },
-    "=": function(a: number | string, b: number | string) { return a = b; },
+    "=": function(a: number | string, b: number | string) { return a == b; },
     "≥": function(a: number | string, b: number | string) { return a >= b; },
     "≤": function(a: number | string, b: number | string) { return a <= b; },
     "≠": function(a: number | string, b: number | string) { return a != b; },
@@ -160,5 +154,7 @@ export default function transformProps(chartProps: ChartProps) {
     categories,
     dataChart,
     customize,
+    selectedValues,
+    rootElem,
   };
 }

@@ -16,7 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, createRef, useLayoutEffect, useRef, useState } from 'react';
+import React, {
+  useEffect,
+  createRef,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useMemo,
+} from 'react';
 import { styled } from '@superset-ui/core';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -79,35 +86,36 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     onContextMenu,
     categories,
     dataChart,
-    //customize,
+    selectedValues = {},
+    rootElem,
   } = props;
 
-  let selectedValue = Object.values({});
+  //const rootElem = createRef<HTMLDivElement>();
+  const chartRef = useRef<XYChart>();
+  const yAxesRef = useRef<am5xy.CategoryAxis<am5xy.AxisRenderer>>();
+  const seriesRef = useRef<ColumnSeries>();
+  const previousSelection = useRef<am5xy.AxisLabel>();
 
-  const rootElem = createRef<HTMLDivElement>();
-  const chartRef = useRef(XYChart);
-  const yAxesRef = useRef(am5xy.CategoryAxis<am5xy.AxisRenderer>);
-  const seriesRef = useRef(ColumnSeries);
-  const [selectCol, setSelectCol] = useState(null);
-  //const labelRef = useRef(am5.Label);
+  const [selection, setSelection] = useState<am5xy.AxisLabel | null>(null);
+  const [category, setCategory] = useState<Set<Category> | null>(categories);
 
-  const [selectValue, setSelectValue] = useState({});
-
-  const handleClick = source => {
+  const handleClick = (source, selectedCategory, prev) => {
     if (!emitCrossFilters) {
       return;
     }
     //getCrossFilterDataMask(source);
 
-    const dataMask = getCrossFilterDataMask(source)?.dataMask;
+    const dataMask = getCrossFilterDataMask(source, selectedCategory, prev)?.dataMask;
     if (dataMask) {
       setDataMask(dataMask);
     }
   };
 
   const handleContextMenu = source => {
+
     const pointerEvent = source.originalEvent;
     pointerEvent.preventDefault();
+
     const key = source.target.dataItem?.uid;
     const category = source.target.dataItem?.dataContext?.category;
 
@@ -137,39 +145,26 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     });
   };
 
-  const getCrossFilterDataMask = source => {
+  const getCrossFilterDataMask = (source, selectedCategory, prev) => {
+    //selectValue = source.target.dataItem?.dataContext?.category;
     const selected = Object.values(filterState.selectedValues || {});
+    
     const key = source.target.dataItem?.uid;
     const category = source.target.dataItem?.dataContext?.category;
 
     if (!category) {
       return undefined;
     }
-    
-    //const fill: am5.Color = source.target.get('fill');
-    setSelectValue(source.target.dataItem?.dataContext?.category);
-    let values;
-    if (selectedValue.includes(category)) {
-      values = [];
-      selectedValue = [];
-      selectCol?.set('active', false);
-      setSelectCol(null);
-      //source.target.states.apply('focused');
-      //source.target.set('fill', am5.Color.fromRGB(mainColor.r, mainColor.g, mainColor.b));
-      //source.target.states.apply("default");
-      //source.target.set('strokeWidth', 1);
-    } else {
-      setSelectCol(source.target);
-      //selectCol = source.target;
-      values = [category];
-      selectedValue = [category];
-      //source.target.set('fill', am5.Color.brighten(am5.color(fill), -0.5));
-      //source.target.set('stroke', am5.Color.lighten(am5.color(fill), 0.5));
 
-      //source.target.states.apply("highlight");
-      
-      //source.target.set('strokeWidth', 3);
-      //source.target.set('scale', 1.2);
+    let values: any[] = [];
+
+    if (
+      previousSelection.current?.dataItem?.dataContext?.category === category
+    ) {
+      previousSelection.current = undefined;
+    } else {
+      previousSelection.current = selectedCategory;
+      values = [category];
     }
 
     return {
@@ -186,22 +181,22 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
             : [],
         },
         filterState: {
-          value: values.length ? values : null,
-          selectedValues: values.length ? [key] : null,
+          value: values.length ? category : null,
+          selectedValues: values.length ? values : null,
         },
       },
-      isCurrentValueSelected: selected.includes(key),
+      isCurrentValueSelected: true,
     };
   };
+
+  const changeCategory = useMemo(() => categories, [categories]);
 
   useEffect(() => {
     yAxesRef?.current?.data.setAll(categories);
     seriesRef?.current?.data.setAll(dataChart);
-  }, [categories, dataChart]);
+    selection?.states.apply('active');
 
-  /*useEffect(() => {
-    labelRef?.current?.set('text', customize);
-  }, [customize]);*/
+  }, [category]);
 
   useEffect(() => {
     seriesRef?.current?.columns.template.set('tooltipText', template);
@@ -228,7 +223,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
         panX: false,
         panY: false,
         wheelX: 'panX',
-        wheelY: 'zoomX',
+        wheelY: 'none',
         paddingLeft: 0,
         layout: gant_chart.verticalLayout,
       }),
@@ -245,37 +240,8 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       }),
     );
 
-    /*const amLabel: am5.Label = am5.Label.new(gant_chart, {
-      text: customize,
-      fontSize: 20,
-      fontWeight: '400',
-      x: am5.p50,
-      centerX: am5.p50,
-    });
-
-    chart.topAxesContainer.children.push(amLabel); */
-    //labelRef.current = amLabel;
-
-
     const colors = chart.get('colors');
     const arrCategory = [...categories];
-    // @ts-ignore
-    // const dataChart = data.map(v => ({
-    //   category: v[cols],
-    //   // @ts-ignore
-    //   start: new Date(v[start]).getTime(),
-    //   // @ts-ignore
-    //   end: new Date(v[end]).getTime(),
-    //   ...v,
-    //   columnSettings: {
-    //     //fill: am5.Color.brighten(
-    //       // @ts-ignore
-    //     //  colors.getIndex(1),//arrCategory.findIndex(x => x.category === v[cols])),
-    //     //  0,
-    //     //),
-    //     fill: am5.Color.fromRGB(mainColor.r, mainColor.g, mainColor.b),
-    //   },
-    // }));
 
     // Create axes
     // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
@@ -287,23 +253,46 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       minHeight: 20,
       minGridDistance: 20,
     });
-    yRenderer.grid.template.set('location', 1);
-    yRenderer.labels.template.set('fontSize', '1em');
-    yRenderer.labels.template.states.create('hover', {
-      fontWeight: 'bold',
-    });
-    //yRenderer.labels.template.set('fontWeight', 'bold');
-    yRenderer.labels.template.states.create('active', {
-      fontWeight: 'bold',
-    });
 
     const yAxis = chart.yAxes.push(
       am5xy.CategoryAxis.new(gant_chart, {
         categoryField: 'category',
         renderer: yRenderer,
         tooltip: am5.Tooltip.new(gant_chart, {}),
+        interactive: true,
       }),
     );
+
+    yRenderer.labels.template.setup = target => {
+      target.setAll({
+        cursorOverStyle: "pointer",
+        background: am5.Rectangle.new(gant_chart, {
+          fill: am5.color(0x000000),
+          fillOpacity: 0,
+        }),
+      });
+    };
+
+    yRenderer.labels.template.events.on('click', ev => {
+      setSelection(selection => {
+        if (selection !== ev.target) {
+          ev.target.states.apply('active');
+          selection?.states.apply('default');
+
+          return ev.target;
+        }
+
+        selection?.states.apply('default');
+        return null;
+      });
+
+      const selectedCategory = ev.target;
+      handleClick(ev, selectedCategory, previousSelection);
+    });
+
+    yRenderer.labels.template.states.create('active', {
+      fontWeight: 'bold',
+    });
 
     // @ts-ignore
     yAxis.data.setAll(categories);
@@ -317,7 +306,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       minGridDistance: 80,
       minorLabelsEnabled: false,
     });
-    //xRenderer.grid.template.set('location', 1);
+
     xRenderer.labels.template.set('fontSize', '.8em');
 
     const xAxis = chart.xAxes.push(
@@ -345,9 +334,8 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     series.columns.template.setAll({
       templateField: 'columnSettings',
       strokeOpacity: 0,
-      tooltipText: template, //'{task}:\n[bold]{openValueX}[/] - [bold]{valueX}[/]',
+      tooltipText: template,
       interactive: true,
-      //toggleKey: 'active',
     });
 
     const linePattern = am5.LinePattern.new(gant_chart, {
@@ -362,11 +350,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       fillPattern: linePattern,
     });
     series.columns.template.states.create('hoverActive', {});
-
     series.columns.template.states.create('active', {});
-
-    series.columns.template.events.on('click', handleClick);
-    series.columns.template.events.on('rightclick', handleContextMenu);
 
     series.data.setAll(dataChart);
     seriesRef.current = series;
@@ -398,9 +382,6 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     // Make stuff animate on load
     // https://www.amcharts.com/docs/v5/concepts/animations/
     series.appear();
-
-    //chart.appear(1000, 100);
-
     chartRef.current = chart;
 
     gant_chart.addDisposer(
@@ -409,9 +390,9 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       }),
     );
 
-    //return () => {
-    //  gant_chart.dispose();
-    //};
+    return () => {
+      gant_chart.dispose();
+    };
   }, []);
 
   return <div ref={rootElem} style={{ width, height }} />;
