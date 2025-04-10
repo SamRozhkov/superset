@@ -28,7 +28,6 @@ import {
   SupersetPluginGantProps,
   SupersetPluginGantStylesProps,
 } from './types';
-import { template } from 'lodash';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
