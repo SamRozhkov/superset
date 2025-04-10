@@ -20,7 +20,6 @@ import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
 import { Color } from '@amcharts/amcharts5';
 import { Category } from '../types';
 import { createRef, Ref, useMemo } from 'react';
-import { bool } from 'prop-types';
 
 export default function transformProps(chartProps: ChartProps) {
   /**
@@ -72,7 +71,6 @@ export default function transformProps(chartProps: ChartProps) {
     endDate,
     cols,
     grane,
-    template,
     mainColor,
     customize,
     condition,
@@ -81,39 +79,54 @@ export default function transformProps(chartProps: ChartProps) {
   const rootElem = createRef<HTMLDivElement>();
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
-  const selectedValues = filterState.selectedValues;
+  const { selectedValues } = filterState;
+
+  const template = formData?.template
+    ?.replaceAll('\\n', '\n')
+    .replaceAll('\\t', '\t');
 
   const categories: Set<Category> = Object.assign([
-      ...Array.from(new Set(data.map(name => name[cols])), v => ({
+    ...Array.from(new Set(data.map(name => name[cols])), v => ({
       category: v,
     })),
   ]);
 
-  const start = chartProps.datasource.verboseMap?.start_date
-  const end = chartProps.datasource.verboseMap?.end_date;
+  const start = startDate instanceof Object ? startDate.label : startDate;
+  const end = endDate instanceof Object ? endDate.label : endDate;
 
-  var operators = {
-    ">": function(a: number | string, b: number | string) { return a > b; },
-    "<": function(a: number | string, b: number | string) { return a < b; },
-    "=": function(a: number | string, b: number | string) { return a == b; },
-    "≥": function(a: number | string, b: number | string) { return a >= b; },
-    "≤": function(a: number | string, b: number | string) { return a <= b; },
-    "≠": function(a: number | string, b: number | string) { return a != b; },
+  const operators = {
+    '>': function (a: number | string, b: number | string) {
+      return a > b;
+    },
+    '<': function (a: number | string, b: number | string) {
+      return a < b;
+    },
+    '=': function (a: number | string, b: number | string) {
+      return a === b;
+    },
+    '≥': function (a: number | string, b: number | string) {
+      return a >= b;
+    },
+    '≤': function (a: number | string, b: number | string) {
+      return a <= b;
+    },
+    '≠': function (a: number | string, b: number | string) {
+      return a !== b;
+    },
   };
 
   function cond(d, cond, mainColor) {
     let resultColor = Color.fromRGB(mainColor.r, mainColor.g, mainColor.b);
     const l = cond.forEach(c => {
       const { column, operator, targetValue, colorScheme } = c;
-      
+
       var operatorFunction = operators[operator];
       if (operatorFunction) {
         var result = operatorFunction(d[column], targetValue);
-        if result {
+        if (result) {
           resultColor =  Color.fromRGB(colorScheme.r, colorScheme.g, colorScheme.b)
         }
       }
-
     });
 
     return resultColor;

@@ -16,14 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, {
-  useEffect,
-  createRef,
-  useLayoutEffect,
-  useRef,
-  useState,
-  useMemo,
-} from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { styled } from '@superset-ui/core';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -35,6 +28,7 @@ import {
   SupersetPluginGantProps,
   SupersetPluginGantStylesProps,
 } from './types';
+import { template } from 'lodash';
 
 // The following Styles component is a <div> element, which has been styled using Emotion
 // For docs, visit https://emotion.sh/docs/styled
@@ -43,6 +37,7 @@ import {
 // imported from @superset-ui/core. For variables available, please visit
 // https://github.com/apache-superset/superset-ui/blob/master/packages/superset-ui-core/src/style/index.ts
 // @ts-ignore
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Styles = styled.div<SupersetPluginGantStylesProps>`
   padding: ${({ theme }) => theme.gridUnit * 4}px;
   border-radius: ${({ theme }) => theme.gridUnit * 2}px;
@@ -81,31 +76,34 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     cols,
     template,
     emitCrossFilters,
-    filterState,
     setDataMask,
     onContextMenu,
     categories,
     dataChart,
-    selectedValues = {},
     rootElem,
   } = props;
 
-  //const rootElem = createRef<HTMLDivElement>();
   const chartRef = useRef<XYChart>();
   const yAxesRef = useRef<am5xy.CategoryAxis<am5xy.AxisRenderer>>();
   const seriesRef = useRef<ColumnSeries>();
   const previousSelection = useRef<am5xy.AxisLabel>();
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selection, setSelection] = useState<am5xy.AxisLabel | null>(null);
-  const [category, setCategory] = useState<Set<Category> | null>(categories);
 
-  const handleClick = (source, selectedCategory, prev) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [category, setCategory] = useState<Set<Category> | null>(categories);
+  const [data, setData] = useState<any>(dataChart);
+
+  if (data !== dataChart) setData(dataChart);
+
+  const handleClick = (source, selectedCategory) => {
     if (!emitCrossFilters) {
       return;
     }
     //getCrossFilterDataMask(source);
 
-    const dataMask = getCrossFilterDataMask(source, selectedCategory, prev)?.dataMask;
+    const dataMask = getCrossFilterDataMask(source, selectedCategory)?.dataMask;
     if (dataMask) {
       setDataMask(dataMask);
     }
@@ -113,8 +111,8 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
 
   const handleContextMenu = source => {
 
-    const pointerEvent = source.originalEvent;
-    pointerEvent.preventDefault();
+    //const pointerEvent = source.originalEvent;
+    //pointerEvent.preventDefault();
 
     const key = source.target.dataItem?.uid;
     const category = source.target.dataItem?.dataContext?.category;
@@ -138,18 +136,17 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
         },
       ];
     }
-    onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
+    onContextMenu(source.clientX, source.clientY, {
       drillToDetail: drillToDetailFilters,
       crossFilter: getCrossFilterDataMask(source),
       drillBy: { filters: drillByFilters, groupbyFieldName: 'cols' },
     });
   };
 
-  const getCrossFilterDataMask = (source, selectedCategory, prev) => {
-    //selectValue = source.target.dataItem?.dataContext?.category;
-    const selected = Object.values(filterState.selectedValues || {});
+  const getCrossFilterDataMask = (source, selectedCategory) => {
+    //const selected = Object.values(filterState.selectedValues || {});
     
-    const key = source.target.dataItem?.uid;
+    //const key = source.target.dataItem?.uid;
     const category = source.target.dataItem?.dataContext?.category;
 
     if (!category) {
@@ -189,14 +186,13 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     };
   };
 
-  const changeCategory = useMemo(() => categories, [categories]);
+  useEffect(() => {
+    yAxesRef?.current?.data.setAll(category);
+  }, [category]);
 
   useEffect(() => {
-    yAxesRef?.current?.data.setAll(categories);
-    seriesRef?.current?.data.setAll(dataChart);
-    selection?.states.apply('active');
-
-  }, [category]);
+    seriesRef?.current?.data.setAll(data);
+  }, [data]);
 
   useEffect(() => {
     seriesRef?.current?.columns.template.set('tooltipText', template);
@@ -287,7 +283,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       });
 
       const selectedCategory = ev.target;
-      handleClick(ev, selectedCategory, previousSelection);
+      handleClick(ev, selectedCategory);
     });
 
     yRenderer.labels.template.states.create('active', {
@@ -295,9 +291,9 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     });
 
     // @ts-ignore
-    yAxis.data.setAll(categories);
+    yAxis.data.setAll(category);
     // @ts-ignore
-    yAxis.zoomToIndexes(categories.length, categories.length - 10);
+    yAxis.zoomToIndexes(category.length, category.length - 10);
     yAxesRef.current = yAxis;
 
     const xRenderer = am5xy.AxisRendererX.new(gant_chart, {
@@ -352,7 +348,12 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     series.columns.template.states.create('hoverActive', {});
     series.columns.template.states.create('active', {});
 
-    series.data.setAll(dataChart);
+    series.columns.events.on('rightclick', ev => {
+      console.log(ev);
+      handleContextMenu(ev);
+    });
+
+    series.data.setAll(data);
     seriesRef.current = series;
 
     // Add scrollbars

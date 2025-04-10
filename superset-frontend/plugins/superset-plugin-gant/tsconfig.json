@@ -33,11 +33,6 @@
       "./node_modules/@types"
     ]
   },
-  /*"compilerOptions": {
-    "declarationDir": "lib",
-    "outDir": "lib",
-    "rootDir": "src"
-  },*/
   "exclude": [
     "lib",
     "test__"
