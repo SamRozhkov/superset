@@ -19,13 +19,14 @@
 import { GenericDataType, t, validateNonEmpty } from '@superset-ui/core';
 import {
   ControlPanelConfig,
-  sections,
   sharedControls,
   Dataset,
 } from '@superset-ui/chart-controls';
 import ConditionalFormattingControl from '../ConditionalFormattingControl';
-import { array } from 'prop-types';
-import { values } from 'lodash';
+import {
+  D3_TIME_FORMAT_OPTIONS_AMCHART,
+  DEFAULT_TIME_FORMAT_AMCHART,
+} from '../types';
 
 const config: ControlPanelConfig = {
   /**
@@ -137,6 +138,18 @@ const config: ControlPanelConfig = {
         ],
         [
           {
+            name: 'attribute',
+            config: {
+              ...sharedControls.entity,
+              label: t('Attribute'),
+              description: t('Columns for attribute'),
+              validators: [],
+              renderTrigger: true,
+            },
+          },
+        ],
+        [
+          {
             name: 'start_date',
             config: {
               ...sharedControls.entity,
@@ -200,6 +213,24 @@ const config: ControlPanelConfig = {
             },
           },
         ],
+        [
+          {
+            name: 'order_by_cols',
+            config: {
+              type: 'SelectControl',
+              label: t('Ordering'),
+              description: t('Order results by selected columns'),
+              multi: true,
+              default: [],
+              mapStateToProps: ({ datasource }) => ({
+                choices: datasource?.hasOwnProperty('order_by_choices')
+                  ? (datasource as Dataset)?.order_by_choices
+                  : datasource?.columns || [],
+              }),
+              resetOnHide: false,
+            },
+          },
+        ],
         ['adhoc_filters'],
         [
           {
@@ -210,65 +241,65 @@ const config: ControlPanelConfig = {
       ],
     },
     {
-      label: t('Hello Controls!'),
+      label: t('Chart Options'),
       expanded: true,
       controlSetRows: [
+        ['color_scheme'],
         [
           {
-            name: 'customize',
-            config: {
-              type: 'TextControl',
-              default: 'Hello, World!',
-              renderTrigger: true,
-              // ^ this makes it apply instantaneously, without triggering a "run query" button
-              label: t('Header Text'),
-              description: t('The text you want to see in the header'),
-            },
-          },
-        ],
-        [
-          {
-            name: 'main_color',
-            config: {
-              type: 'ColorPickerControl',
-              renderTrigger: true,
-              label: 'Основной цвет',
-              // eslint-disable-next-line theme-colors/no-literal-colors
-              default: '#253577',
-            },
-          },
-        ],
-        [
-          {
-            name: 'bold_text',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Bold Text'),
-              renderTrigger: true,
-              default: true,
-              description: t('A checkbox to make the '),
-            },
-          },
-        ],
-        [
-          {
-            name: 'header_font_size',
+            name: 'oversizedBehavior',
             config: {
               type: 'SelectControl',
-              label: t('Font Size'),
-              default: 'xl',
-              choices: [
-                // [value, label]
-                ['xxs', 'xx-small'],
-                ['xs', 'x-small'],
-                ['s', 'small'],
-                ['m', 'medium'],
-                ['l', 'large'],
-                ['xl', 'x-large'],
-                ['xxl', 'xx-large'],
-              ],
               renderTrigger: true,
-              description: t('The size of your header font'),
+              label: t('Oversized behavior categories'),
+              default: 'none',
+              choices: [
+                ['none', 'None'],
+                ['fit', 'Fit'],
+                ['wrap', 'Wrap'],
+                ['wrap-no-break', 'Wrap no break'],
+                ['truncate', 'Truncate'],
+              ],
+            },
+          },
+        ],
+        [
+          {
+            name: 'maxWidth',
+            config: {
+              type: 'TextControl',
+              renderTrigger: true,
+              label: t('Max width category'),
+              default: 150,
+              isInt: true,
+              isFloat: false,
+              visibility: ({ controls }) => {
+                const { oversizedBehavior } = controls;
+
+                if (
+                  oversizedBehavior?.value === 'none' ||
+                  oversizedBehavior?.value === null
+                )
+                  return false;
+
+                return true;
+              },
+            },
+          },
+        ],
+        [
+          {
+            name: 'date_format',
+            config: {
+              type: 'SelectControl',
+              freeForm: true,
+              label: t('Time format'),
+              renderTrigger: true,
+              default: DEFAULT_TIME_FORMAT_AMCHART,
+              choices: D3_TIME_FORMAT_OPTIONS_AMCHART,
+              //description: D3_TIME_FORMAT_DOCS,
+              filterOption: ({ data: option }, search) =>
+                option.label.includes(search) || option.value.includes(search),
             },
           },
         ],
@@ -283,13 +314,32 @@ const config: ControlPanelConfig = {
                 return true;
               },
               mapStateToProps(state, controlState, chartState) {
-                const columns =
-                  state?.controls?.fields_template?.value?.map(e => ({
-                    label: e,
-                    value: e,
-                  })) ?? {};
+                const verboseMap = state?.datasource?.hasOwnProperty(
+                  'verbose_map',
+                )
+                  ? (state?.datasource as Dataset)?.verbose_map
+                  : state?.datasource?.columns ?? {};
+
+                const chartStatus = chartState?.chartStatus;
+                const { colnames, coltypes } =
+                  chartState?.queriesResponse?.[0] ?? {};
+
+                const columnsNumeric =
+                  Array.isArray(colnames) && Array.isArray(coltypes)
+                    ? colnames
+                        .filter(
+                          (colname: string, index: number) =>
+                            coltypes[index] === GenericDataType.Numeric,
+                        )
+                        .map(colname => ({
+                          value: colname,
+                          label: verboseMap[colname] ?? colname,
+                        }))
+                    : [];
                 return {
-                  columnOptions: columns,
+                  columnOptions: columnsNumeric,
+                  removeIrrelevantConditions: chartStatus === 'success',
+                  verboseMap,
                 };
               },
             },

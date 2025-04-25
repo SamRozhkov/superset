@@ -24,7 +24,6 @@ import {
   HandlerFunction,
   FilterState,
 } from '@superset-ui/core';
-import { Ref } from 'react';
 
 export interface SupersetPluginGantStylesProps {
   height: number;
@@ -63,10 +62,32 @@ export type SupersetPluginGantProps = SupersetPluginGantStylesProps &
     categories: any;
     dataChart: any;
     customize: string;
-    rootElem: Ref<HTMLDivElement>;
+    oversizedBehavior?:
+      | 'none'
+      | 'hide'
+      | 'fit'
+      | 'wrap'
+      | 'wrap-no-break'
+      | 'truncate'
+      | undefined;
+    maxWidth?: number;
+    dateFormat: string;
+    attribute: string;
+    condition: any;
     // add typing here for the props you pass in from transformProps.ts!
   };
 
-export type Category = {
-  category: string;
-};
+export type Category = String[];
+
+export const D3_TIME_FORMAT_OPTIONS_AMCHART: [string, string][] = [
+  ['dd.MM.yyyy', 'dd.MM.yyyy | 14.01.2019'],
+  ['dd.MM.yyyy H:m:s', 'dd.MM.yyyy H:m:s | 14-01-2019 01:32:10'],
+  ['dd/MM/yyyy', 'dd/MM/yyyy | 14/01/2019'],
+  ['MM/dd/yyyy', 'MM/dd/yyyy | 01/14/2019'],
+  ['yyyy-MM-dd', 'yyyy-MM-dd | 2019-01-14'],
+  ['yyyy-MM-dd H:m:s', 'yyyy-MM-dd H:m:s | 2019-01-14 01:32:10'],
+  ['dd-MM-yyyy H:m:s', 'dd-MM-yyyy H:m:s | 14-01-2019 01:32:10'],
+  ['H:m:s', 'H:m:s | 01:32:10'],
+];
+
+export const DEFAULT_TIME_FORMAT_AMCHART = D3_TIME_FORMAT_OPTIONS_AMCHART[0][0];

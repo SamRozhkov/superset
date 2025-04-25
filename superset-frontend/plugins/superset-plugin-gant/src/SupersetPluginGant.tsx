@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
 import { styled } from '@superset-ui/core';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -79,22 +79,25 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     onContextMenu,
     categories,
     dataChart,
-    rootElem,
+    oversizedBehavior,
+    maxWidth,
+    dateFormat,
   } = props;
 
+  const rootElem = useRef<HTMLDivElement>();
+  const rootRef = useRef<am5.Root>();
   const chartRef = useRef<XYChart>();
   const yAxesRef = useRef<am5xy.CategoryAxis<am5xy.AxisRenderer>>();
   const seriesRef = useRef<ColumnSeries>();
   const previousSelection = useRef<am5xy.AxisLabel>();
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [selection, setSelection] = useState<am5xy.AxisLabel | null>(null);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [category, setCategory] = useState<Set<Category> | null>(categories);
+  const [category, setCategory] = useState<any>(categories);
   const [data, setData] = useState<any>(dataChart);
 
   if (data !== dataChart) setData(dataChart);
+  if (category !== categories) setCategory(categories);
 
   const handleClick = (source, selectedCategory) => {
     if (!emitCrossFilters) {
@@ -187,15 +190,27 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
 
   useEffect(() => {
     yAxesRef?.current?.data.setAll(category);
-  }, [category]);
+  }, [categories]);
 
   useEffect(() => {
     seriesRef?.current?.data.setAll(data);
-  }, [data]);
+  }, [dataChart]);
 
   useEffect(() => {
     seriesRef?.current?.columns.template.set('tooltipText', template);
-  }, [template]);
+    rootRef?.current?.dateFormatter.set("dateFormat", dateFormat);
+  }, [template, dateFormat]);
+
+  useEffect(() => {
+    if (!yAxesRef?.current) {
+      return;
+    }
+
+    yAxesRef?.current.get("renderer").labels.template.setAll({
+      oversizedBehavior,
+      maxWidth,
+    });
+  }, [oversizedBehavior, maxWidth]);
 
   // Often, you just want to access the DOM and do whatever you want.
   // Here, you can do that with createRef, and the useEffect hook.
@@ -204,8 +219,13 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     const gant_chart = am5.Root.new(root);
     gant_chart.locale = am5locales_ru_RU;
     gant_chart.dateFormatter.setAll({
-      dateFormat: 'yyyy-MM-dd',
-      dateFields: ['start', 'end'],
+      dateFormat,
+      dateFields: ['fromDate', 'toDate'],
+    });
+
+    gant_chart.durationFormatter.setAll({
+      durationFormat: 'mm:ss',
+      baseUnit: 'day',
     });
 
     // Set themes
@@ -216,27 +236,14 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     const chart = gant_chart.container.children.push(
       am5xy.XYChart.new(gant_chart, {
         panX: false,
-        panY: false,
+        panY: true,
         wheelX: 'panX',
-        wheelY: 'none',
+        wheelY: 'panY',
         paddingLeft: 0,
         layout: gant_chart.verticalLayout,
       }),
     );
     chart.zoomOutButton.set('forceHidden', true);
-
-    // Add legend
-    // https://www.amcharts.com/docs/v5/charts/xy-chart/legend-xy-series/
-    // @ts-ignore
-    chart.children.push(
-      am5.Legend.new(gant_chart, {
-        centerX: am5.p50,
-        x: am5.p50,
-      }),
-    );
-
-    const colors = chart.get('colors');
-    const arrCategory = [...categories];
 
     // Create axes
     // https://www.amcharts.com/docs/v5/charts/xy-chart/axes/
@@ -265,11 +272,22 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
           fill: am5.color(0x000000),
           fillOpacity: 0,
         }),
+        interactive: true,
+        templateField: 'columnSettings',
       });
     };
 
+/*    yAxis.labelsContainer.set("tooltip", am5.Tooltip.new(gant_chart, {
+        pointerOrientation: 'down',
+      }),
+    );
+*/
+
     yRenderer.labels.template.events.on('click', ev => {
-      setSelection(selection => {
+      handleClick(ev, ev.target);
+    });
+
+      /*setSelection(selection => {
         if (selection !== ev.target) {
           ev.target.states.apply('active');
           selection?.states.apply('default');
@@ -283,9 +301,9 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
 
       const selectedCategory = ev.target;
       handleClick(ev, selectedCategory);
-    });
+    }); */
 
-    yRenderer.labels.template.states.create('active', {
+    yRenderer.labels.template.states.create('hover', {
       fontWeight: 'bold',
     });
 
@@ -296,9 +314,9 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     yAxesRef.current = yAxis;
 
     const xRenderer = am5xy.AxisRendererX.new(gant_chart, {
-      strokeOpacity: 0.1,
+      strokeOpacity: 1,
       minorGridEnabled: false,
-      minGridDistance: 80,
+      minGridDistance: 50,
       minorLabelsEnabled: false,
     });
 
@@ -319,10 +337,10 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       am5xy.ColumnSeries.new(gant_chart, {
         xAxis,
         yAxis,
-        openValueXField: 'start',
-        valueXField: 'end',
-        categoryYField: 'category',
-        sequencedInterpolation: true,
+        openValueXField: 'fromDate',
+        valueXField: 'toDate',
+        categoryYField: 'categoryField',
+        clustered: true,
       }),
     );
 
@@ -333,6 +351,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       interactive: true,
     });
 
+    // задаем паттерн для заполнения столюцов
     const linePattern = am5.LinePattern.new(gant_chart, {
       color: am5.color(0xffffff),
       colorOpacity: 0.5,
@@ -341,14 +360,14 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       height: 200,
     });
 
-    series.columns.template.states.create('hover', {
-      fillPattern: linePattern,
-    });
-    series.columns.template.states.create('hoverActive', {});
-    series.columns.template.states.create('active', {});
+    //series.columns.template.states.create('hover', {
+    //  fillPattern: linePattern,
+    //});
+
+    //series.columns.template.states.create('hoverActive', {});
+    //series.columns.template.states.create('active', {});
 
     series.columns.events.on('rightclick', ev => {
-      console.log(ev);
       handleContextMenu(ev);
     });
 
@@ -358,31 +377,64 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     // Add scrollbars
     chart.set(
       'scrollbarX',
-      am5.Scrollbar.new(gant_chart, { orientation: 'horizontal' }),
+      am5.Scrollbar.new(gant_chart, {
+        orientation: 'horizontal',
+        minHeight: 3,
+      }),
     );
     chart.set(
       'scrollbarY',
-      am5.Scrollbar.new(gant_chart, { orientation: 'vertical' }),
+      am5.Scrollbar.new(gant_chart, {
+        orientation: 'vertical',
+        minWidth: 3,
+        forceHidden: false,
+      }),
     );
     const scrollY = chart.get('scrollbarY');
+    const scrollX = chart.get('scrollbarX');
 
     // Disable grip for Y scroll
     // @ts-ignore
     scrollY.startGrip.setAll({
       visible: false,
       x: 100,
+      scale: 0.7,
     });
 
     // @ts-ignore
     scrollY.endGrip.setAll({
       visible: false,
       dy: 100,
+      scale: 0.7,
     });
+
+    scrollX?.startGrip.set('scale', 0.7);
+    scrollX?.endGrip.set('scale', 0.7);
+
+    // Add legend
+    // https://www.amcharts.com/docs/v5/charts/xy-chart/legend-xy-series/
+    // @ts-ignore
+    const legend = chart.children.push(
+      am5.Legend.new(gant_chart, {
+        centerX: am5.p50,
+        x: am5.p50,
+        nameField: 'type',
+        fillField: 'color',
+      }),
+    );
+
+    /*legend.data.setAll(
+      Object.entries(sharedLabelColors).map(e => ({
+        type: e[0],
+        color: e[1],
+      })),
+    );*/
 
     // Make stuff animate on load
     // https://www.amcharts.com/docs/v5/concepts/animations/
     series.appear();
     chartRef.current = chart;
+    rootRef.current = gant_chart;
 
     gant_chart.addDisposer(
       am5.utils.addEventListener(gant_chart.dom, 'contextmenu', function (ev) {

@@ -11,3 +11,4 @@ to import the plugin and later add the following to the array that's passed to t
 new SupersetPluginGant().configure({ key: 'superset-plugin-gant' }),
 ```
 
+![Chart](esm/images/gant.png)

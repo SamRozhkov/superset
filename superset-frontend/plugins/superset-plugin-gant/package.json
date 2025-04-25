@@ -1,6 +1,6 @@
 {
   "name": "superset-plugin-gant",
-  "version": "0.1.2",
+  "version": "0.1.6",
   "description": "Superset Plugin Gant",
   "sideEffects": false,
   "main": "lib/index.js",
@@ -8,6 +8,11 @@
   "files": [
     "esm",
     "lib"
+  ],
+  "keywords": [
+    "superset",
+    "chart",
+    "gant"
   ],
   "repository": {
     "type": "git",

@@ -16,10 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import { ChartProps, TimeseriesDataRecord } from '@superset-ui/core';
+import {
+  CategoricalColorNamespace,
+  ChartProps,
+  TimeseriesDataRecord,
+} from '@superset-ui/core';
 import { Color } from '@amcharts/amcharts5';
-import { Category } from '../types';
-import { createRef, Ref, useMemo } from 'react';
 
 export default function transformProps(chartProps: ChartProps) {
   /**
@@ -64,67 +66,98 @@ export default function transformProps(chartProps: ChartProps) {
   const { onContextMenu, setDataMask = () => {} } = hooks;
 
   const {
-    boldText,
-    headerFontSize,
-    headerText,
     startDate,
     endDate,
     cols,
-    grane,
-    mainColor,
-    customize,
+    //mainColor,
     condition,
+    oversizedBehavior,
+    maxWidth,
+    sharedLabelColors,
+    dateFormat,
+    colorScheme,
+    attribute,
   } = formData;
 
-  const rootElem = createRef<HTMLDivElement>();
   const data = queriesData[0].data as TimeseriesDataRecord[];
 
-  const { selectedValues } = filterState;
+  const colorFn = CategoricalColorNamespace.getScale(colorScheme as string);
+
+  //const { selectedValues } = filterState;
 
   const template = formData?.template
     ?.replaceAll('\\n', '\n')
     .replaceAll('\\t', '\t');
 
-  const categories: Set<Category> = Object.assign([
+  const categories = [
     ...Array.from(new Set(data.map(name => name[cols])), v => ({
       category: v,
+      columnSettings: {
+        fontWeight: filterState.selectedValues?.includes(v) ? 'bold' : 'normal',
+      },
     })),
-  ]);
+  ];
 
   const start = startDate instanceof Object ? startDate.label : startDate;
   const end = endDate instanceof Object ? endDate.label : endDate;
 
   const operators = {
-    '>': function (a: number | string, b: number | string) {
+    '>': function (a: number, b: number) {
       return a > b;
     },
-    '<': function (a: number | string, b: number | string) {
+    '<': function (a: number, b: number) {
       return a < b;
     },
-    '=': function (a: number | string, b: number | string) {
+    '=': function (a: number, b: number) {
       return a === b;
     },
-    '≥': function (a: number | string, b: number | string) {
+    '≥': function (a: number, b: number) {
       return a >= b;
     },
-    '≤': function (a: number | string, b: number | string) {
+    '≤': function (a: number, b: number) {
       return a <= b;
     },
-    '≠': function (a: number | string, b: number | string) {
+    '≠': function (a: number, b: number) {
       return a !== b;
+    },
+    '< x ≤': function (a: number, b: number, c: number) {
+      return b < a && a <= c;
+    },
+    '< x <': function (a: number, b: number, c: number) {
+      return b < a && a < c;
+    },
+    '≤ x ≤': function (a: number, b: number, c: number) {
+      return b <= a && a <= c;
+    },
+    '≤ x <': function (a: number, b: number, c: number) {
+      return b <= a && a < c;
     },
   };
 
-  function cond(d, cond, mainColor) {
-    let resultColor = Color.fromRGB(mainColor.r, mainColor.g, mainColor.b);
-    const l = cond.forEach(c => {
-      const { column, operator, targetValue, colorScheme } = c;
+  function cond(d, cond) {
+    let resultColor = colorFn(d[attribute], d[attribute]);
+    cond.forEach(c => {
+      const {
+        column,
+        operator,
+        targetValue,
+        colorScheme,
+        targetValueLeft,
+        targetValueRight,
+      } = c;
 
-      var operatorFunction = operators[operator];
+      const operatorFunction = operators[operator];
       if (operatorFunction) {
-        var result = operatorFunction(d[column], targetValue);
+        const result =
+          targetValue !== undefined
+            ? operatorFunction(d[column], targetValue)
+            : operatorFunction(d[column], targetValueLeft, targetValueRight);
         if (result) {
-          resultColor =  Color.fromRGB(colorScheme.r, colorScheme.g, colorScheme.b)
+          resultColor = Color.fromRGB(
+            colorScheme.r,
+            colorScheme.g,
+            colorScheme.b,
+          );
         }
       }
     });
@@ -133,41 +166,39 @@ export default function transformProps(chartProps: ChartProps) {
   }
 
   const dataChart = data.map(v => ({
-    category: v[cols],
+    categoryField: v[cols],
     // @ts-ignore
-    start: new Date(v[start]).getTime(),
+    fromDate: new Date(v[start]).getTime(),
     // @ts-ignore
-    end: new Date(v[end]).getTime(),
+    toDate: new Date(v[end]).getTime(),
     ...v,
     columnSettings: {
       fill:
         Array.isArray(condition) && condition.length > 0
-          ? cond(v, condition, mainColor)
-          : Color.fromRGB(mainColor.r, mainColor.g, mainColor.b),
+          ? cond(v, condition)
+          : colorFn(v[attribute], v[attribute]),
+      opacity:
+        filterState.selectedValues && !filterState.selectedValues.includes(v[cols])
+          ? 0.3
+          : 1,
     },
   }));
 
   return {
-    width,
     height,
-    data,
-    startDate,
-    endDate,
+    width,
     cols,
-    boldText,
-    headerFontSize,
-    headerText,
-    grane,
     template,
-    filterState,
     emitCrossFilters,
-    onContextMenu,
     setDataMask,
-    mainColor,
+    onContextMenu,
     categories,
     dataChart,
-    customize,
-    selectedValues,
-    rootElem,
+    oversizedBehavior,
+    maxWidth,
+    sharedLabelColors,
+    dateFormat,
+    attribute,
+    condition,
   };
 }
