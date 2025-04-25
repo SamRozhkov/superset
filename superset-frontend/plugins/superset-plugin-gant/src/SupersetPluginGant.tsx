@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useEffect, useLayoutEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useMemo, createRef } from 'react';
 import { styled } from '@superset-ui/core';
 import * as am5 from '@amcharts/amcharts5';
 import * as am5xy from '@amcharts/amcharts5/xy';
@@ -24,7 +24,6 @@ import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
 import am5locales_ru_RU from '@amcharts/amcharts5/locales/ru_RU';
 import { ColumnSeries, XYChart } from '@amcharts/amcharts5/xy';
 import {
-  Category,
   SupersetPluginGantProps,
   SupersetPluginGantStylesProps,
 } from './types';
@@ -84,7 +83,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
     dateFormat,
   } = props;
 
-  const rootElem = useRef<HTMLDivElement>();
+  const rootElem = createRef<HTMLDivElement>();
   const rootRef = useRef<am5.Root>();
   const chartRef = useRef<XYChart>();
   const yAxesRef = useRef<am5xy.CategoryAxis<am5xy.AxisRenderer>>();
@@ -198,7 +197,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
 
   useEffect(() => {
     seriesRef?.current?.columns.template.set('tooltipText', template);
-    rootRef?.current?.dateFormatter.set("dateFormat", dateFormat);
+    rootRef?.current?.dateFormatter.set('dateFormat', dateFormat);
   }, [template, dateFormat]);
 
   useEffect(() => {
@@ -206,7 +205,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
       return;
     }
 
-    yAxesRef?.current.get("renderer").labels.template.setAll({
+    yAxesRef?.current.get('renderer').labels.template.setAll({
       oversizedBehavior,
       maxWidth,
     });
@@ -267,7 +266,7 @@ export default function SupersetPluginGant(props: SupersetPluginGantProps) {
 
     yRenderer.labels.template.setup = target => {
       target.setAll({
-        cursorOverStyle: "pointer",
+        cursorOverStyle: 'pointer',
         background: am5.Rectangle.new(gant_chart, {
           fill: am5.color(0x000000),
           fillOpacity: 0,
