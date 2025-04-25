@@ -38,6 +38,7 @@ export default class SmartiteamPluginMaplibre extends ChartPlugin {
       description: 'Smartiteam Plugin Maplibre',
       name: t('Smartiteam Plugin Maplibre'),
       thumbnail,
+      tags: [t('Map'), t('Geo')],
     });
 
     super({
