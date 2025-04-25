@@ -111,7 +111,7 @@ export default function SmartiteamPluginMaplibre(
         latitude: 52.52,
         zoom: 10,
       }}
-      projection={ "globe" }
+      projection="mercator"
       style={{ width, height }}
       maplibreLogo={false}
       mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
