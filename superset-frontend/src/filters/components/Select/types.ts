@@ -41,6 +41,7 @@ export interface PluginFilterSelectCustomizeProps {
   searchAllOptions: boolean;
   sortAscending?: boolean;
   sortMetric?: string;
+  showViewFilterControl?: boolean;
 }
 
 export type PluginFilterSelectQueryFormData = QueryFormData &

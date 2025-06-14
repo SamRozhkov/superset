@@ -47,6 +47,7 @@ export interface NativeFiltersFormItem {
   granularity_sqla?: string;
   type: typeof NativeFilterType.NativeFilter;
   description: string;
+  showViewFilterControl: boolean;
 }
 export interface NativeFilterDivider {
   id: string;

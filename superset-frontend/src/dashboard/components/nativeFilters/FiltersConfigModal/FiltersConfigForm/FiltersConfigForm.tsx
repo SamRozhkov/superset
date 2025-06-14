@@ -134,6 +134,7 @@ const controlsOrder: ControlKey[] = [
   'multiSelect',
   'searchAllOptions',
   'inverseSelection',
+  'showViewFilterControl',
 ];
 
 export const StyledFormItem = styled(FormItem)`
@@ -1175,6 +1176,20 @@ const FiltersConfigForm = (
               hidden
               initialValue={null}
             />
+            <CleanFormItem
+              name={['filters', filterId, 'showViewFilterControl']}>
+                <CollapsibleControl
+                initialValue={filterToEdit?.showViewFilterControl || false}
+                title={t('Show filter control in view mode')}
+                onChange={value => {
+                  if (value !== undefined) {
+                    setNativeFilterFieldValues(form, filterId, {
+                      showViewFilterControl: value,
+                    });
+                  }
+                  formChanged();
+                } } children={undefined}/>
+            </CleanFormItem>
             <CleanFormItem name={['filters', filterId, 'defaultValue']}>
               <CollapsibleControl
                 checked={hasDefaultValue}
