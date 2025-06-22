@@ -29,7 +29,7 @@ const NativeFilterView = ({ dashboardData }: { dashboardData: any }) => {
   const { nativeFilters, dataMask } = dashboardData;
 
   const filters: FilterProps[] = [];
-  Object.keys(nativeFilters?.filters).forEach((value, index) => {
+  Object.keys(nativeFilters?.filters).forEach(value => {
     filters.push({
       id: value,
       name: nativeFilters?.filters[value].name,
@@ -38,8 +38,8 @@ const NativeFilterView = ({ dashboardData }: { dashboardData: any }) => {
           ? dataMask[value]?.filterState?.label
           : dataMask[value]?.filterState?.value,
       type: nativeFilters?.filters[value].filterType,
-      first: /*index === 0*/ true,
-      show: nativeFilters?.filters[value]?.showViewFilterControl ,
+      first: true,
+      show: nativeFilters?.filters[value]?.showViewFilterControl,
     });
   });
 
@@ -60,7 +60,7 @@ const NativeFilterView = ({ dashboardData }: { dashboardData: any }) => {
       ));
 
     setFilters(listFilter);
-  }, [dataMask, nativeFilters]);
+  }, [dataMask]);
 
   return <NativeFilterViewDiv>{listFilters}</NativeFilterViewDiv>;
 };

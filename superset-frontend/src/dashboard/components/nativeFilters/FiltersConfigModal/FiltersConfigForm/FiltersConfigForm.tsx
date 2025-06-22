@@ -1177,8 +1177,9 @@ const FiltersConfigForm = (
               initialValue={null}
             />
             <CleanFormItem
-              name={['filters', filterId, 'showViewFilterControl']}>
-                <CollapsibleControl
+              name={['filters', filterId, 'showViewFilterControl']}
+            >
+              <CollapsibleControl
                 initialValue={filterToEdit?.showViewFilterControl || false}
                 title={t('Show filter control in view mode')}
                 onChange={value => {
@@ -1188,7 +1189,9 @@ const FiltersConfigForm = (
                     });
                   }
                   formChanged();
-                } } children={undefined}/>
+                }}
+                children={<></>}
+              />
             </CleanFormItem>
             <CleanFormItem name={['filters', filterId, 'defaultValue']}>
               <CollapsibleControl

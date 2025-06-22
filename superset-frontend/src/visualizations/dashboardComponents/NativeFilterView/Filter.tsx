@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { styled } from '@superset-ui/core';
+import { styled, SupersetClient } from '@superset-ui/core';
 import { guessFrame } from 'src/explore/components/controls/DateFilterControl/utils/dateFilterUtils';
-import rison from 'rison'; 
-import { SupersetClient } from '@superset-ui/core';
+import rison from 'rison';
 import { getClientErrorObject } from 'src/utils/getClientErrorObject';
-import { timeCompareOperator } from '@superset-ui/chart-controls';
 
 const FilterEl = styled.span``;
 
@@ -55,22 +53,20 @@ const formatTimeRange = (
   if (splitDateRange.length === 1) return timeRange;
 
   const rangeType = guessFrame(timeRangeType);
-  
+
   // выводим текст диапазона только для определенных форматов
   // в остальных случаях как есть
-  if (rangeType == 'Calendar' || rangeType == 'Common') {
+  if (rangeType === 'Calendar' || rangeType === 'Common') {
     return `${timeRangeType} по (${formatDateEndpoint(splitDateRange[1])})`;
   }
-  
-   return `${formatDateEndpoint(
+
+  return `${formatDateEndpoint(
     splitDateRange[0],
     true,
   )} ≤ ${columnPlaceholder} < ${formatDateEndpoint(splitDateRange[1])}`;
 };
 
-const fetchTimeRange = async (
-  timeRange: string,
-) => {
+const fetchTimeRange = async (timeRange: string) => {
   const query = rison.encode_uri(timeRange);
   const endpoint = `/api/v1/time_range/?q=${query}`;
   try {
@@ -80,7 +76,10 @@ const fetchTimeRange = async (
       response?.json?.result?.until || '',
     );
     return {
-      value: formatTimeRange(timeRangeString, response?.json?.result?.timeRange),
+      value: formatTimeRange(
+        timeRangeString,
+        response?.json?.result?.timeRange,
+      ),
     };
   } catch (response) {
     const clientError = await getClientErrorObject(response);
@@ -96,9 +95,11 @@ const Filter = (props: FilterProps) => {
   const [value, setValue] = useState<string | undefined>(label);
 
   useEffect(() => {
-    type === 'filter_time'
-      ? fetchTimeRange(label).then(data => setValue(data?.value))
-      : setValue(label);
+    if (type === 'filter_time') {
+      fetchTimeRange(label).then(data => setValue(data?.value));
+    } else {
+      setValue(label);
+    }
   }, [label]);
 
   return (
