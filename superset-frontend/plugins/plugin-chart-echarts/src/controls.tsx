@@ -56,6 +56,25 @@ const legendMarginControl: ControlSetItem = {
     description: t('Additional padding for legend.'),
     visibility: ({ controls }: ControlPanelsContainerProps) =>
       Boolean(controls?.show_legend?.value),
+    shouldMapStateToProps() {
+      return true;
+    },
+    mapStateToProps(state, controlState, chartState) {
+      const countMetric = 
+        Array.isArray(chartState?.queriesResponse) ? 
+        chartState?.queriesResponse[0].rowcount : undefined;
+      
+      let value = controlState.value;
+
+      if ((countMetric || countMetric > 0) && state?.controls?.legendType?.value == legendType) {
+        value = countMetric * 5;
+      }
+
+      return {
+        ...controlState,
+        value
+      }
+    },
   },
 };
 

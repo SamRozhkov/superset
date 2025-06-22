@@ -99,8 +99,8 @@ export const TIMEGRAIN_TO_TIMESTAMP = {
 
 export const DEFAULT_LEGEND_FORM_DATA: LegendFormData = {
   legendMargin: null,
-  legendOrientation: LegendOrientation.Top,
-  legendType: LegendType.Scroll,
+  legendOrientation: LegendOrientation.Bottom,
+  legendType: LegendType.Plain,
   showLegend: true,
 };
 
