@@ -53,6 +53,7 @@ const d3Formatted: [string, string][] = [
 // input choices & options
 export const D3_FORMAT_OPTIONS: [string, string][] = [
   [NumberFormats.SMART_NUMBER, t('Adaptive formatting')],
+  [NumberFormats.MAX_SCALE, t('Новый масштаб')],
   ['~g', t('Original value')],
   ...d3Formatted,
   ['DURATION', t('Duration in ms (66000 => 1m 6s)')],

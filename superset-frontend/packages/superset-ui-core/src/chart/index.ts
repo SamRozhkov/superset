@@ -34,6 +34,7 @@ export { default as getChartTransformPropsRegistry } from './registries/ChartTra
 export type { BuildQuery } from './registries/ChartBuildQueryRegistrySingleton';
 
 export { default as ChartDataProvider } from './components/ChartDataProvider';
+export { default as MaxScaleChartMiddleware } from './middleware/MaxScaleChartMiddleware';
 
 export * from './types/Base';
 export * from './types/TransformFunction';

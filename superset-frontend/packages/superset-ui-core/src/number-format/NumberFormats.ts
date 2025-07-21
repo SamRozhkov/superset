@@ -53,6 +53,7 @@ const SI_3_DIGIT = '.3s';
 const SMART_NUMBER = 'SMART_NUMBER';
 const SMART_NUMBER_SIGNED = 'SMART_NUMBER_SIGNED';
 const OVER_MAX_HIDDEN = 'OVER_MAX_HIDDEN';
+const MAX_SCALE = 'MAX_SCALE';
 
 const NumberFormats = {
   DOLLAR,
@@ -84,6 +85,7 @@ const NumberFormats = {
   SMART_NUMBER,
   SMART_NUMBER_SIGNED,
   OVER_MAX_HIDDEN,
+  MAX_SCALE,
 };
 
 export default NumberFormats;

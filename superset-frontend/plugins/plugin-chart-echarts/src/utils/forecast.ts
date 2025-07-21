@@ -26,6 +26,10 @@ import {
   ForecastValue,
 } from '../types';
 import { sanitizeHtml } from './series';
+import { format as d3Format } from 'd3-format';
+
+// Формат для отображения точных значений с разделителями тысяч
+const tooltipValueFormatter = d3Format(',d');
 
 const seriesTypeRegex = new RegExp(
   `(.+)(${ForecastSeriesEnum.ForecastLower}|${ForecastSeriesEnum.ForecastTrend}|${ForecastSeriesEnum.ForecastUpper})$`,
@@ -98,19 +102,24 @@ export const formatForecastTooltipSeries = ({
 }): string => {
   let row = `${marker}${sanitizeHtml(seriesName)}: `;
   let isObservation = false;
+  
   if (isNumber(observation)) {
     isObservation = true;
-    row += `${formatter(observation)}`;
+    // Используем формат с разделителями тысяч без масштабирования
+    row += tooltipValueFormatter(observation);
   }
+  
   if (forecastTrend) {
     if (isObservation) row += ', ';
-    row += `ŷ = ${formatter(forecastTrend)}`;
+    // Используем формат с разделителями тысяч без масштабирования
+    row += `ŷ = ${tooltipValueFormatter(forecastTrend)}`;
   }
-  if (forecastLower && forecastUpper)
-    // the lower bound needs to be added to the upper bound
-    row = `${row.trim()} (${formatter(forecastLower)}, ${formatter(
-      forecastLower + forecastUpper,
-    )})`;
+  
+  if (forecastLower && forecastUpper) {
+    // Используем формат с разделителями тысяч без масштабирования
+    row = `${row.trim()} (${tooltipValueFormatter(forecastLower)}, ${tooltipValueFormatter(forecastLower + forecastUpper)})`;
+  }
+  
   return `${row.trim()}`;
 };
 

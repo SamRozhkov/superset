@@ -186,7 +186,7 @@ export default function transformProps(
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
   const refs: Refs = {};
   const groupBy = ensureIsArray(groupby);
-  const labelMap = Object.entries(label_map).reduce((acc, entry) => {
+  const labelMap: Record<string, string[]> = Object.entries(label_map).reduce((acc, entry) => {
     if (
       entry[1].length > groupBy.length &&
       Array.isArray(timeCompare) &&
@@ -195,7 +195,7 @@ export default function transformProps(
       entry[1].shift();
     }
     return { ...acc, [entry[0]]: entry[1] };
-  }, {});
+  }, {} as Record<string, string[]>);
 
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
@@ -270,7 +270,8 @@ export default function transformProps(
   const array = ensureIsArray(chartProps.rawFormData?.time_compare);
   const inverted = invert(verboseMap);
 
-  const offsetLineWidths = {};
+  // Добавляем типизацию для объекта offsetLineWidths
+  const offsetLineWidths: Record<string, number> = {};
 
   rawSeries.forEach(entry => {
     const derivedSeries = isDerivedSeries(entry, chartProps.rawFormData);
@@ -477,7 +478,7 @@ export default function transformProps(
     minorTick: { show: minorTicks },
     minInterval:
       xAxisType === AxisType.Time && timeGrainSqla
-        ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+        ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla as keyof typeof TIMEGRAIN_TO_TIMESTAMP] || 0
         : 0,
     ...getMinAndMaxFromBounds(
       xAxisType,

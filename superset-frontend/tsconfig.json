@@ -32,6 +32,10 @@
       "@testing-library/jest-dom",
       "@types/node"
     ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./typings"
+    ],
 
     /* Emit */
     "declaration": true,
@@ -50,7 +54,6 @@
     "forceConsistentCasingInFileNames": true,
 
     /* Backwards Compatibility */
-    "suppressImplicitAnyIndexErrors": true,
 
     /* Language and Environment */
     "target": "esnext",
@@ -69,6 +72,7 @@
   "include": [
     "./src/**/*",
     "./spec/**/*",
+    "./typings/**/*",
     "./packages/*/src/**/*",
     "./packages/*/types/**/*",
     "./plugins/*/src/**/*",
