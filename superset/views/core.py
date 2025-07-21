@@ -32,6 +32,7 @@ from flask_appbuilder.security.decorators import (
     permission_name,
 )
 from flask_babel import gettext as __, lazy_gettext as _
+from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from superset import (
@@ -930,3 +931,40 @@ class Superset(BaseSupersetView):
     @deprecated(new_target="/sqllab/history")
     def sqllab_history(self) -> FlaskResponse:
         return redirect("/sqllab/history")
+
+
+# --- Дополнительная проверка доступа пользователей без ролей ---
+
+@app.before_request
+def _check_user_roles():  # pylint: disable=unused-variable
+    """Блокируем доступ аутентифицированных пользователей без назначенных ролей.
+
+    Если пользователь аутентифицирован, но за ним не закреплено ни одной роли,
+    возвращаем ошибку 403 (Forbidden). Это предотвращает ситуацию, когда такие
+    пользователи получают 500-ю ошибку из-за отсутствия ролей.
+    """
+
+    # Не трогаем анонимных пользователей и системные эндпойнты
+    if not current_user or current_user.is_anonymous:
+        return None
+
+    # Разрешаем обращение к статике и точкам входа аутентификации/разлогина
+    skip_endpoints_prefixes = (
+        "static",  # файлы статики
+        "Superset.theme",  # тема
+        "health",  # health-чек
+        "welcome",  # публичная страница приветствия
+        "logout",  # разлогин
+        "login",  # логин
+    )
+    if request.endpoint and request.endpoint.startswith(skip_endpoints_prefixes):
+        return None
+
+    user_roles = getattr(current_user, "roles", [])
+
+    # Если ролей нет, возвращаем 403
+    if not user_roles:
+        return abort(403)
+
+    # Всё в порядке – продолжаем обработку запроса
+    return None
