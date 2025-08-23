@@ -100,7 +100,6 @@ const config: ControlPanelConfig = {
 
   // For control input types, see: superset-frontend/src/explore/components/controls/index.js
   controlPanelSections: [
-    
     {
       label: t('Query'),
       expanded: true,
@@ -183,6 +182,32 @@ const config: ControlPanelConfig = {
               ],
               renderTrigger: true,
               description: t('The size of your header font'),
+            },
+          },
+        ],
+        [
+          {
+            name: 'map_style_url',
+            config: {
+              type: 'SelectControl',
+              label: t('Map Style'),
+              default: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+              choices: [
+                [
+                  'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+                  'Voyager',
+                ],
+                [
+                  'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+                  'Positron',
+                ],
+                [
+                  'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+                  'Dark Matter',
+                ],
+              ],
+              renderTrigger: true,
+              description: t('Select the base map style'),
             },
           },
         ],

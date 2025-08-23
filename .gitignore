@@ -60,6 +60,8 @@ tmp
 rat-results.txt
 superset/app/
 superset-websocket/config.json
+.gigaide
+.cursor
 
 # Node.js, webpack artifacts, storybook
 *.entry.js

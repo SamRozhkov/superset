@@ -105,6 +105,8 @@ dist
 
 # IDEs
 .idea/
+.cursor
+.gigaide
 
 # build
 esm

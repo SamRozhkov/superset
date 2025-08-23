@@ -29,6 +29,20 @@ export interface SmartiteamPluginMaplibreStylesProps {
   boldText: boolean;
 }
 
+type CircleLayer = {
+  id: string;
+  type: 'circle';
+  paint: Record<string, any>;
+};
+
+export interface SmartiteamPluginMaplibreFormData {
+  map_style_url?: string;
+  boldText?: boolean;
+  headerFontSize?: string;
+  headerText?: string;
+  // ... другие поля
+}
+
 interface SmartiteamPluginMaplibreCustomizeProps {
   headerText: string;
 }
@@ -37,9 +51,9 @@ export type SmartiteamPluginMaplibreQueryFormData = QueryFormData &
   SmartiteamPluginMaplibreStylesProps &
   SmartiteamPluginMaplibreCustomizeProps;
 
-export type SmartiteamPluginMaplibreProps =
-  SmartiteamPluginMaplibreStylesProps &
-    SmartiteamPluginMaplibreCustomizeProps & {
-      data: TimeseriesDataRecord[];
-      // add typing here for the props you pass in from transformProps.ts!
-    };
+export type SmartiteamPluginMaplibreProps = SmartiteamPluginMaplibreFormData & {
+  width: number;
+  height: number;
+  data: any[]; // или ваш тип
+  mapStyleUrl?: string;
+};

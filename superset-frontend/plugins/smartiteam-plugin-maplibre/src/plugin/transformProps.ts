@@ -48,19 +48,20 @@ export default function transformProps(chartProps: ChartProps) {
    * function during development with hot reloading, changes won't
    * be seen until restarting the development server.
    */
+  // const formData = chartProps.formData as SmartiteamPluginMaplibreFormData;
   const { width, height, formData, queriesData } = chartProps;
-  const { boldText, headerFontSize, headerText } = formData;
+  const { boldText, headerFontSize, headerText, mapStyleUrl } = formData;
   const data = queriesData[0].data as TimeseriesDataRecord[];
-
-  console.log('formData via TransformProps.ts', formData);
+  // const mapStyleUrl = map_style_url;
+  console.log('formData via TransformProps.ts', mapStyleUrl, formData);
 
   return {
     width,
     height,
     data,
-    // and now your control data, manipulated as needed, and passed through as props!
     boldText,
     headerFontSize,
     headerText,
+    mapStyleUrl,
   };
 }

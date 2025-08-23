@@ -41,7 +41,7 @@
     "src/**/*",
     "types/**/*",
     "../../types/**/*"
-  ],
+, "countries.ts"  ],
   "references": [
   {
     "path": "../../packages/superset-ui-chart-controls"
