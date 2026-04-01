@@ -1,10 +1,6 @@
 {
   "name": "superset",
-<<<<<<< HEAD
-  "version": "4.0.2",
-=======
   "version": "6.0.0",
->>>>>>> 6.0.0
   "description": "Superset is a data exploration platform designed to be visual, intuitive, and interactive.",
   "keywords": [
     "big",
@@ -46,17 +42,10 @@
     "build-dev": "cross-env NODE_OPTIONS=--max_old_space_size=8192 NODE_ENV=development webpack --mode=development --color",
     "build-instrumented": "cross-env NODE_ENV=production BABEL_ENV=instrumented webpack --mode=production --color",
     "build-storybook": "storybook build",
-<<<<<<< HEAD
-    "check-translation": "prettier --check ../superset/translations/**/LC_MESSAGES/*.json",
-    "clean-translation": "prettier --write ../superset/translations/**/LC_MESSAGES/*.json",
-    "core:cover": "cross-env NODE_ENV=test jest --coverage --coverageThreshold='{\"global\":{\"statements\":100,\"branches\":100,\"functions\":100,\"lines\":100}}' --collectCoverageFrom='[\"packages/**/src/**/*.{js,ts}\", \"!packages/superset-ui-demo/**/*\"]' packages",
-    "cover": "cross-env NODE_ENV=test jest --coverage",
-=======
     "build-translation": "scripts/po2json.sh",
     "bundle-stats": "cross-env BUNDLE_ANALYZER=true npm run build && npx open-cli ../superset/static/stats/statistics.html",
     "core:cover": "cross-env NODE_ENV=test NODE_OPTIONS=\"--max-old-space-size=4096\" jest --coverage --coverageThreshold='{\"global\":{\"statements\":100,\"branches\":100,\"functions\":100,\"lines\":100}}' --collectCoverageFrom='[\"packages/**/src/**/*.{js,ts}\", \"!packages/superset-ui-demo/**/*\"]' packages",
     "cover": "cross-env NODE_ENV=test NODE_OPTIONS=\"--max-old-space-size=4096\" jest --coverage",
->>>>>>> 6.0.0
     "dev": "webpack --mode=development --color --watch",
     "dev-server": "cross-env NODE_ENV=development BABEL_ENV=development node --max_old_space_size=4096 ./node_modules/webpack-dev-server/bin/webpack-dev-server.js --mode=development",
     "eslint": "eslint --ignore-path=.eslintignore --ext .js,.jsx,.ts,tsx --quiet",
@@ -67,20 +56,12 @@
     "plugins:build": "node ./scripts/build.js",
     "plugins:build-assets": "node ./scripts/copyAssets.js",
     "plugins:build-storybook": "cd packages/superset-ui-demo && npm run build-storybook",
-<<<<<<< HEAD
-    "plugins:create-conventional-version": "npm run prune && lerna version --conventional-commits --create-release github --no-private --yes",
-    "plugins:create-minor-version": "npm run prune && lerna version minor --no-private --yes",
-    "plugins:create-patch-version": "npm run prune && lerna version patch --no-private --yes",
-    "plugins:release-conventional": "npm run prune && lerna publish --conventional-commits --create-release github --yes",
-    "plugins:release-from-tag": "npm run prune && lerna publish from-package --yes",
-=======
     "plugins:create-conventional-version": "npm run prune && lerna version --conventional-commits --create-release github --no-private --yes --tag-version-prefix=\"plugins-and-packages-v\"",
     "plugins:create-minor-version": "npm run prune && lerna version minor --no-private --yes --tag-version-prefix=\"plugins-and-packages-v\"",
     "plugins:create-patch-version": "npm run prune && lerna version patch --no-private --yes --tag-version-prefix=\"plugins-and-packages-v\"",
     "plugins:publish-all": "npm run prune && npm run plugins:build && lerna publish from-package --force-publish --yes",
     "plugins:release-conventional": "npm run prune && npm run plugins:build && lerna publish --conventional-commits --create-release github --yes",
     "plugins:release-from-tag": "npm run prune && npm run plugins:build && lerna publish from-package --yes",
->>>>>>> 6.0.0
     "plugins:storybook": "cd packages/superset-ui-demo && npm run storybook",
     "prettier": "npm run _prettier -- --write",
     "prettier-check": "npm run _prettier -- --check",
@@ -133,14 +114,11 @@
     "@superset-ui/plugin-gant": "file:./plugins/superset-plugin-gant",
     "@superset-ui/plugin-pivot": "file:./plugins/superset-plugin-pivot",
     "@superset-ui/switchboard": "file:./packages/superset-ui-switchboard",
-<<<<<<< HEAD
     "@superset-ui/test_plugins": "file:./plugins/superset_plugins",
     "@superset-ui/plugin-maplibre": "file:./plugins/smartiteam-plugin-maplibre",
-=======
     "@types/d3-format": "^3.0.1",
     "@types/d3-time-format": "^4.0.3",
     "@types/react-google-recaptcha": "^2.1.9",
->>>>>>> 6.0.0
     "@visx/axis": "^3.8.0",
     "@visx/grid": "^3.5.0",
     "@visx/responsive": "^3.0.0",
@@ -216,15 +194,9 @@
     "redux-thunk": "^2.1.0",
     "redux-undo": "^1.0.0-beta9-9-7",
     "rison": "^0.1.1",
-<<<<<<< HEAD
-    "scroll-into-view-if-needed": "^2.2.28",
-    "shortid": "^2.2.16",
-    "superset-plugin-gant": "^0.1.0",
-=======
     "scroll-into-view-if-needed": "^3.1.0",
     "simple-zstd": "^1.4.2",
     "stream-browserify": "^3.0.0",
->>>>>>> 6.0.0
     "tinycolor2": "^1.4.2",
     "urijs": "^1.19.8",
     "use-event-callback": "^0.1.0",
@@ -285,18 +257,9 @@
     "@types/react-redux": "^7.1.10",
     "@types/react-resizable": "^3.0.8",
     "@types/react-router-dom": "^5.3.3",
-<<<<<<< HEAD
-    "@types/react-syntax-highlighter": "^15.5.11",
-    "@types/react-table": "^7.7.19",
-    "@types/react-transition-group": "^4.4.10",
-    "@types/react-ultimate-pagination": "^1.2.0",
-    "@types/react-virtualized-auto-sizer": "^1.0.4",
-    "@types/react-window": "^1.8.5",
-=======
     "@types/react-transition-group": "^4.4.12",
     "@types/react-virtualized-auto-sizer": "^1.0.4",
     "@types/react-window": "^1.8.8",
->>>>>>> 6.0.0
     "@types/redux-localstorage": "^1.0.8",
     "@types/redux-mock-store": "^1.0.6",
     "@types/rison": "0.1.0",
@@ -310,23 +273,12 @@
     "babel-plugin-dynamic-import-node": "^2.3.3",
     "babel-plugin-jsx-remove-data-test-id": "^3.0.0",
     "babel-plugin-lodash": "^3.3.4",
-<<<<<<< HEAD
-    "copy-webpack-plugin": "^12.0.2",
-    "cross-env": "^5.2.1",
-    "css-loader": "^6.8.1",
-    "css-minimizer-webpack-plugin": "^5.0.1",
-    "enzyme": "^3.11.0",
-    "enzyme-adapter-react-16": "^1.15.7",
-    "esbuild": "^0.20.0",
-    "esbuild-loader": "^4.0.3",
-=======
     "babel-plugin-typescript-to-proptypes": "^2.0.0",
     "cheerio": "1.1.0",
     "copy-webpack-plugin": "^13.0.0",
     "cross-env": "^7.0.3",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
->>>>>>> 6.0.0
     "eslint": "^8.56.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^7.2.0",
