@@ -16,10 +16,16 @@
 # under the License.
 from superset.reports.models import ReportRecipients
 from superset.reports.notifications.base import BaseNotification, NotificationContent
+<<<<<<< HEAD
 from superset.reports.notifications.email import EmailNotification
 from superset.reports.notifications.slack import SlackNotification
 from superset.reports.notifications.telegram import TelegramNotification
 from superset.reports.notifications.vkteam import VkteamNotification
+=======
+from superset.reports.notifications.email import EmailNotification  # noqa: F401
+from superset.reports.notifications.slack import SlackNotification  # noqa: F401
+from superset.reports.notifications.slackv2 import SlackV2Notification  # noqa: F401
+>>>>>>> 6.0.0
 
 
 def create_notification(

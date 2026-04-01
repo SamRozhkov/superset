@@ -21,7 +21,7 @@ import * as net from 'net';
 import WebSocket from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import jwt, { Algorithm } from 'jsonwebtoken';
-import cookie from 'cookie';
+import { parse } from 'cookie';
 import Redis, { RedisOptions } from 'ioredis';
 import StatsD from 'hot-shots';
 
@@ -36,6 +36,7 @@ export type StreamResult = [
 
 // sync with superset-frontend/src/components/ErrorMessage/types
 export type ErrorLevel = 'info' | 'warning' | 'error';
+// eslint-disable-next-line  @typescript-eslint/no-explicit-any
 export type SupersetError<ExtraType = Record<string, any> | null> = {
   error_type: string;
   extra: ExtraType;
@@ -94,8 +95,17 @@ export const statsd = new StatsD({
 });
 
 // enforce JWT secret length
-if (startServer && opts.jwtSecret.length < 32)
-  throw new Error('Please provide a JWT secret at least 32 bytes long');
+if (startServer && opts.jwtSecret.length < 32) {
+  console.error('ERROR: Please provide a JWT secret at least 32 bytes long');
+  process.exit(1);
+}
+
+if (startServer && opts.jwtSecret.startsWith('CHANGE-ME')) {
+  console.warn(
+    'WARNING: it appears your secret in your config.json is insecure',
+  );
+  console.warn('DO NOT USE IN PRODUCTION');
+}
 
 export const buildRedisOpts = (baseConfig: RedisConfig) => {
   const redisOpts: RedisOptions = {
@@ -228,10 +238,10 @@ export const subscribeToGlobalStream = async (
   while (true) {
     try {
       const reply = await redis.xread(
-        'BLOCK',
-        opts.redisStreamReadBlockMs,
         'COUNT',
         opts.redisStreamReadCount,
+        'BLOCK',
+        opts.redisStreamReadBlockMs,
         'STREAMS',
         stream,
         lastFirehoseId,
@@ -275,7 +285,7 @@ export const processStreamResults = (results: StreamResult[]): void => {
  * configured via 'jwtCookieName' in the config.
  */
 const readChannelId = (request: http.IncomingMessage): string => {
-  const cookies = cookie.parse(request.headers.cookie || '');
+  const cookies = parse(request.headers.cookie || '');
   const token = cookies[opts.jwtCookieName];
 
   if (!token) throw new Error('JWT not present');
@@ -456,6 +466,9 @@ export const cleanChannel = (channel: string) => {
 
 if (startServer) {
   // init server event listeners
+  wss.on('connection', function (ws) {
+    ws.on('error', console.error);
+  });
   wss.on('connection', wsConnection);
   httpServer.on('request', httpRequest);
   httpServer.on('upgrade', httpUpgrade);

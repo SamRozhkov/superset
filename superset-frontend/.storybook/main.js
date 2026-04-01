@@ -24,12 +24,13 @@ module.exports = {
   stories: [
     '../src/@(components|common|filters|explore|views|dashboard|features)/**/*.stories.@(tsx|jsx)',
     '../packages/superset-ui-demo/storybook/stories/**/*.*.@(tsx|jsx)',
+    '../packages/superset-ui-core/src/components/**/*.stories.@(tsx|jsx)',
   ],
 
   addons: [
     getAbsolutePath('@storybook/addon-essentials'),
     getAbsolutePath('@storybook/addon-links'),
-    getAbsolutePath('storybook-addon-jsx'),
+    '@mihkeleidast/storybook-addon-source',
     getAbsolutePath('@storybook/addon-controls'),
     getAbsolutePath('@storybook/addon-mdx-gfm'),
   ],

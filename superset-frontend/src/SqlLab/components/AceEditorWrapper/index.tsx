@@ -16,18 +16,23 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { IAceEditor } from 'react-ace/lib/types';
+<<<<<<< HEAD
 import { useDispatch } from 'react-redux';
 import { css, styled, usePrevious, useTheme } from '@superset-ui/core';
+=======
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
+import { css, usePrevious, useTheme } from '@superset-ui/core';
+>>>>>>> 6.0.0
 import { Global } from '@emotion/react';
 
 import { SQL_EDITOR_LEFTBAR_WIDTH } from 'src/SqlLab/constants';
 import { queryEditorSetSelectedText } from 'src/SqlLab/actions/sqlLab';
-import { FullSQLEditor as AceEditor } from 'src/components/AsyncAceEditor';
+import { FullSQLEditor as AceEditor } from '@superset-ui/core/components';
 import type { KeyboardShortcut } from 'src/SqlLab/components/KeyboardShortcutButton';
 import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
-import type { CursorPosition } from 'src/SqlLab/types';
+import { SqlLabRootState, type CursorPosition } from 'src/SqlLab/types';
 import { useAnnotations } from './useAnnotations';
 import { useKeywords } from './useKeywords';
 
@@ -48,6 +53,7 @@ type AceEditorWrapperProps = {
   hotkeys: HotKey[];
 };
 
+<<<<<<< HEAD
 const StyledAceEditor = styled(AceEditor)`
   ${({ theme }) => css`
     && {
@@ -60,6 +66,8 @@ const StyledAceEditor = styled(AceEditor)`
   `}
 `;
 
+=======
+>>>>>>> 6.0.0
 const AceEditorWrapper = ({
   autocomplete,
   onBlur = () => {},
@@ -74,13 +82,24 @@ const AceEditorWrapper = ({
     'id',
     'dbId',
     'sql',
+    'catalog',
     'schema',
     'templateParams',
-    'cursorPosition',
+    'tabViewId',
   ]);
+  // Prevent a maximum update depth exceeded error
+  // by skipping access the unsaved query editor state
+  const cursorPosition = useSelector<SqlLabRootState, CursorPosition>(
+    ({ sqlLab: { queryEditors } }) => {
+      const { cursorPosition } = {
+        ...queryEditors.find(({ id }) => id === queryEditorId),
+      };
+      return cursorPosition ?? { row: 0, column: 0 };
+    },
+    shallowEqual,
+  );
 
   const currentSql = queryEditor.sql ?? '';
-  const cursorPosition = queryEditor.cursorPosition ?? { row: 0, column: 0 };
   const [sql, setSql] = useState(currentSql);
 
   // The editor changeSelection is called multiple times in a row,
@@ -141,6 +160,7 @@ const AceEditorWrapper = ({
 
       currentSelectionCache.current = selectedText;
     });
+
     editor.selection.on('changeCursor', () => {
       const cursor = editor.getCursorPosition();
       onCursorPositionChange(cursor);
@@ -161,6 +181,7 @@ const AceEditorWrapper = ({
 
   const { data: annotations } = useAnnotations({
     dbId: queryEditor.dbId,
+    catalog: queryEditor.catalog,
     schema: queryEditor.schema,
     sql: currentSql,
     templateParams: queryEditor.templateParams,
@@ -170,7 +191,9 @@ const AceEditorWrapper = ({
     {
       queryEditorId,
       dbId: queryEditor.dbId,
+      catalog: queryEditor.catalog,
       schema: queryEditor.schema,
+      tabViewId: queryEditor.tabViewId,
     },
     !autocomplete,
   );
@@ -187,7 +210,16 @@ const AceEditorWrapper = ({
           .ace_autocomplete {
             // Use !important because Ace Editor applies extra CSS at the last second
             // when opening the autocomplete.
+<<<<<<< HEAD
             width: ${theme.gridUnit * 130}px !important;
+=======
+            width: ${theme.sizeUnit * 130}px !important;
+          }
+
+          .ace_completion-highlight {
+            color: ${theme.colorPrimaryText} !important;
+            background-color: ${theme.colorPrimaryBgHover};
+>>>>>>> 6.0.0
           }
 
           .ace_tooltip {
@@ -195,11 +227,19 @@ const AceEditorWrapper = ({
           }
 
           .ace_scroller {
+<<<<<<< HEAD
             background-color: ${theme.colors.grayscale.light4};
           }
         `}
       />
       <StyledAceEditor
+=======
+            background-color: ${theme.colorBgLayout};
+          }
+        `}
+      />
+      <AceEditor
+>>>>>>> 6.0.0
         keywords={keywords}
         onLoad={onEditorLoad}
         onBlur={onBlurSql}

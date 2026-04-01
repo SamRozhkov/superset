@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, {
   ReactNode,
   useCallback,
@@ -23,8 +24,11 @@ import React, {
   useEffect,
   useMemo,
 } from 'react';
+=======
+import { ReactNode, useCallback, useContext, useEffect, useMemo } from 'react';
+>>>>>>> 6.0.0
 import { useDrop } from 'react-dnd';
-import { t, useTheme } from '@superset-ui/core';
+import { t } from '@superset-ui/core';
 import ControlHeader from 'src/explore/components/ControlHeader';
 import {
   AddControlLabel,
@@ -35,7 +39,7 @@ import {
   DatasourcePanelDndItem,
   DndItemValue,
 } from 'src/explore/components/DatasourcePanel/types';
-import Icons from 'src/components/Icons';
+import { Icons } from '@superset-ui/core/components/Icons';
 import { DndItemType } from '../../DndItemType';
 import { DraggingContext, DropzoneContext } from '../../ExploreContainer';
 
@@ -60,7 +64,10 @@ export default function DndSelectLabel({
   isLoading,
   ...props
 }: DndSelectLabelProps) {
+<<<<<<< HEAD
   const theme = useTheme();
+=======
+>>>>>>> 6.0.0
   const canDropProp = props.canDrop;
   const canDropValueProp = props.canDropValue;
 
@@ -106,7 +113,7 @@ export default function DndSelectLabel({
         cancelHover={!props.onClickGhostButton}
         onClick={props.onClickGhostButton}
       >
-        <Icons.PlusSmall iconColor={theme.colors.grayscale.light1} />
+        <Icons.PlusOutlined iconSize="m" />
         {t(props.ghostButtonText)}
       </AddControlLabel>
     );

@@ -16,15 +16,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { useEffect, useState } from 'react';
+=======
+import { useEffect, useState } from 'react';
+>>>>>>> 6.0.0
 import {
   t,
   SupersetTheme,
   isFeatureEnabled,
   FeatureFlag,
 } from '@superset-ui/core';
+<<<<<<< HEAD
 import { AntdSwitch } from 'src/components';
 import InfoTooltip from 'src/components/InfoTooltip';
+=======
+import { Switch } from '@superset-ui/core/components/Switch';
+import { InfoTooltip } from '@superset-ui/core/components';
+>>>>>>> 6.0.0
 import { isEmpty } from 'lodash';
 import { infoTooltip, toggleStyle } from './styles';
 import { SwitchProps } from '../types';
@@ -80,7 +89,11 @@ const SSHTunnelSwitch = ({
 
   return isSSHTunnelEnabled ? (
     <div css={(theme: SupersetTheme) => infoTooltip(theme)}>
+<<<<<<< HEAD
       <AntdSwitch
+=======
+      <Switch
+>>>>>>> 6.0.0
         checked={isChecked}
         onChange={handleOnChange}
         data-test="ssh-tunnel-switch"
@@ -89,7 +102,6 @@ const SSHTunnelSwitch = ({
       <InfoTooltip
         tooltip={t('SSH Tunnel configuration parameters')}
         placement="right"
-        viewBox="0 -5 24 24"
       />
     </div>
   ) : null;

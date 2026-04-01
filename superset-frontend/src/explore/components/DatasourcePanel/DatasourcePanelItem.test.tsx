@@ -16,12 +16,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
 
+=======
+>>>>>>> 6.0.0
 import {
   columns,
   metrics,
 } from 'src/explore/components/DatasourcePanel/fixtures';
+<<<<<<< HEAD
 import { fireEvent, render, within } from 'spec/helpers/testing-library';
 import DatasourcePanelItem from './DatasourcePanelItem';
 
@@ -196,4 +200,91 @@ test('shows ineligible items count', () => {
   expect(
     getByText(`${hiddenColumnCount} ineligible item(s) are hidden`),
   ).toBeInTheDocument();
+=======
+import { screen, userEvent, render } from 'spec/helpers/testing-library';
+import DatasourcePanelItem, {
+  DatasourcePanelItemProps,
+} from './DatasourcePanelItem';
+
+const mockData: DatasourcePanelItemProps['data'] = {
+  flattenedItems: [
+    { type: 'header', depth: 0, folderId: '1', height: 50 },
+    ...metrics.map((m, idx) => ({
+      type: 'item' as const,
+      depth: 0,
+      folderId: '1',
+      height: 32,
+      index: idx,
+      item: { ...m, type: 'metric' as const },
+    })),
+    { type: 'divider', depth: 0, folderId: '1', height: 16 },
+    { type: 'header', depth: 0, folderId: '2', height: 50 },
+    ...columns.map((m, idx) => ({
+      type: 'item' as const,
+      depth: 0,
+      folderId: '2',
+      height: 32,
+      index: idx,
+      item: { ...m, type: 'column' as const },
+    })),
+  ],
+  folderMap: new Map([
+    [
+      '1',
+      {
+        id: '1',
+        isCollapsed: false,
+        name: 'Metrics',
+        items: metrics.map(m => ({ ...m, type: 'metric' })),
+        totalItems: metrics.length,
+        showingItems: metrics.length,
+      },
+    ],
+    [
+      '2',
+      {
+        id: '2',
+        isCollapsed: false,
+        name: 'Columns',
+        items: columns.map(c => ({ ...c, type: 'column' })),
+        totalItems: columns.length,
+        showingItems: columns.length,
+      },
+    ],
+  ]),
+  width: 300,
+  onToggleCollapse: jest.fn(),
+  collapsedFolderIds: new Set(),
+};
+
+const setup = (data: DatasourcePanelItemProps['data'] = mockData) =>
+  render(
+    <>
+      {data.flattenedItems.map((_, index) => (
+        <DatasourcePanelItem index={index} data={data} style={{}} />
+      ))}
+    </>,
+    { useDnd: true },
+  );
+
+test('renders each item accordingly', () => {
+  setup();
+  expect(screen.getByText('Metrics')).toBeInTheDocument();
+  expect(screen.getByText('metric_end_certified')).toBeInTheDocument();
+  expect(screen.getByText('metric_end')).toBeInTheDocument();
+
+  expect(screen.getByText('Columns')).toBeInTheDocument();
+  expect(screen.getByText('bootcamp_attend')).toBeInTheDocument();
+  expect(screen.getByText('calc_first_time_dev')).toBeInTheDocument();
+  expect(screen.getByText('aaaaaaaaaaa')).toBeInTheDocument();
+
+  expect(screen.getByTestId('datasource-panel-divider')).toBeInTheDocument();
+  expect(screen.getAllByTestId('DatasourcePanelDragOption').length).toEqual(5);
+});
+
+test('can collapse metrics and columns', () => {
+  setup();
+  userEvent.click(screen.getAllByRole('button')[0]);
+  expect(mockData.onToggleCollapse).toHaveBeenCalled();
+>>>>>>> 6.0.0
 });

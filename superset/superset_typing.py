@@ -59,6 +59,7 @@ class AdhocColumn(TypedDict, total=False):
     hasCustomLabel: Optional[bool]
     label: str
     sqlExpression: str
+    isColumnReference: Optional[bool]
     columnType: Optional[Literal["BASE_AXIS", "SERIES"]]
     timeGrain: Optional[str]
 
@@ -108,7 +109,7 @@ FormData = dict[str, Any]
 Granularity = Union[str, dict[str, Union[str, float]]]
 Column = Union[AdhocColumn, str]
 Metric = Union[AdhocMetric, str]
-OrderBy = tuple[Metric, bool]
+OrderBy = tuple[Union[Metric, Column], bool]
 QueryObjectDict = dict[str, Any]
 VizData = Optional[Union[list[Any], dict[Any, Any]]]
 VizPayload = dict[str, Any]
@@ -124,3 +125,56 @@ FlaskResponse = Union[
     tuple[Base, Status, Headers],
     tuple[Response, Status],
 ]
+
+
+class OAuth2ClientConfig(TypedDict):
+    """
+    Configuration for an OAuth2 client.
+    """
+
+    # The client ID and secret.
+    id: str
+    secret: str
+
+    # The scopes requested; this is usually a space separated list of URLs.
+    scope: str
+
+    # The URI where the user is redirected to after authorizing the client; by default
+    # this points to `/api/v1/databases/oauth2/`, but it can be overridden by the admin.
+    redirect_uri: str
+
+    # The URI used to getting a code.
+    authorization_request_uri: str
+
+    # The URI used when exchaing the code for an access token, or when refreshing an
+    # expired access token.
+    token_request_uri: str
+
+    # Not all identity providers expect json. Keycloak expects a form encoded request,
+    # which in the `requests` package context means using the `data` param, not `json`.
+    request_content_type: str
+
+
+class OAuth2TokenResponse(TypedDict, total=False):
+    """
+    Type for an OAuth2 response when exchanging or refreshing tokens.
+    """
+
+    access_token: str
+    expires_in: int
+    scope: str
+    token_type: str
+
+    # only present when exchanging code for refresh/access tokens
+    refresh_token: str
+
+
+class OAuth2State(TypedDict):
+    """
+    Type for the state passed during OAuth2.
+    """
+
+    database_id: int
+    user_id: int
+    default_redirect_uri: str
+    tab_id: str

@@ -16,7 +16,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { useEffect, Dispatch, useReducer } from 'react';
+=======
+import {
+  createContext,
+  useEffect,
+  useState,
+  Dispatch,
+  FC,
+  useReducer,
+} from 'react';
+
+>>>>>>> 6.0.0
 import { styled } from '@superset-ui/core';
 import { useDragDropManager } from 'react-dnd';
 import { DatasourcePanelDndItem } from '../DatasourcePanel/types';
@@ -25,10 +37,18 @@ type CanDropValidator = (item: DatasourcePanelDndItem) => boolean;
 type DropzoneSet = Record<string, CanDropValidator>;
 type Action = { key: string; canDrop?: CanDropValidator };
 
+<<<<<<< HEAD
 export const DraggingContext = React.createContext(false);
 export const DropzoneContext = React.createContext<
   [DropzoneSet, Dispatch<Action>]
 >([{}, () => {}]);
+=======
+export const DraggingContext = createContext(false);
+export const DropzoneContext = createContext<[DropzoneSet, Dispatch<Action>]>([
+  {},
+  () => {},
+]);
+>>>>>>> 6.0.0
 const StyledDiv = styled.div`
   display: flex;
   flex-direction: column;
@@ -51,9 +71,15 @@ const reducer = (state: DropzoneSet = {}, action: Action) => {
   return state;
 };
 
+<<<<<<< HEAD
 const ExploreContainer: React.FC<{}> = ({ children }) => {
   const dragDropManager = useDragDropManager();
   const [dragging, setDragging] = React.useState(
+=======
+const ExploreContainer: FC<{}> = ({ children }) => {
+  const dragDropManager = useDragDropManager();
+  const [dragging, setDragging] = useState(
+>>>>>>> 6.0.0
     dragDropManager.getMonitor().isDragging(),
   );
 

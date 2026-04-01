@@ -16,11 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { t } from '@superset-ui/core';
 import {
   ControlPanelConfig,
-  ControlStateMapping,
   ControlSubSectionHeader,
   D3_FORMAT_DOCS,
   D3_FORMAT_OPTIONS,
@@ -63,12 +61,8 @@ const config: ControlPanelConfig = {
           {
             name: 'sort_by_metric',
             config: {
+              ...sharedControls.sort_by_metric,
               default: true,
-              type: 'CheckboxControl',
-              label: t('Sort by metric'),
-              description: t(
-                'Whether to sort results by the selected metric in descending order.',
-              ),
             },
           },
         ],
@@ -202,15 +196,6 @@ const config: ControlPanelConfig = {
       ],
     },
   ],
-  onInit(state: ControlStateMapping) {
-    return {
-      ...state,
-      row_limit: {
-        ...state.row_limit,
-        value: state.row_limit.default,
-      },
-    };
-  },
   formDataOverrides: formData => ({
     ...formData,
     metric: getStandardizedControls().shiftMetric(),

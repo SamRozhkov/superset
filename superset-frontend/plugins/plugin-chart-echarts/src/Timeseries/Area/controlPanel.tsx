@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { t } from '@superset-ui/core';
 import {
   ControlPanelConfig,
@@ -38,6 +37,7 @@ import {
   seriesOrderSection,
   percentageThresholdControl,
   xAxisLabelRotation,
+  xAxisLabelInterval,
   truncateXAxis,
   xAxisBounds,
   minorTicks,
@@ -54,7 +54,6 @@ const {
   seriesType,
   truncateYAxis,
   yAxisBounds,
-  zoomable,
 } = DEFAULT_FORM_DATA;
 const config: ControlPanelConfig = {
   controlPanelSections: [
@@ -69,6 +68,7 @@ const config: ControlPanelConfig = {
       controlSetRows: [
         ...seriesOrderSection,
         ['color_scheme'],
+        ['time_shift_color'],
         [
           {
             name: 'seriesType',
@@ -131,7 +131,7 @@ const config: ControlPanelConfig = {
               default: false,
               description: t(
                 'Whether to show extra controls or not. Extra controls ' +
-                  'include things like making mulitBar charts stacked ' +
+                  'include things like making multiBar charts stacked ' +
                   'or side by side.',
               ),
             },
@@ -170,18 +170,7 @@ const config: ControlPanelConfig = {
           },
         ],
         [minorTicks],
-        [
-          {
-            name: 'zoomable',
-            config: {
-              type: 'CheckboxControl',
-              label: t('Data Zoom'),
-              default: zoomable,
-              renderTrigger: true,
-              description: t('Enable data zooming controls'),
-            },
-          },
-        ],
+        ['zoomable'],
         ...legendSection,
         [<ControlSubSectionHeader>{t('X Axis')}</ControlSubSectionHeader>],
         [
@@ -195,6 +184,7 @@ const config: ControlPanelConfig = {
           },
         ],
         [xAxisLabelRotation],
+        [xAxisLabelInterval],
         ...richTooltipSection,
         // eslint-disable-next-line react/jsx-key
         [<ControlSubSectionHeader>{t('Y Axis')}</ControlSubSectionHeader>],

@@ -17,7 +17,7 @@
  * under the License.
  */
 /* eslint camelcase: 0 */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
@@ -31,12 +31,16 @@ import {
   useComponentDidMount,
   usePrevious,
 } from '@superset-ui/core';
+<<<<<<< HEAD
 import { debounce, omit, pick } from 'lodash';
+=======
+import { debounce, isEqual, isObjectLike, omit, pick } from 'lodash';
+>>>>>>> 6.0.0
 import { Resizable } from 're-resizable';
-import { usePluginContext } from 'src/components/DynamicPlugins';
+import { Tooltip } from '@superset-ui/core/components';
+import { usePluginContext } from 'src/components';
 import { Global } from '@emotion/react';
-import { Tooltip } from 'src/components/Tooltip';
-import Icons from 'src/components/Icons';
+import { Icons } from '@superset-ui/core/components/Icons';
 import {
   getItem,
   setItem,
@@ -50,6 +54,7 @@ import {
   LOG_ACTIONS_MOUNT_EXPLORER,
   LOG_ACTIONS_CHANGE_EXPLORE_CONTROLS,
 } from 'src/logger/LogUtils';
+import { ensureAppRoot } from 'src/utils/pathUtils';
 import { getUrlParam } from 'src/utils/urlUtils';
 import cx from 'classnames';
 import * as chartActions from 'src/components/Chart/chartAction';
@@ -76,6 +81,9 @@ const propTypes = {
   actions: PropTypes.object.isRequired,
   datasource_type: PropTypes.string.isRequired,
   dashboardId: PropTypes.number,
+  colorScheme: PropTypes.string,
+  ownColorScheme: PropTypes.string,
+  dashboardColorScheme: PropTypes.string,
   isDatasourceMetaLoading: PropTypes.bool.isRequired,
   chart: chartPropShape.isRequired,
   slice: PropTypes.object,
@@ -94,32 +102,31 @@ const propTypes = {
 
 const ExplorePanelContainer = styled.div`
   ${({ theme }) => css`
-    background: ${theme.colors.grayscale.light5};
     text-align: left;
     position: relative;
     width: 100%;
     max-height: 100%;
+    background-color: ${theme.colorBgContainer};
     min-height: 0;
     display: flex;
     flex: 1;
     flex-wrap: nowrap;
-    border-top: 1px solid ${theme.colors.grayscale.light2};
+    border-top: 1px solid ${theme.colorSplit};
     .explore-column {
       display: flex;
       flex-direction: column;
-      padding: ${theme.gridUnit * 2}px 0;
+      padding: ${theme.sizeUnit * 2}px 0;
       max-height: 100%;
     }
     .data-source-selection {
-      background-color: ${theme.colors.grayscale.light5};
-      padding: ${theme.gridUnit * 2}px 0;
-      border-right: 1px solid ${theme.colors.grayscale.light2};
+      padding: ${theme.sizeUnit * 2}px 0;
+      border-right: 1px solid ${theme.colorSplit};
     }
     .main-explore-content {
       flex: 1;
-      min-width: ${theme.gridUnit * 128}px;
-      border-left: 1px solid ${theme.colors.grayscale.light2};
-      padding: 0 ${theme.gridUnit * 4}px;
+      min-width: ${theme.sizeUnit * 128}px;
+      border-left: 1px solid ${theme.colorSplit};
+      padding: 0 ${theme.sizeUnit * 4}px;
       .panel {
         margin-bottom: 0;
       }
@@ -132,10 +139,10 @@ const ExplorePanelContainer = styled.div`
       position: relative;
       display: flex;
       flex-direction: row;
-      padding: 0 ${theme.gridUnit * 2}px 0 ${theme.gridUnit * 4}px;
+      padding: 0 ${theme.sizeUnit * 2}px 0 ${theme.sizeUnit * 4}px;
       justify-content: space-between;
       .horizontal-text {
-        font-size: ${theme.typography.sizes.m}px;
+        font-size: ${theme.fontSize}px;
       }
     }
     .no-show {
@@ -147,12 +154,11 @@ const ExplorePanelContainer = styled.div`
     }
     .sidebar {
       height: 100%;
-      background-color: ${theme.colors.grayscale.light4};
-      padding: ${theme.gridUnit * 2}px;
-      width: ${theme.gridUnit * 8}px;
+      padding: ${theme.sizeUnit * 2}px;
+      width: ${theme.sizeUnit * 8}px;
     }
     .collapse-icon > svg {
-      color: ${theme.colors.primary.base};
+      color: ${theme.colorPrimary};
     }
   `};
 `;
@@ -212,7 +218,7 @@ const updateHistory = debounce(
         stateModifier = 'pushState';
       }
       // avoid race condition in case user changes route before explore updates the url
-      if (window.location.pathname.startsWith('/explore')) {
+      if (window.location.pathname.startsWith(ensureAppRoot('/explore'))) {
         const url = mountExploreUrl(
           standalone ? URL_PARAMS.standalone.name : null,
           {
@@ -265,6 +271,18 @@ function ExploreViewContainer(props) {
 
   const theme = useTheme();
 
+<<<<<<< HEAD
+=======
+  useEffect(() => {
+    if (props.sliceName) {
+      document.title = props.sliceName;
+    }
+    return () => {
+      document.title = 'Superset';
+    };
+  }, [props.sliceName]);
+
+>>>>>>> 6.0.0
   const addHistory = useCallback(
     async ({ isReplace = false, title } = {}) => {
       const formData = props.dashboardId
@@ -356,7 +374,14 @@ function ExploreViewContainer(props) {
   }
 
   useComponentDidMount(() => {
-    props.actions.logEvent(LOG_ACTIONS_MOUNT_EXPLORER);
+    props.actions.logEvent(
+      LOG_ACTIONS_MOUNT_EXPLORER,
+      props.slice?.slice_id
+        ? {
+            slice_id: props.slice.slice_id,
+          }
+        : undefined,
+    );
   });
 
   useChangeEffect(tabId, (previous, current) => {
@@ -461,15 +486,21 @@ function ExploreViewContainer(props) {
 
   const chartIsStale = useMemo(() => {
     if (lastQueriedControls) {
-      const changedControlKeys = Object.keys(props.controls).filter(
-        key =>
-          typeof lastQueriedControls[key] !== 'undefined' &&
-          !areObjectsEqual(
-            props.controls[key].value,
-            lastQueriedControls[key].value,
-            { ignoreFields: ['datasourceWarning'] },
-          ),
-      );
+      const { controls } = props;
+      const changedControlKeys = Object.keys(controls).filter(key => {
+        const lastControl = lastQueriedControls[key];
+        if (typeof lastControl === 'undefined') {
+          return false;
+        }
+        const { value: value1 } = controls[key];
+        const { value: value2 } = lastControl;
+        if (isObjectLike(value1) && isObjectLike(value2)) {
+          return !areObjectsEqual(value1, value2, {
+            ignoreFields: ['datasourceWarning'],
+          });
+        }
+        return !isEqual(value1, value2);
+      });
 
       return changedControlKeys.some(
         key =>
@@ -517,7 +548,11 @@ function ExploreViewContainer(props) {
       .map(message => {
         const matchingLabels = controlsWithErrors
           .filter(control => control.validationErrors?.includes(message))
-          .map(control => control.label);
+          .map(control =>
+            typeof control.label === 'function'
+              ? control.label(props.exploreState)
+              : control.label,
+          );
         return [matchingLabels, message];
       })
       .map(([labels, message]) => (
@@ -557,6 +592,7 @@ function ExploreViewContainer(props) {
         canOverwrite={props.can_overwrite}
         canDownload={props.can_download}
         dashboardId={props.dashboardId}
+        colorScheme={props.dashboardColorScheme}
         isStarred={props.isStarred}
         slice={props.slice}
         sliceName={props.sliceName}
@@ -568,6 +604,7 @@ function ExploreViewContainer(props) {
         reports={props.reports}
         saveDisabled={errorMessage || props.chart.chartStatus === 'loading'}
         metadata={props.metadata}
+        isSaveModalVisible={props.isSaveModalVisible}
       />
       <ExplorePanelContainer id="explore-container">
         <Global
@@ -618,10 +655,13 @@ function ExploreViewContainer(props) {
               className="action-button"
               onClick={toggleCollapse}
             >
-              <Icons.Expand
+              <Icons.VerticalAlignTopOutlined
+                iconSize="xl"
+                css={css`
+                  transform: rotate(-90deg);
+                `}
                 className="collapse-icon"
-                iconColor={theme.colors.primary.base}
-                iconSize="l"
+                iconColor={theme.colorPrimary}
               />
             </span>
           </div>
@@ -644,10 +684,13 @@ function ExploreViewContainer(props) {
           >
             <span role="button" tabIndex={0} className="action-button">
               <Tooltip title={t('Open Datasource tab')}>
-                <Icons.Collapse
+                <Icons.VerticalAlignTopOutlined
+                  iconSize="xl"
+                  css={css`
+                    transform: rotate(90deg);
+                  `}
                   className="collapse-icon"
-                  iconColor={theme.colors.primary.base}
-                  iconSize="l"
+                  iconColor={theme.colorPrimary}
                 />
               </Tooltip>
             </span>
@@ -710,6 +753,20 @@ const retainQueryModeRequirements = hiddenFormData =>
     key => !QUERY_MODE_REQUISITES.has(key),
   );
 
+<<<<<<< HEAD
+=======
+function patchBigNumberTotalFormData(form_data, slice) {
+  if (
+    form_data.viz_type === 'big_number_total' &&
+    !form_data.subtitle &&
+    slice?.form_data?.subheader
+  ) {
+    return { ...form_data, subtitle: slice.form_data.subheader };
+  }
+  return form_data;
+}
+
+>>>>>>> 6.0.0
 function mapStateToProps(state) {
   const {
     explore,
@@ -726,7 +783,33 @@ function mapStateToProps(state) {
   const fieldsToOmit = hasQueryMode
     ? retainQueryModeRequirements(hiddenFormData)
     : Object.keys(hiddenFormData ?? {});
+<<<<<<< HEAD
   const form_data = omit(getFormDataFromControls(controls), fieldsToOmit);
+=======
+
+  const controlsBasedFormData = omit(
+    getFormDataFromControls(controls),
+    fieldsToOmit,
+  );
+  const isDeckGLChart = explore.form_data?.viz_type === 'deck_multi';
+
+  const getDeckGLFormData = () => {
+    const formData = { ...controlsBasedFormData };
+
+    if (explore.form_data?.layer_filter_scope) {
+      formData.layer_filter_scope = explore.form_data.layer_filter_scope;
+    }
+
+    if (explore.form_data?.filter_data_mapping) {
+      formData.filter_data_mapping = explore.form_data.filter_data_mapping;
+    }
+
+    return formData;
+  };
+
+  const form_data = isDeckGLChart ? getDeckGLFormData() : controlsBasedFormData;
+
+>>>>>>> 6.0.0
   const slice_id = form_data.slice_id ?? slice?.slice_id ?? 0; // 0 - unsaved chart
   form_data.extra_form_data = mergeExtraFormData(
     { ...form_data.extra_form_data },
@@ -735,11 +818,33 @@ function mapStateToProps(state) {
     },
   );
   const chart = charts[slice_id];
+  const colorScheme = explore.form_data?.color_scheme;
+  const ownColorScheme = explore.form_data?.own_color_scheme;
+  const dashboardColorScheme = explore.form_data?.dashboard_color_scheme;
 
   let dashboardId = Number(explore.form_data?.dashboardId);
   if (Number.isNaN(dashboardId)) {
     dashboardId = undefined;
   }
+
+  if (
+    form_data.viz_type === 'big_number_total' &&
+    slice?.form_data?.subheader &&
+    (!controls.subtitle?.value || controls.subtitle.value === '')
+  ) {
+    controls.subtitle = {
+      ...controls.subtitle,
+      value: slice.form_data.subheader,
+    };
+    if (slice?.form_data?.subheader_font_size) {
+      controls.subtitle_font_size = {
+        ...controls.subtitle_font_size,
+        value: slice.form_data.subheader_font_size,
+      };
+    }
+  }
+
+  const patchedFormData = patchBigNumberTotalFormData(form_data, slice);
 
   return {
     isDatasourceMetaLoading: explore.isDatasourceMetaLoading,
@@ -747,6 +852,9 @@ function mapStateToProps(state) {
     datasource_type: datasource.type,
     datasourceId: datasource.datasource_id,
     dashboardId,
+    colorScheme,
+    ownColorScheme,
+    dashboardColorScheme,
     controls: explore.controls,
     can_add: !!explore.can_add,
     can_download: !!explore.can_download,
@@ -759,7 +867,7 @@ function mapStateToProps(state) {
     slice,
     sliceName: explore.sliceName ?? slice?.slice_name ?? null,
     triggerRender: explore.triggerRender,
-    form_data,
+    form_data: patchedFormData,
     table_name: datasource.table_name,
     vizType: form_data.viz_type,
     standalone: !!explore.standalone,
@@ -793,4 +901,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(withToasts(React.memo(ExploreViewContainer)));
+)(withToasts(memo(ExploreViewContainer)));

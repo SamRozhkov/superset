@@ -17,7 +17,6 @@
 from unittest.mock import call, patch
 
 from flask_appbuilder.security.sqla.models import User
-from pytest_mock import MockFixture
 
 from superset.common.query_object import QueryObject
 from superset.connectors.sqla.models import SqlaTable
@@ -45,6 +44,7 @@ def test_default_query_object_to_dict():
         "filter": [],
         "from_dttm": None,
         "granularity": None,
+        "group_others_when_limit_reached": False,
         "inner_from_dttm": None,
         "inner_to_dttm": None,
         "is_rowcount": False,

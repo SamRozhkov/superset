@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { CSSProperties } from 'react';
 import { css, Metric, styled, t, useTheme } from '@superset-ui/core';
 
@@ -81,6 +82,35 @@ const LabelWrapper = styled.div`
     margin: ${theme.gridUnit * 2}px 0;
     border-radius: 4px;
     padding: 0 ${theme.gridUnit}px;
+=======
+import { CSSProperties, ReactNode, useCallback } from 'react';
+
+import {
+  css,
+  styled,
+  t,
+  useCSSTextTruncation,
+  useTheme,
+} from '@superset-ui/core';
+
+import { Icons } from '@superset-ui/core/components/Icons';
+import { Tooltip } from '@superset-ui/core/components/Tooltip';
+import { Typography } from '@superset-ui/core/components';
+import DatasourcePanelDragOption from './DatasourcePanelDragOption';
+import { DndItemType } from '../DndItemType';
+import { DndItemValue, FlattenedItem, Folder } from './types';
+
+const LabelWrapper = styled.div`
+  ${({ theme }) => css`
+    color: ${theme.colorText};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: ${theme.fontSizeSM}px;
+    background-color: ${theme.colorBgTextActive};
+    margin: ${theme.sizeUnit * 2}px 0;
+    border-radius: ${theme.borderRadius}px;
+    padding: 0 ${theme.sizeUnit}px;
+>>>>>>> 6.0.0
 
     &:first-of-type {
       margin-top: 0;
@@ -90,9 +120,18 @@ const LabelWrapper = styled.div`
     }
 
     padding: 0;
+<<<<<<< HEAD
     cursor: pointer;
     &:hover {
       background-color: ${theme.colors.grayscale.light3};
+=======
+    cursor: grab;
+    &:active {
+      cursor: grabbing;
+    }
+    &:hover {
+      background-color: ${theme.colorBgTextHover};
+>>>>>>> 6.0.0
     }
 
     & > span {
@@ -105,7 +144,11 @@ const LabelWrapper = styled.div`
 
     .metric-option {
       & > svg {
+<<<<<<< HEAD
         min-width: ${theme.gridUnit * 4}px;
+=======
+        min-width: ${theme.sizeUnit * 4}px;
+>>>>>>> 6.0.0
       }
       & > .option-label {
         overflow: hidden;
@@ -116,6 +159,7 @@ const LabelWrapper = styled.div`
 `;
 
 const SectionHeaderButton = styled.button`
+<<<<<<< HEAD
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -212,6 +256,141 @@ const DatasourcePanelItem: React.FC<Props> = ({ index, style, data }) => {
           css={css`
             display: flex;
             gap: ${theme.gridUnit * 2}px;
+=======
+  border: none;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  padding-inline: 0;
+`;
+
+const SectionHeaderTextContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+`;
+
+const SectionHeader = styled(Typography.Text)`
+  ${({ theme }) => css`
+    font-size: ${theme.fontSize}px;
+    font-weight: ${theme.fontWeightStrong};
+    line-height: 1.3;
+    text-align: left;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  `}
+`;
+
+const Divider = styled.div`
+  ${({ theme }) => css`
+    height: 16px;
+    border-bottom: 1px solid ${theme.colorSplit};
+  `}
+`;
+
+export interface DatasourcePanelItemProps {
+  index: number;
+  style: CSSProperties;
+  data: {
+    flattenedItems: FlattenedItem[];
+    folderMap: Map<string, Folder>;
+    width: number;
+    onToggleCollapse: (folderId: string) => void;
+    collapsedFolderIds: Set<string>;
+  };
+}
+
+const DatasourcePanelItem = ({
+  index,
+  style,
+  data,
+}: DatasourcePanelItemProps) => {
+  const {
+    flattenedItems,
+    folderMap,
+    width,
+    onToggleCollapse,
+    collapsedFolderIds,
+  } = data;
+  const item = flattenedItems[index];
+  const theme = useTheme();
+  const [labelRef, labelIsTruncated] = useCSSTextTruncation<HTMLSpanElement>({
+    isVertical: true,
+    isHorizontal: false,
+  });
+
+  const getTooltipNode = useCallback(
+    (folder: Folder) => {
+      let tooltipNode: ReactNode | null = null;
+      if (labelIsTruncated) {
+        tooltipNode = (
+          <div>
+            <b>{t('Name')}:</b> {folder.name}
+          </div>
+        );
+      }
+      if (folder.description) {
+        tooltipNode = (
+          <div>
+            {tooltipNode}
+            <div
+              css={
+                tooltipNode &&
+                css`
+                  margin-top: ${theme.sizeUnit}px;
+                `
+              }
+            >
+              <b>{t('Description')}:</b> {folder.description}
+            </div>
+          </div>
+        );
+      }
+      return tooltipNode;
+    },
+    [labelIsTruncated],
+  );
+
+  if (!item) return null;
+
+  const folder = folderMap.get(item.folderId);
+  if (!folder) return null;
+
+  const indentation = item.depth * theme.sizeUnit * 4;
+
+  return (
+    <div
+      style={{
+        ...style,
+        paddingLeft: theme.sizeUnit * 4 + indentation,
+        paddingRight: theme.sizeUnit * 4,
+      }}
+    >
+      {item.type === 'header' && (
+        <SectionHeaderButton onClick={() => onToggleCollapse(folder.id)}>
+          <Tooltip title={getTooltipNode(folder)}>
+            <SectionHeaderTextContainer>
+              <SectionHeader ref={labelRef}>{folder.name}</SectionHeader>
+              {collapsedFolderIds.has(folder.id) ? (
+                <Icons.DownOutlined iconSize="s" iconColor={theme.colorText} />
+              ) : (
+                <Icons.UpOutlined iconSize="s" iconColor={theme.colorText} />
+              )}
+            </SectionHeaderTextContainer>
+          </Tooltip>
+        </SectionHeaderButton>
+      )}
+
+      {item.type === 'subtitle' && (
+        <div
+          css={css`
+            display: flex;
+            gap: ${theme.sizeUnit * 2}px;
+>>>>>>> 6.0.0
             justify-content: space-between;
             align-items: baseline;
           `}
@@ -222,6 +401,7 @@ const DatasourcePanelItem: React.FC<Props> = ({ index, style, data }) => {
               flex-shrink: 0;
             `}
           >
+<<<<<<< HEAD
             {isColumnSection
               ? t(`Showing %s of %s`, columnSlice?.length, totalColumns)
               : t(`Showing %s of %s`, metricSlice?.length, totalMetrics)}
@@ -238,10 +418,24 @@ const DatasourcePanelItem: React.FC<Props> = ({ index, style, data }) => {
               ? columnSlice[index - SUBTITLE_LINE - 1].column_name
               : metricSlice[index - SUBTITLE_LINE - 1].metric_name) +
             String(width)
+=======
+            {t(`Showing %s of %s items`, item.showingItems, item.totalItems)}
+          </div>
+        </div>
+      )}
+
+      {item.type === 'item' && item.item && (
+        <LabelWrapper
+          key={
+            (item.item.type === 'column'
+              ? item.item.column_name
+              : item.item.metric_name) + String(width)
+>>>>>>> 6.0.0
           }
           className="column"
         >
           <DatasourcePanelDragOption
+<<<<<<< HEAD
             value={
               isColumnSection
                 ? (columnSlice[index - SUBTITLE_LINE - 1] as DndItemValue)
@@ -262,6 +456,21 @@ const DatasourcePanelItem: React.FC<Props> = ({ index, style, data }) => {
             </Button>
           </ButtonContainer>
         )}
+=======
+            value={item.item as DndItemValue}
+            type={
+              item.item.type === 'column'
+                ? DndItemType.Column
+                : DndItemType.Metric
+            }
+          />
+        </LabelWrapper>
+      )}
+
+      {item.type === 'divider' && (
+        <Divider data-test="datasource-panel-divider" />
+      )}
+>>>>>>> 6.0.0
     </div>
   );
 };

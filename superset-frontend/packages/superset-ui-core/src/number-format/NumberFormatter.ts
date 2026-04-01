@@ -24,6 +24,8 @@ import {
   DEFALT_D3_FORMAT_PREFIXIES,
 } from './D3FormatConfig';
 
+/* eslint-disable @typescript-eslint/no-unsafe-declaration-merging */
+
 export const PREVIEW_VALUE = 12345.432;
 
 export interface NumberFormatterConfig {

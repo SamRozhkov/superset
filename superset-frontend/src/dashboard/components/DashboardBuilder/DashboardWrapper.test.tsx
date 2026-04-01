@@ -16,8 +16,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
 import { fireEvent, render, waitFor } from 'spec/helpers/testing-library';
+=======
+import { fireEvent, render } from 'spec/helpers/testing-library';
+>>>>>>> 6.0.0
 import { OptionControlLabel } from 'src/explore/components/controls/OptionControls';
 
 import DashboardWrapper from './DashboardWrapper';
@@ -77,7 +81,11 @@ test('should update the style on dragging state', async () => {
     container.getElementsByClassName('dragdroppable--dragging'),
   ).toHaveLength(0);
   fireEvent.dragStart(getByText('Label 1'));
+<<<<<<< HEAD
   await waitFor(() => jest.runAllTimers());
+=======
+  jest.runAllTimers();
+>>>>>>> 6.0.0
   expect(
     container.getElementsByClassName('dragdroppable--dragging'),
   ).toHaveLength(1);

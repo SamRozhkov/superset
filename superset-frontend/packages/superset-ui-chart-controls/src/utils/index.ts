@@ -16,14 +16,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+
 export * from './checkColumnType';
 export * from './selectOptions';
 export * from './D3Formatting';
 export * from './expandControlConfig';
 export * from './getColorFormatters';
 export { default as mainMetric } from './mainMetric';
-export { default as columnChoices } from './columnChoices';
+export { default as columnChoices, columnsByType } from './columnChoices';
 export * from './defineSavedMetrics';
 export * from './getStandardizedControls';
 export * from './getTemporalColumns';
+<<<<<<< HEAD
 export { default as displayTimeRelatedControls } from './displayTimeRelatedControls';
+=======
+export * from './displayTimeRelatedControls';
+export * from './colorControls';
+export * from './metricColumnFilter';
+>>>>>>> 6.0.0

@@ -17,12 +17,20 @@
  * under the License.
  */
 
+<<<<<<< HEAD
 import React, { useMemo } from 'react';
+=======
+import { memo, useMemo } from 'react';
+>>>>>>> 6.0.0
 import { ensureIsArray } from '@superset-ui/core';
 import { ChartLinkedDashboard } from 'src/types/Chart';
 import CrossLinks from './CrossLinks';
 
+<<<<<<< HEAD
 export const DashboardCrossLinks = React.memo(
+=======
+export const DashboardCrossLinks = memo(
+>>>>>>> 6.0.0
   ({ dashboards }: { dashboards: ChartLinkedDashboard[] }) => {
     const crossLinks = useMemo(
       () =>

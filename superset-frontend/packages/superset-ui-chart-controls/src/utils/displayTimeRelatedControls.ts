@@ -19,7 +19,11 @@
 import { isAdhocColumn, isPhysicalColumn } from '@superset-ui/core';
 import type { ColumnMeta, ControlPanelsContainerProps } from '../types';
 
+<<<<<<< HEAD
 export default function displayTimeRelatedControls({
+=======
+export function displayTimeRelatedControls({
+>>>>>>> 6.0.0
   controls,
 }: ControlPanelsContainerProps) {
   if (!controls?.x_axis) {

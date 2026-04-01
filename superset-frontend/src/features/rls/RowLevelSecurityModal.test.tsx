@@ -16,9 +16,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import fetchMock from 'fetch-mock';
 import {
+<<<<<<< HEAD
   render,
   screen,
   selectOption,
@@ -26,6 +26,15 @@ import {
 } from 'spec/helpers/testing-library';
 import { act } from 'react-dom/test-utils';
 import userEvent from '@testing-library/user-event';
+=======
+  act,
+  render,
+  screen,
+  selectOption,
+  userEvent,
+  waitFor,
+} from 'spec/helpers/testing-library';
+>>>>>>> 6.0.0
 import RowLevelSecurityModal, {
   RowLevelSecurityModalProps,
 } from './RowLevelSecurityModal';
@@ -194,6 +203,7 @@ describe('Rule modal', () => {
 
     const name = await screen.findByTestId('rule-name-test');
     expect(name).toHaveDisplayValue('rls 1');
+    userEvent.clear(name);
     userEvent.type(name, 'rls 2');
     expect(name).toHaveDisplayValue('rls 2');
 
@@ -226,6 +236,7 @@ describe('Rule modal', () => {
   });
 
   it('Does not allow to create rule without name, tables and clause', async () => {
+    jest.setTimeout(10000);
     await renderAndWait(addNewRuleDefaultProps);
 
     const addButton = screen.getByRole('button', { name: /add/i });
@@ -258,9 +269,14 @@ describe('Rule modal', () => {
     const clause = await screen.findByTestId('clause-test');
     userEvent.type(clause, 'gender="girl"');
 
-    await waitFor(() => userEvent.click(addButton));
+    await waitFor(() => userEvent.click(addButton), { timeout: 10000 });
 
-    expect(fetchMock.calls(postRuleEndpoint)).toHaveLength(1);
+    await waitFor(
+      () => {
+        expect(fetchMock.calls(postRuleEndpoint)).toHaveLength(1);
+      },
+      { timeout: 10000 },
+    );
   });
 
   it('Updates existing rule', async () => {
@@ -275,6 +291,17 @@ describe('Rule modal', () => {
 
     const addButton = screen.getByRole('button', { name: /save/i });
     await waitFor(() => userEvent.click(addButton));
-    expect(fetchMock.calls(putRuleEndpoint)).toHaveLength(4);
+
+    await waitFor(
+      () => {
+        const allCalls = fetchMock.calls(putRuleEndpoint);
+        // Find the PUT request among all calls
+        const putCall = allCalls.find(call => call[1]?.method === 'PUT');
+        expect(putCall).toBeTruthy();
+        expect(putCall?.[1]?.body).toContain('"name":"rls 1"');
+        expect(putCall?.[1]?.body).toContain('"filter_type":"Base"');
+      },
+      { timeout: 10000 },
+    );
   });
 });

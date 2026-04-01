@@ -24,11 +24,16 @@ import {
 } from 'spec/helpers/testing-library';
 import { api } from 'src/hooks/apiResources/queryApi';
 import { LatestQueryEditorVersion } from 'src/SqlLab/types';
-import { useUpdateSqlEditorTabMutation } from './sqlEditorTabs';
+import {
+  useDeleteSqlEditorTabMutation,
+  useUpdateCurrentSqlEditorTabMutation,
+  useUpdateSqlEditorTabMutation,
+} from './sqlEditorTabs';
 
 const expectedQueryEditor = {
   version: LatestQueryEditorVersion,
   id: '123',
+  immutableId: 'immutable-id',
   dbId: 456,
   name: 'tab 1',
   sql: 'SELECT * from example_table',
@@ -95,5 +100,45 @@ test('puts api request with formData', async () => {
         version: LatestQueryEditorVersion,
       }),
     ),
+  );
+});
+
+test('posts activate request with queryEditorId', async () => {
+  const tabStateMutationApiRoute = `glob:*/tabstateview/${expectedQueryEditor.id}/activate`;
+  fetchMock.post(tabStateMutationApiRoute, 200);
+  const { result, waitFor } = renderHook(
+    () => useUpdateCurrentSqlEditorTabMutation(),
+    {
+      wrapper: createWrapper({
+        useRedux: true,
+        store,
+      }),
+    },
+  );
+  act(() => {
+    result.current[0](expectedQueryEditor.id);
+  });
+  await waitFor(() =>
+    expect(fetchMock.calls(tabStateMutationApiRoute).length).toBe(1),
+  );
+});
+
+test('deletes destoryed query editors', async () => {
+  const tabStateMutationApiRoute = `glob:*/tabstateview/${expectedQueryEditor.id}`;
+  fetchMock.delete(tabStateMutationApiRoute, 200);
+  const { result, waitFor } = renderHook(
+    () => useDeleteSqlEditorTabMutation(),
+    {
+      wrapper: createWrapper({
+        useRedux: true,
+        store,
+      }),
+    },
+  );
+  act(() => {
+    result.current[0](expectedQueryEditor.id);
+  });
+  await waitFor(() =>
+    expect(fetchMock.calls(tabStateMutationApiRoute).length).toBe(1),
   );
 });

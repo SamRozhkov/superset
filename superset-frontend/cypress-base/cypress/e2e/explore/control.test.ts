@@ -19,14 +19,13 @@
 // ***********************************************
 // Tests for setting controls in the UI
 // ***********************************************
-import { interceptChart } from 'cypress/utils';
-import { FORM_DATA_DEFAULTS, NUM_METRIC } from './visualizations/shared.helper';
+import { interceptChart, setSelectSearchInput } from 'cypress/utils';
 
 describe('Datasource control', () => {
   const newMetricName = `abc${Date.now()}`;
 
   it('should allow edit dataset', () => {
-    interceptChart({ legacy: true }).as('chartData');
+    interceptChart({ legacy: false }).as('chartData');
 
     cy.visitChartByName('Num Births Trend');
     cy.verifySliceSuccess({ waitAlias: '@chartData' });
@@ -41,19 +40,15 @@ describe('Datasource control', () => {
     // create new metric
     cy.get('[data-test="crud-add-table-item"]', { timeout: 10000 }).click();
     cy.wait(1000);
-    cy.get(
-      '[data-test="table-content-rows"] [data-test="editable-title-input"]',
-    )
+    cy.get('.ant-table-body [data-test="textarea-editable-title-input"]')
       .first()
       .click();
 
-    cy.get(
-      '[data-test="table-content-rows"] [data-test="editable-title-input"]',
-    )
+    cy.get('.ant-table-body [data-test="textarea-editable-title-input"]')
       .first()
-      .focus()
-      .clear()
-      .type(`${newMetricName}{enter}`);
+      .focus();
+    cy.focused().clear({ force: true });
+    cy.focused().type(`${newMetricName}{enter}`, { force: true });
 
     cy.get('[data-test="datasource-modal-save"]').click();
     cy.get('.ant-modal-confirm-btns button').contains('OK').click();
@@ -62,9 +57,12 @@ describe('Datasource control', () => {
       .contains('Drop columns/metrics here or click')
       .click();
 
-    cy.get('input[aria-label="Select saved metrics"]').type(
-      `${newMetricName}{enter}`,
-    );
+    cy.get('input[aria-label="Select saved metrics"]')
+      .should('exist')
+      .then($input => {
+        setSelectSearchInput($input, newMetricName);
+      });
+
     // delete metric
     cy.get('[data-test="datasource-menu-trigger"]').click();
     cy.get('[data-test="edit-dataset"]').click();
@@ -73,7 +71,8 @@ describe('Datasource control', () => {
         .contains('Metrics')
         .click();
     });
-    cy.get(`input[value="${newMetricName}"]`)
+    cy.get(`[data-test="textarea-editable-title-input"]`)
+      .contains(newMetricName)
       .closest('tr')
       .find('[data-test="crud-delete-icon"]')
       .click();
@@ -85,38 +84,43 @@ describe('Datasource control', () => {
 
 describe('Color scheme control', () => {
   beforeEach(() => {
-    interceptChart({ legacy: true }).as('chartData');
+    interceptChart({ legacy: false }).as('chartData');
 
     cy.visitChartByName('Num Births Trend');
     cy.verifySliceSuccess({ waitAlias: '@chartData' });
   });
 
   it('should show color options with and without tooltips', () => {
-    cy.get('#controlSections-tab-display').click();
+    cy.get('#controlSections-tab-CUSTOMIZE').click();
     cy.get('.ant-select-selection-item .color-scheme-label').contains(
       'Superset Colors',
     );
     cy.get('.ant-select-selection-item .color-scheme-label').trigger(
       'mouseover',
     );
+    cy.get('.color-scheme-tooltip').should('be.visible');
     cy.get('.color-scheme-tooltip').contains('Superset Colors');
     cy.get('.Control[data-test="color_scheme"]').scrollIntoView();
-    cy.get('.Control[data-test="color_scheme"] input[type="search"]')
-      .focus()
-      .type('lyftColors{enter}');
-    cy.get(
-      '.Control[data-test="color_scheme"] .ant-select-selection-item [data-test="lyftColors"]',
-    ).should('exist');
-    cy.get('.ant-select-selection-item .color-scheme-label').trigger(
-      'mouseover',
-    );
-    cy.get('.color-scheme-tooltip').should('not.exist');
+    cy.get('.Control[data-test="color_scheme"] input[type="search"]').focus();
+
+    cy.get('.color-scheme-label')
+      .contains('Superset Colors')
+      .trigger('mouseover');
+
+    cy.get('.color-scheme-label')
+      .contains('Superset Colors')
+      .trigger('mouseout');
+
+    cy.focused().type('lyftColors');
+    cy.getBySel('lyftColors').should('exist');
+    cy.getBySel('lyftColors').trigger('mouseover', { force: true });
+    cy.get('.color-scheme-tooltip').should('not.be.visible');
   });
 });
 describe('VizType control', () => {
   beforeEach(() => {
     interceptChart({ legacy: false }).as('tableChartData');
-    interceptChart({ legacy: true }).as('lineChartData');
+    interceptChart({ legacy: false }).as('bigNumberChartData');
   });
 
   it('Can change vizType', () => {
@@ -126,15 +130,14 @@ describe('VizType control', () => {
     cy.contains('View all charts').click();
 
     cy.get('.ant-modal-content').within(() => {
-      cy.get('button').contains('Evolution').click(); // change categories
-      cy.get('[role="button"]').contains('Line Chart').click();
+      cy.get('button').contains('KPI').click(); // change categories
+      cy.get('[role="button"]').contains('Big Number').click();
       cy.get('button').contains('Select').click();
     });
 
     cy.get('button[data-test="run-query-button"]').click();
     cy.verifySliceSuccess({
-      waitAlias: '@lineChartData',
-      chartSelector: 'svg',
+      waitAlias: '@bigNumberChartData',
     });
   });
 });
@@ -142,7 +145,7 @@ describe('VizType control', () => {
 describe('Test datatable', () => {
   beforeEach(() => {
     interceptChart({ legacy: false }).as('tableChartData');
-    interceptChart({ legacy: true }).as('lineChartData');
+    interceptChart({ legacy: false }).as('lineChartData');
     cy.visitChartByName('Daily Totals');
   });
   it('Data Pane opens and loads results', () => {
@@ -152,8 +155,9 @@ describe('Test datatable', () => {
   });
   it('Datapane loads view samples', () => {
     cy.intercept(
-      'datasource/samples?force=false&datasource_type=table&datasource_id=*',
+      '**/datasource/samples?force=false&datasource_type=table&datasource_id=*',
     ).as('Samples');
+<<<<<<< HEAD
     cy.contains('Samples')
       .click()
       .then(() => {
@@ -275,12 +279,19 @@ describe('Time range filter', () => {
         cy.get('[data-test=no-filter]');
       });
     cy.get('[data-test=cancel-button]').click();
+=======
+    cy.contains('Samples').click();
+    cy.wait('@Samples');
+    cy.get('.ant-tabs-tab-active').contains('Samples');
+    cy.get('[data-test="row-count-label"]').contains('1k rows');
+    cy.get('.ant-empty-description').should('not.exist');
+>>>>>>> 6.0.0
   });
 });
 
 describe('Groupby control', () => {
   it('Set groupby', () => {
-    interceptChart({ legacy: true }).as('chartData');
+    interceptChart({ legacy: false }).as('chartData');
 
     cy.visitChartByName('Num Births Trend');
     cy.verifySliceSuccess({ waitAlias: '@chartData' });
@@ -289,10 +300,11 @@ describe('Groupby control', () => {
       .contains('Drop columns here or click')
       .click();
     cy.get('[id="adhoc-metric-edit-tabs-tab-simple"]').click();
-    cy.get('input[aria-label="Column"]').click().type('state{enter}');
+    cy.get('input[aria-label="Column"]').click();
+    cy.get('input[aria-label="Column"]').type('state{enter}');
     cy.get('[data-test="ColumnEdit#save"]').contains('Save').click();
 
     cy.get('button[data-test="run-query-button"]').click();
-    cy.verifySliceSuccess({ waitAlias: '@chartData', chartSelector: 'svg' });
+    cy.verifySliceSuccess({ waitAlias: '@chartData' });
   });
 });

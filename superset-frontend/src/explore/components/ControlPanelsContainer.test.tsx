@@ -16,10 +16,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
 import { useSelector } from 'react-redux';
 import userEvent from '@testing-library/user-event';
 import { render, screen } from 'spec/helpers/testing-library';
+=======
+import { useSelector } from 'react-redux';
+import {
+  render,
+  screen,
+  userEvent,
+  waitFor,
+} from 'spec/helpers/testing-library';
+>>>>>>> 6.0.0
 import {
   DatasourceType,
   getChartControlPanelRegistry,
@@ -42,50 +52,54 @@ const FormDataMock = () => {
 };
 
 describe('ControlPanelsContainer', () => {
-  beforeAll(() => {
-    getChartControlPanelRegistry().registerValue('table', {
-      controlPanelSections: [
-        {
-          label: t('GROUP BY'),
-          description: t(
-            'Use this section if you want a query that aggregates',
-          ),
-          expanded: true,
-          controlSetRows: [
-            ['groupby'],
-            ['metrics'],
-            ['percent_metrics'],
-            ['timeseries_limit_metric', 'row_limit'],
-            ['include_time', 'order_desc'],
-          ],
-        },
-        {
-          label: t('NOT GROUPED BY'),
-          description: t('Use this section if you want to query atomic rows'),
-          expanded: true,
-          controlSetRows: [
-            ['all_columns'],
-            ['order_by_cols'],
-            ['row_limit', null],
-          ],
-        },
-        {
-          label: t('Query'),
-          expanded: true,
-          controlSetRows: [['adhoc_filters']],
-        },
-        {
-          label: t('Options'),
-          expanded: true,
-          controlSetRows: [
-            ['table_timestamp_format'],
-            ['page_length', null],
-            ['include_search', 'table_filter'],
-            ['align_pn', 'color_pn'],
-          ],
-        },
-      ],
-    });
+  const defaultTableConfig = {
+    controlPanelSections: [
+      {
+        label: t('GROUP BY'),
+        description: t('Use this section if you want a query that aggregates'),
+        expanded: true,
+        controlSetRows: [
+          ['groupby'],
+          ['metrics'],
+          ['percent_metrics'],
+          ['timeseries_limit_metric', 'row_limit'],
+          ['include_time', 'order_desc'],
+        ],
+      },
+      {
+        label: t('NOT GROUPED BY'),
+        description: t('Use this section if you want to query atomic rows'),
+        expanded: true,
+        controlSetRows: [
+          ['all_columns'],
+          ['order_by_cols'],
+          ['row_limit', null],
+        ],
+      },
+      {
+        label: t('Query'),
+        expanded: true,
+        controlSetRows: [['adhoc_filters']],
+      },
+      {
+        label: t('Options'),
+        expanded: true,
+        controlSetRows: [
+          ['table_timestamp_format'],
+          ['page_length', null],
+          ['include_search', 'table_filter'],
+          ['align_pn', 'color_pn'],
+        ],
+      },
+    ],
+  };
+
+  beforeEach(() => {
+    getChartControlPanelRegistry().registerValue('table', defaultTableConfig);
+  });
+
+  afterEach(() => {
+    getChartControlPanelRegistry().remove('table');
   });
 
   afterAll(() => {
@@ -112,17 +126,22 @@ describe('ControlPanelsContainer', () => {
     render(<ControlPanelsContainer {...getDefaultProps()} />, {
       useRedux: true,
     });
-    expect(
-      await screen.findAllByTestId('collapsible-control-panel-header'),
-    ).toHaveLength(4);
+    await waitFor(() => {
+      expect(
+        screen.getAllByTestId('collapsible-control-panel-header'),
+      ).toHaveLength(4);
+    });
     expect(screen.getByRole('tab', { name: /customize/i })).toBeInTheDocument();
     userEvent.click(screen.getByRole('tab', { name: /customize/i }));
-    expect(
-      await screen.findAllByTestId('collapsible-control-panel-header'),
-    ).toHaveLength(5);
+    await waitFor(() => {
+      expect(
+        screen.getAllByTestId('collapsible-control-panel-header'),
+      ).toHaveLength(5);
+    });
   });
 
   test('renders ControlPanelSections no Customize Tab', async () => {
+    getChartControlPanelRegistry().remove('table');
     getChartControlPanelRegistry().registerValue('table', {
       controlPanelSections: [
         {
@@ -150,9 +169,119 @@ describe('ControlPanelsContainer', () => {
       useRedux: true,
     });
     expect(screen.queryByText(/customize/i)).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getAllByTestId('collapsible-control-panel-header'),
+      ).toHaveLength(2);
+    });
+  });
+
+  test('visibility of panels is correctly applied', async () => {
+    getChartControlPanelRegistry().remove('table');
+    getChartControlPanelRegistry().registerValue('table', {
+      controlPanelSections: [
+        {
+          label: t('Advanced analytics'),
+          description: t('Advanced analytics post processing'),
+          expanded: true,
+          controlSetRows: [['groupby'], ['metrics'], ['percent_metrics']],
+          visibility: () => false,
+        },
+        {
+          label: t('Chart Title'),
+          visibility: () => true,
+          controlSetRows: [['timeseries_limit_metric', 'row_limit']],
+        },
+        {
+          label: t('Chart Options'),
+          controlSetRows: [['include_time', 'order_desc']],
+        },
+      ],
+    });
+    const { getByTestId } = render(
+      <>
+        <ControlPanelsContainer {...getDefaultProps()} />
+        <FormDataMock />
+      </>,
+      {
+        useRedux: true,
+        initialState: { explore: { form_data: defaultState.form_data } },
+      },
+    );
+
+    const disabledSection = screen.queryByRole('button', {
+      name: /advanced analytics/i,
+    });
+    expect(disabledSection).not.toBeInTheDocument();
     expect(
-      await screen.findAllByTestId('collapsible-control-panel-header'),
-    ).toHaveLength(2);
+      screen.getByRole('button', { name: /chart title/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /chart options/i }),
+    ).toBeInTheDocument();
+
+    expect(getByTestId('mock-formdata')).not.toHaveTextContent('groupby');
+    expect(getByTestId('mock-formdata')).not.toHaveTextContent('metrics');
+    expect(getByTestId('mock-formdata')).not.toHaveTextContent(
+      'percent_metrics',
+    );
+  });
+
+  test('hidden state of controls is correctly applied', async () => {
+    getChartControlPanelRegistry().remove('table');
+    getChartControlPanelRegistry().registerValue('table', {
+      controlPanelSections: [
+        {
+          label: t('Time Comparison'),
+          expanded: true,
+          controlSetRows: [
+            [
+              {
+                name: 'time_compare',
+                config: {
+                  type: 'SelectControl',
+                  freeForm: true,
+                  label: t('Time shift'),
+                  choices: [],
+                },
+              },
+            ],
+            [
+              {
+                name: 'start_date_offset',
+                config: {
+                  type: 'SelectControl',
+                  choices: [],
+                  label: t('Shift start date'),
+                  hidden: true,
+                },
+              },
+            ],
+            [
+              {
+                name: 'comparison_type',
+                config: {
+                  type: 'SelectControl',
+                  label: t('Calculation type'),
+                  default: 'values',
+                  choices: [],
+                  hidden: () => true,
+                },
+              },
+            ],
+          ],
+        },
+      ],
+    });
+    render(<ControlPanelsContainer {...getDefaultProps()} />, {
+      useRedux: true,
+    });
+
+    expect(screen.getByText('Time shift')).toBeInTheDocument();
+    expect(screen.getByText('Shift start date')).toBeInTheDocument();
+    expect(screen.getByText('Calculation type')).toBeInTheDocument();
+    expect(screen.getByText('Shift start date')).not.toBeVisible();
+    expect(screen.getByText('Calculation type')).not.toBeVisible();
   });
 
   test('visibility of panels is correctly applied', async () => {

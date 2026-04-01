@@ -190,6 +190,8 @@ def delete_all_inserted_objects() -> None:
 
 def delete_all_inserted_dashboards():
     try:
+        # Expire all objects to ensure fresh state after potential rollbacks
+        db.session.expire_all()
         dashboards_to_delete: list[Dashboard] = (
             db.session.query(Dashboard)
             .filter(Dashboard.id.in_(inserted_dashboards_ids))
@@ -198,15 +200,15 @@ def delete_all_inserted_dashboards():
         for dashboard in dashboards_to_delete:
             try:
                 delete_dashboard(dashboard, False)
-            except Exception as ex:
+            except Exception:
                 logger.error(f"failed to delete {dashboard.id}", exc_info=True)
-                raise ex
+                raise
         if len(inserted_dashboards_ids) > 0:
             db.session.commit()
             inserted_dashboards_ids.clear()
-    except Exception as ex2:
+    except Exception:
         logger.error("delete_all_inserted_dashboards failed", exc_info=True)
-        raise ex2
+        raise
 
 
 def delete_dashboard(dashboard: Dashboard, do_commit: bool = False) -> None:
@@ -245,15 +247,15 @@ def delete_all_inserted_slices():
         for slice in slices_to_delete:
             try:
                 delete_slice(slice, False)
-            except Exception as ex:
+            except Exception:
                 logger.error(f"failed to delete {slice.id}", exc_info=True)
-                raise ex
+                raise
         if len(inserted_slices_ids) > 0:
             db.session.commit()
             inserted_slices_ids.clear()
-    except Exception as ex2:
+    except Exception:
         logger.error("delete_all_inserted_slices failed", exc_info=True)
-        raise ex2
+        raise
 
 
 def delete_slice(slice_: Slice, do_commit: bool = False) -> None:
@@ -278,15 +280,15 @@ def delete_all_inserted_tables():
         for table in tables_to_delete:
             try:
                 delete_sqltable(table, False)
-            except Exception as ex:
+            except Exception:
                 logger.error(f"failed to delete {table.id}", exc_info=True)
-                raise ex
+                raise
         if len(inserted_sqltables_ids) > 0:
             db.session.commit()
             inserted_sqltables_ids.clear()
-    except Exception as ex2:
+    except Exception:
         logger.error("delete_all_inserted_tables failed", exc_info=True)
-        raise ex2
+        raise
 
 
 def delete_sqltable(table: SqlaTable, do_commit: bool = False) -> None:
@@ -313,15 +315,15 @@ def delete_all_inserted_dbs():
         for database in databases_to_delete:
             try:
                 delete_database(database, False)
-            except Exception as ex:
+            except Exception:
                 logger.error(f"failed to delete {database.id}", exc_info=True)
-                raise ex
+                raise
         if len(inserted_databases_ids) > 0:
             db.session.commit()
             inserted_databases_ids.clear()
-    except Exception as ex2:
+    except Exception:
         logger.error("delete_all_inserted_databases failed", exc_info=True)
-        raise ex2
+        raise
 
 
 def delete_database(database: Database, do_commit: bool = False) -> None:

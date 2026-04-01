@@ -27,9 +27,10 @@ import {
   isAdhocColumn,
   NumberFormatter,
   rgbToHex,
-  SupersetTheme,
+  tooltipHtml,
 } from '@superset-ui/core';
-import { EChartsOption, BarSeriesOption } from 'echarts';
+import type { ComposeOption } from 'echarts/core';
+import type { BarSeriesOption } from 'echarts/charts';
 import {
   EchartsWaterfallChartProps,
   ISeriesData,
@@ -43,14 +44,14 @@ import { getColtypesMapping } from '../utils/series';
 import { Refs } from '../types';
 import { NULL_STRING } from '../constants';
 
+type EChartsOption = ComposeOption<BarSeriesOption>;
+
 function formatTooltip({
-  theme,
   params,
   breakdownName,
   defaultFormatter,
   xAxisFormatter,
 }: {
-  theme: SupersetTheme;
   params: ICallbackDataParams[];
   breakdownName?: string;
   defaultFormatter: NumberFormatter | CurrencyFormatter;
@@ -70,40 +71,19 @@ function formatTooltip({
     return NULL_STRING;
   }
 
-  const createRow = (name: string, value: string) => `
-    <div>
-      <span style="
-        font-size:${theme.typography.sizes.m}px;
-        color:${theme.colors.grayscale.base};
-        font-weight:${theme.typography.weights.normal};
-        margin-left:${theme.gridUnit * 0.5}px;"
-      >
-        ${name}:
-      </span>
-      <span style="
-        float:right;
-        margin-left:${theme.gridUnit * 5}px;
-        font-size:${theme.typography.sizes.m}px;
-        color:${theme.colors.grayscale.base};
-        font-weight:${theme.typography.weights.bold}"
-      >
-        ${value}
-      </span>
-    </div>
-  `;
-
-  let result = '';
-  if (!isTotal || breakdownName) {
-    result = xAxisFormatter(series.name, series.dataIndex);
-  }
+  const title =
+    !isTotal || breakdownName
+      ? xAxisFormatter(series.name, series.dataIndex)
+      : undefined;
+  const rows: string[][] = [];
   if (!isTotal) {
-    result += createRow(
+    rows.push([
       series.seriesName!,
       defaultFormatter(series.data.originalValue),
-    );
+    ]);
   }
-  result += createRow(TOTAL_MARK, defaultFormatter(series.data.totalSum));
-  return result;
+  rows.push([TOTAL_MARK, defaultFormatter(series.data.totalSum)]);
+  return tooltipHtml(rows, title);
 }
 
 function transformer({
@@ -375,7 +355,13 @@ export default function transformProps(
       disabled: true,
     },
   };
-
+  const labelProps = {
+    show: showValue,
+    formatter: seriesformatter,
+    color: theme.colorText,
+    borderColor: theme.colorBgBase,
+    borderWidth: 1,
+  };
   const barSeries: BarSeriesOption[] = [
     {
       ...seriesProps,
@@ -386,9 +372,8 @@ export default function transformProps(
       ...seriesProps,
       name: LEGEND.INCREASE,
       label: {
-        show: showValue,
+        ...labelProps,
         position: 'top',
-        formatter: seriesformatter,
       },
       itemStyle: {
         color: rgbToHex(increaseColor.r, increaseColor.g, increaseColor.b),
@@ -399,9 +384,8 @@ export default function transformProps(
       ...seriesProps,
       name: LEGEND.DECREASE,
       label: {
-        show: showValue,
+        ...labelProps,
         position: 'bottom',
-        formatter: seriesformatter,
       },
       itemStyle: {
         color: rgbToHex(decreaseColor.r, decreaseColor.g, decreaseColor.b),
@@ -412,9 +396,8 @@ export default function transformProps(
       ...seriesProps,
       name: LEGEND.TOTAL,
       label: {
-        show: showValue,
+        ...labelProps,
         position: 'top',
-        formatter: seriesformatter,
       },
       itemStyle: {
         color: rgbToHex(totalColor.r, totalColor.g, totalColor.b),
@@ -426,10 +409,10 @@ export default function transformProps(
   const echartOptions: EChartsOption = {
     grid: {
       ...defaultGrid,
-      top: theme.gridUnit * 7,
-      bottom: theme.gridUnit * 7,
-      left: theme.gridUnit * 5,
-      right: theme.gridUnit * 7,
+      top: theme.sizeUnit * 7,
+      bottom: theme.sizeUnit * 7,
+      left: theme.sizeUnit * 5,
+      right: theme.sizeUnit * 7,
     },
     legend: {
       show: showLegend,
@@ -441,7 +424,7 @@ export default function transformProps(
       type: 'category',
       name: xAxisLabel,
       nameTextStyle: {
-        padding: [theme.gridUnit * 4, 0, 0, 0],
+        padding: [theme.sizeUnit * 4, 0, 0, 0],
       },
       nameLocation: 'middle',
       axisLabel,
@@ -450,7 +433,7 @@ export default function transformProps(
       ...defaultYAxis,
       type: 'value',
       nameTextStyle: {
-        padding: [0, 0, theme.gridUnit * 5, 0],
+        padding: [0, 0, theme.sizeUnit * 5, 0],
       },
       nameLocation: 'middle',
       name: yAxisLabel,
@@ -463,7 +446,6 @@ export default function transformProps(
       show: !inContextMenu,
       formatter: (params: any) =>
         formatTooltip({
-          theme,
           params,
           breakdownName,
           defaultFormatter,

@@ -17,12 +17,10 @@
  * under the License.
  */
 import rison from 'rison';
+import { createApi, BaseQueryFn } from '@reduxjs/toolkit/query/react';
 import {
   ClientErrorObject,
   getClientErrorObject,
-} from 'src/utils/getClientErrorObject';
-import { createApi, BaseQueryFn } from '@reduxjs/toolkit/query/react';
-import {
   SupersetClient,
   ParseMethod,
   SupersetClientResponse,
@@ -66,6 +64,10 @@ export const supersetClientQuery: BaseQueryFn<
       getClientErrorObject(response).then(errorObj => ({
         error: {
           error: errorObj?.message || errorObj?.error || response.statusText,
+<<<<<<< HEAD
+=======
+          errors: errorObj?.errors || [], // used by <ErrorMessageWithStackTrace />
+>>>>>>> 6.0.0
           status: response.status,
         },
       })),
@@ -74,6 +76,7 @@ export const supersetClientQuery: BaseQueryFn<
 export const api = createApi({
   reducerPath: 'queryApi',
   tagTypes: [
+    'Catalogs',
     'Schemas',
     'Tables',
     'DatabaseFunctions',

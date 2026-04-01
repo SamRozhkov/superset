@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import thunk from 'redux-thunk';
 import configureStore from 'redux-mock-store';
 
@@ -26,7 +25,6 @@ import {
   QueryFormData,
 } from '@superset-ui/core';
 import { ColumnMeta } from '@superset-ui/chart-controls';
-import { TimeseriesDefaultFormData } from '@superset-ui/plugin-chart-echarts';
 
 import {
   fireEvent,
@@ -34,9 +32,14 @@ import {
   screen,
   within,
 } from 'spec/helpers/testing-library';
+<<<<<<< HEAD
 import type { AsyncAceEditorProps } from 'src/components/AsyncAceEditor';
+=======
+import type { AsyncAceEditorProps } from '@superset-ui/core/components';
+>>>>>>> 6.0.0
 import AdhocMetric from 'src/explore/components/controls/MetricControl/AdhocMetric';
 import AdhocFilter from 'src/explore/components/controls/FilterControl/AdhocFilter';
+import { Operators } from 'src/explore/constants';
 import {
   DndFilterSelect,
   DndFilterSelectProps,
@@ -47,7 +50,12 @@ import { Datasource } from '../../../types';
 import { DndItemType } from '../../DndItemType';
 import DatasourcePanelDragOption from '../../DatasourcePanel/DatasourcePanelDragOption';
 
+<<<<<<< HEAD
 jest.mock('src/components/AsyncAceEditor', () => ({
+=======
+jest.mock('@superset-ui/core/components/AsyncAceEditor', () => ({
+  ...jest.requireActual('@superset-ui/core/components/AsyncAceEditor'),
+>>>>>>> 6.0.0
   SQLEditor: (props: AsyncAceEditorProps) => (
     <div data-test="react-ace">{props.value}</div>
   ),
@@ -78,11 +86,19 @@ function setup({
   formData = baseFormData,
   columns = [],
   datasource = PLACEHOLDER_DATASOURCE,
+<<<<<<< HEAD
+=======
+  additionalProps = {},
+>>>>>>> 6.0.0
 }: {
-  value?: AdhocFilter;
+  value?: AdhocFilter | AdhocFilter[];
   formData?: QueryFormData;
   columns?: ColumnMeta[];
   datasource?: Datasource;
+<<<<<<< HEAD
+=======
+  additionalProps?: Partial<DndFilterSelectProps>;
+>>>>>>> 6.0.0
 } = {}) {
   return (
     <DndFilterSelect
@@ -91,9 +107,17 @@ function setup({
       value={ensureIsArray(value)}
       formData={formData}
       columns={columns}
+<<<<<<< HEAD
+=======
+      {...additionalProps}
+>>>>>>> 6.0.0
     />
   );
 }
+
+beforeEach(() => {
+  jest.clearAllMocks();
+});
 
 test('renders with default props', async () => {
   render(setup(), { useDnd: true, store });
@@ -119,7 +143,6 @@ test('renders options with saved metric', async () => {
     setup({
       formData: {
         ...baseFormData,
-        ...TimeseriesDefaultFormData,
         metrics: ['saved_metric'],
       },
     }),
@@ -164,7 +187,6 @@ test('renders options with adhoc metric', async () => {
     setup({
       formData: {
         ...baseFormData,
-        ...TimeseriesDefaultFormData,
         metrics: [adhocMetric],
       },
     }),
@@ -194,13 +216,24 @@ test('cannot drop a column that is not part of the simple column selection', () 
         type={DndItemType.Column}
       />
       <DatasourcePanelDragOption
+<<<<<<< HEAD
         value={{ metric_name: 'metric_a', expression: 'AGG(metric_a)' }}
+=======
+        value={{
+          metric_name: 'metric_a',
+          expression: 'AGG(metric_a)',
+          uuid: '1',
+        }}
+>>>>>>> 6.0.0
         type={DndItemType.Metric}
       />
       {setup({
         formData: {
           ...baseFormData,
+<<<<<<< HEAD
           ...TimeseriesDefaultFormData,
+=======
+>>>>>>> 6.0.0
           metrics: [adhocMetric],
         },
         columns: [{ column_name: 'order_date' }],
@@ -248,6 +281,76 @@ test('cannot drop a column that is not part of the simple column selection', () 
   ).toHaveTextContent('AGG(metric_a)');
 });
 
+<<<<<<< HEAD
+=======
+test('calls onChange when close is clicked and canDelete is true', () => {
+  const value1 = new AdhocFilter({
+    sqlExpression: 'COUNT(*)',
+    expressionType: ExpressionTypes.Sql,
+  });
+  const value2 = new AdhocFilter({
+    expressionType: ExpressionTypes.Simple,
+    subject: 'col',
+    comparator: 'val',
+    operator: Operators.Equals,
+  });
+  const canDelete = jest.fn();
+  canDelete.mockReturnValue(true);
+  render(setup({ value: [value1, value2], additionalProps: { canDelete } }), {
+    useDnd: true,
+    store,
+  });
+  fireEvent.click(screen.getAllByTestId('remove-control-button')[0]);
+  expect(canDelete).toHaveBeenCalled();
+  expect(defaultProps.onChange).toHaveBeenCalledWith([value2]);
+});
+
+test('onChange is not called when close is clicked and canDelete is false', () => {
+  const value1 = new AdhocFilter({
+    sqlExpression: 'COUNT(*)',
+    expressionType: ExpressionTypes.Sql,
+  });
+  const value2 = new AdhocFilter({
+    expressionType: ExpressionTypes.Simple,
+    subject: 'col',
+    comparator: 'val',
+    operator: Operators.Equals,
+  });
+  const canDelete = jest.fn();
+  canDelete.mockReturnValue(false);
+  render(setup({ value: [value1, value2], additionalProps: { canDelete } }), {
+    useDnd: true,
+    store,
+  });
+  fireEvent.click(screen.getAllByTestId('remove-control-button')[0]);
+  expect(canDelete).toHaveBeenCalled();
+  expect(defaultProps.onChange).not.toHaveBeenCalled();
+});
+
+test('onChange is not called when close is clicked and canDelete is string, warning is displayed', async () => {
+  const value1 = new AdhocFilter({
+    sqlExpression: 'COUNT(*)',
+    expressionType: ExpressionTypes.Sql,
+  });
+  const value2 = new AdhocFilter({
+    expressionType: ExpressionTypes.Simple,
+    subject: 'col',
+    comparator: 'val',
+    operator: Operators.Equals,
+  });
+  const canDelete = jest.fn();
+  canDelete.mockReturnValue('Test warning');
+  render(setup({ value: [value1, value2], additionalProps: { canDelete } }), {
+    useDnd: true,
+    store,
+  });
+  fireEvent.click(screen.getAllByTestId('remove-control-button')[0]);
+  expect(canDelete).toHaveBeenCalled();
+  expect(defaultProps.onChange).not.toHaveBeenCalled();
+  expect(await screen.findByText('Test warning')).toBeInTheDocument();
+});
+
+>>>>>>> 6.0.0
 describe('when disallow_adhoc_metrics is set', () => {
   test('can drop a column type from the simple column selection', () => {
     const adhocMetric = new AdhocMetric({
@@ -263,7 +366,10 @@ describe('when disallow_adhoc_metrics is set', () => {
         {setup({
           formData: {
             ...baseFormData,
+<<<<<<< HEAD
             ...TimeseriesDefaultFormData,
+=======
+>>>>>>> 6.0.0
             metrics: [adhocMetric],
           },
           datasource: {
@@ -302,17 +408,28 @@ describe('when disallow_adhoc_metrics is set', () => {
           type={DndItemType.Column}
         />
         <DatasourcePanelDragOption
+<<<<<<< HEAD
           value={{ metric_name: 'metric_a' }}
           type={DndItemType.Metric}
         />
         <DatasourcePanelDragOption
           value={{ metric_name: 'avg__num' }}
+=======
+          value={{ metric_name: 'metric_a', uuid: '1' }}
+          type={DndItemType.Metric}
+        />
+        <DatasourcePanelDragOption
+          value={{ metric_name: 'avg__num', uuid: '2' }}
+>>>>>>> 6.0.0
           type={DndItemType.AdhocMetricOption}
         />
         {setup({
           formData: {
             ...baseFormData,
+<<<<<<< HEAD
             ...TimeseriesDefaultFormData,
+=======
+>>>>>>> 6.0.0
             metrics: [adhocMetric],
           },
           datasource: {

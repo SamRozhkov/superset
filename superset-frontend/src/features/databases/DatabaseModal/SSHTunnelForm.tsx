@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { useState } from 'react';
 import { t, styled } from '@superset-ui/core';
 import { AntdForm, Col, Row } from 'src/components';
@@ -24,28 +25,41 @@ import { Radio } from 'src/components/Radio';
 import { Input, TextArea } from 'src/components/Input';
 import { Input as AntdInput, Tooltip } from 'antd';
 import { EyeInvisibleOutlined, EyeOutlined } from '@ant-design/icons';
+=======
+import { useState } from 'react';
+import { t, styled } from '@superset-ui/core';
+import {
+  Form,
+  FormLabel,
+  Col,
+  Row,
+  Tooltip,
+} from '@superset-ui/core/components';
+import { Input } from '@superset-ui/core/components/Input';
+import { Radio } from '@superset-ui/core/components/Radio';
+import { Icons } from '@superset-ui/core/components/Icons';
+>>>>>>> 6.0.0
 import { DatabaseObject, FieldPropTypes } from '../types';
 import { AuthType } from '.';
 
 const StyledDiv = styled.div`
-  padding-top: ${({ theme }) => theme.gridUnit * 2}px;
+  padding-top: ${({ theme }) => theme.sizeUnit * 2}px;
   label {
-    color: ${({ theme }) => theme.colors.grayscale.base};
-    text-transform: uppercase;
-    margin-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+    color: ${({ theme }) => theme.colorText};
+    margin-bottom: ${({ theme }) => theme.sizeUnit * 2}px;
   }
 `;
 
 const StyledRow = styled(Row)`
-  padding-bottom: ${({ theme }) => theme.gridUnit * 2}px;
+  padding-bottom: ${({ theme }) => theme.sizeUnit * 2}px;
 `;
 
-const StyledFormItem = styled(AntdForm.Item)`
+const StyledFormItem = styled(Form.Item)`
   margin-bottom: 0 !important;
 `;
 
-const StyledInputPassword = styled(AntdInput.Password)`
-  margin: ${({ theme }) => `${theme.gridUnit}px 0 ${theme.gridUnit * 2}px`};
+const StyledInputPassword = styled(Input.Password)`
+  margin: ${({ theme }) => `${theme.sizeUnit}px 0 ${theme.sizeUnit * 2}px`};
 `;
 
 const SSHTunnelForm = ({
@@ -156,11 +170,11 @@ const SSHTunnelForm = ({
                 iconRender={visible =>
                   visible ? (
                     <Tooltip title="Hide password.">
-                      <EyeInvisibleOutlined />
+                      <Icons.EyeInvisibleOutlined />
                     </Tooltip>
                   ) : (
                     <Tooltip title="Show password.">
-                      <EyeOutlined />
+                      <Icons.EyeOutlined />
                     </Tooltip>
                   )
                 }
@@ -178,7 +192,7 @@ const SSHTunnelForm = ({
                 <FormLabel htmlFor="private_key" required>
                   {t('Private Key')}
                 </FormLabel>
-                <TextArea
+                <Input.TextArea
                   name="private_key"
                   placeholder={t('Paste Private Key here')}
                   value={db?.ssh_tunnel?.private_key || ''}
@@ -204,11 +218,11 @@ const SSHTunnelForm = ({
                   iconRender={visible =>
                     visible ? (
                       <Tooltip title="Hide password.">
-                        <EyeInvisibleOutlined />
+                        <Icons.EyeInvisibleOutlined />
                       </Tooltip>
                     ) : (
                       <Tooltip title="Show password.">
-                        <EyeOutlined />
+                        <Icons.EyeOutlined />
                       </Tooltip>
                     )
                   }

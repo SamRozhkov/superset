@@ -16,23 +16,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { useEffect, useMemo, useState } from 'react';
 import { shallowEqual, useSelector } from 'react-redux';
 import { useInView } from 'react-intersection-observer';
 import { omit } from 'lodash';
 import { EmptyStateMedium } from 'src/components/EmptyState';
+=======
+import { useEffect, useMemo, useState } from 'react';
+import { shallowEqual, useSelector } from 'react-redux';
+import { useInView } from 'react-intersection-observer';
+import { omit } from 'lodash';
+import { EmptyState, Skeleton } from '@superset-ui/core/components';
+>>>>>>> 6.0.0
 import {
   t,
   styled,
   css,
   FeatureFlag,
   isFeatureEnabled,
+<<<<<<< HEAD
+=======
+  useTheme,
+>>>>>>> 6.0.0
 } from '@superset-ui/core';
 import QueryTable from 'src/SqlLab/components/QueryTable';
 import { SqlLabRootState } from 'src/SqlLab/types';
 import { useEditorQueriesQuery } from 'src/hooks/apiResources/queries';
+<<<<<<< HEAD
 import { Skeleton } from 'src/components';
 import useEffectEvent from 'src/hooks/useEffectEvent';
+=======
+import useEffectEvent from 'src/hooks/useEffectEvent';
+import useQueryEditor from 'src/SqlLab/hooks/useQueryEditor';
+>>>>>>> 6.0.0
 
 interface QueryHistoryProps {
   queryEditorId: string | number;
@@ -64,14 +81,31 @@ const QueryHistory = ({
   displayLimit,
   latestQueryId,
 }: QueryHistoryProps) => {
+<<<<<<< HEAD
+=======
+  const { id, tabViewId } = useQueryEditor(String(queryEditorId), [
+    'tabViewId',
+  ]);
+  const theme = useTheme();
+  const editorId = tabViewId ?? id;
+>>>>>>> 6.0.0
   const [ref, hasReachedBottom] = useInView({ threshold: 0 });
   const [pageIndex, setPageIndex] = useState(0);
   const queries = useSelector(
     ({ sqlLab: { queries } }: SqlLabRootState) => queries,
     shallowEqual,
   );
+<<<<<<< HEAD
   const { data, isLoading, isFetching } = useEditorQueriesQuery(
     { editorId: `${queryEditorId}`, pageIndex },
+=======
+  const {
+    currentData: data,
+    isLoading,
+    isFetching,
+  } = useEditorQueriesQuery(
+    { editorId, pageIndex },
+>>>>>>> 6.0.0
     {
       skip: !isFeatureEnabled(FeatureFlag.SqllabBackendPersistence),
     },
@@ -84,12 +118,25 @@ const QueryHistory = ({
               queries,
               data.result.map(({ id }) => id),
             ),
+<<<<<<< HEAD
             queryEditorId,
           )
             .concat(data.result)
             .reverse()
         : getEditorQueries(queries, queryEditorId),
     [queries, data, queryEditorId],
+=======
+            editorId,
+          )
+            .concat(data.result)
+            .sort((a, b) => {
+              const aTime = a.startDttm || 0;
+              const bTime = b.startDttm || 0;
+              return aTime - bTime;
+            })
+        : getEditorQueries(queries, editorId),
+    [queries, data, editorId],
+>>>>>>> 6.0.0
   );
 
   const loadNext = useEffectEvent(() => {
@@ -110,7 +157,15 @@ const QueryHistory = ({
   }
 
   return editorQueries.length > 0 ? (
+<<<<<<< HEAD
     <>
+=======
+    <div
+      css={css`
+        padding-left: ${theme.sizeUnit * 4}px;
+      `}
+    >
+>>>>>>> 6.0.0
       <QueryTable
         columns={[
           'state',
@@ -136,11 +191,16 @@ const QueryHistory = ({
         />
       )}
       {isFetching && <Skeleton active />}
+<<<<<<< HEAD
     </>
+=======
+    </div>
+>>>>>>> 6.0.0
   ) : (
     <StyledEmptyStateWrapper>
-      <EmptyStateMedium
+      <EmptyState
         title={t('Run a query to display query history')}
+        size="medium"
         image="document.svg"
       />
     </StyledEmptyStateWrapper>

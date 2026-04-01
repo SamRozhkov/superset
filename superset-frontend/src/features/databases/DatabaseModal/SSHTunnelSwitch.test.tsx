@@ -16,9 +16,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
 import { render, screen } from 'spec/helpers/testing-library';
 import userEvent from '@testing-library/user-event';
+=======
+import { render, screen, userEvent } from 'spec/helpers/testing-library';
+>>>>>>> 6.0.0
 import SSHTunnelSwitch from './SSHTunnelSwitch';
 import { DatabaseForm, DatabaseObject } from '../types';
 
@@ -27,8 +31,13 @@ jest.mock('@superset-ui/core', () => ({
   isFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+<<<<<<< HEAD
 jest.mock('src/components', () => ({
   AntdSwitch: ({
+=======
+jest.mock('@superset-ui/core/components/Switch', () => ({
+  Switch: ({
+>>>>>>> 6.0.0
     checked,
     onChange,
   }: {
@@ -96,6 +105,10 @@ test('Does not render if SSH Tunnel is disabled', () => {
         engine_information: {
           disable_ssh_tunneling: true,
           supports_file_upload: false,
+<<<<<<< HEAD
+=======
+          supports_dynamic_catalog: false,
+>>>>>>> 6.0.0
         },
       }}
     />,
@@ -149,9 +162,13 @@ test('Displays tooltip text on hover over the InfoTooltip', async () => {
     />,
   );
 
+<<<<<<< HEAD
   const infoTooltipTrigger = screen.getByRole('img', {
     name: 'info-solid_small',
   });
+=======
+  const infoTooltipTrigger = screen.getByTestId('info-tooltip-icon');
+>>>>>>> 6.0.0
   expect(infoTooltipTrigger).toBeInTheDocument();
 
   userEvent.hover(infoTooltipTrigger);

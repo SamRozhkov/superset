@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import { t } from '@superset-ui/core';
 import {
   ControlPanelSectionConfig,
@@ -100,7 +99,8 @@ export const NVD3TimeSeries: ControlPanelSectionConfig[] = [
       ['metrics'],
       ['adhoc_filters'],
       ['groupby'],
-      ['limit', 'timeseries_limit_metric'],
+      ['limit', 'group_others_when_limit_reached'],
+      ['timeseries_limit_metric'],
       ['order_desc'],
       [
         {

@@ -16,7 +16,6 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
 import PropTypes from 'prop-types';
 import { styled, reactify, useTheme } from '@superset-ui/core';
 import WorldMap from './WorldMap';
@@ -40,7 +39,11 @@ export default styled(WorldMapComponent)`
   .superset-legacy-chart-world-map {
     position: relative;
     svg {
-      background-color: ${({ theme }) => theme.colors.grayscale.light5};
+      background-color: ${({ theme }) => theme.colorBgLayout};
     }
+  }
+  .hoverinfo {
+    background-color: ${({ theme }) => theme.colorBgElevated};
+    color: ${({ theme }) => theme.colorTextSecondary};
   }
 `;

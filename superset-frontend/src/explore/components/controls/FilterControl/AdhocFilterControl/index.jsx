@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
+import { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
   t,
@@ -37,17 +37,17 @@ import {
 import FilterDefinitionOption from 'src/explore/components/controls/MetricControl/FilterDefinitionOption';
 import {
   AddControlLabel,
-  AddIconButton,
   HeaderContainer,
   LabelsContainer,
 } from 'src/explore/components/controls/OptionControls';
-import Icons from 'src/components/Icons';
-import Modal from 'src/components/Modal';
+import { Icons } from '@superset-ui/core/components/Icons';
+import { Modal } from '@superset-ui/core/components';
 import AdhocFilterPopoverTrigger from 'src/explore/components/controls/FilterControl/AdhocFilterPopoverTrigger';
 import AdhocFilterOption from 'src/explore/components/controls/FilterControl/AdhocFilterOption';
 import AdhocFilter from 'src/explore/components/controls/FilterControl/AdhocFilter';
 import adhocFilterType from 'src/explore/components/controls/FilterControl/adhocFilterType';
 import columnType from 'src/explore/components/controls/FilterControl/columnType';
+import { toQueryString } from 'src/utils/urlUtils';
 import { Clauses, ExpressionTypes } from '../types';
 
 const { warning } = Modal;
@@ -87,7 +87,7 @@ function isDictionaryForAdhocFilter(value) {
   return value && !(value instanceof AdhocFilter) && value.expressionType;
 }
 
-class AdhocFilterControl extends React.Component {
+class AdhocFilterControl extends Component {
   constructor(props) {
     super(props);
     this.optionsForSelect = this.optionsForSelect.bind(this);
@@ -137,13 +137,20 @@ class AdhocFilterControl extends React.Component {
       const dbId = datasource.database?.id;
       const {
         datasource_name: name,
+        catalog,
         schema,
         is_sqllab_view: isSqllabView,
       } = datasource;
 
       if (!isSqllabView && dbId && name && schema) {
         SupersetClient.get({
-          endpoint: `/api/v1/database/${dbId}/table_extra/${name}/${schema}/`,
+          endpoint: `/api/v1/database/${dbId}/table_metadata/extra/${toQueryString(
+            {
+              name,
+              catalog,
+              schema,
+            },
+          )}`,
         })
           .then(({ json }) => {
             if (json && json.partitions) {
@@ -347,31 +354,25 @@ class AdhocFilterControl extends React.Component {
   }
 
   render() {
-    const { theme } = this.props;
     return (
       <div className="metrics-select" data-test="adhoc-filter-control">
         <HeaderContainer>
           <ControlHeader {...this.props} />
-          {this.addNewFilterPopoverTrigger(
-            <AddIconButton data-test="add-filter-button">
-              <Icons.PlusLarge
-                iconSize="s"
-                iconColor={theme.colors.grayscale.light5}
-              />
-            </AddIconButton>,
-          )}
         </HeaderContainer>
         <LabelsContainer>
-          {this.state.values.length > 0
-            ? this.state.values.map((value, index) =>
-                this.valueRenderer(value, index),
-              )
-            : this.addNewFilterPopoverTrigger(
-                <AddControlLabel>
-                  <Icons.PlusSmall iconColor={theme.colors.grayscale.light1} />
-                  {t('Add filter')}
-                </AddControlLabel>,
-              )}
+          {[
+            ...(this.state.values.length > 0
+              ? this.state.values.map((value, index) =>
+                  this.valueRenderer(value, index),
+                )
+              : []),
+            this.addNewFilterPopoverTrigger(
+              <AddControlLabel role="button" data-test="add-filter-button">
+                <Icons.PlusOutlined iconSize="m" />
+                {t('Add filter')}
+              </AddControlLabel>,
+            ),
+          ]}
         </LabelsContainer>
       </div>
     );

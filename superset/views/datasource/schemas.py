@@ -16,9 +16,9 @@
 # under the License.
 from typing import Any, Optional, TypedDict
 
+from flask import current_app as app
 from marshmallow import fields, post_load, pre_load, Schema, validate
 
-from superset import app
 from superset.charts.schemas import ChartDataExtrasSchema, ChartDataFilterSchema
 from superset.utils.core import DatasourceType
 
@@ -26,6 +26,7 @@ from superset.utils.core import DatasourceType
 class ExternalMetadataParams(TypedDict):
     datasource_type: str
     database_name: str
+    catalog_name: Optional[str]
     schema_name: str
     table_name: str
     normalize_columns: Optional[bool]
@@ -45,6 +46,7 @@ get_external_metadata_schema = {
 class ExternalMetadataSchema(Schema):
     datasource_type = fields.Str(required=True)
     database_name = fields.Str(required=True)
+    catalog_name = fields.Str(allow_none=True)
     schema_name = fields.Str(allow_none=True)
     table_name = fields.Str(required=True)
     normalize_columns = fields.Bool(allow_none=True)
@@ -60,6 +62,7 @@ class ExternalMetadataSchema(Schema):
         return ExternalMetadataParams(
             datasource_type=data["datasource_type"],
             database_name=data["database_name"],
+            catalog_name=data.get("catalog_name"),
             schema_name=data.get("schema_name", ""),
             table_name=data["table_name"],
             normalize_columns=data["normalize_columns"],
@@ -97,6 +100,21 @@ class SamplesRequestSchema(Schema):
     force = fields.Boolean(load_default=False)
     page = fields.Integer(load_default=1)
     per_page = fields.Integer(
-        validate=validate.Range(min=1, max=app.config.get("SAMPLES_ROW_LIMIT", 1000)),
-        load_default=app.config.get("SAMPLES_ROW_LIMIT", 1000),
+        validate=validate.Range(min=1, max=1000),
+        load_default=None,
     )
+    dashboard_id = fields.Integer(required=False, allow_none=True, load_default=None)
+
+    @pre_load
+    def set_default_per_page(
+        self, data: dict[str, Any], **kwargs: Any
+    ) -> dict[str, Any]:
+        # Create a mutable copy if data is immutable (e.g., request.args)
+        if hasattr(data, "to_dict"):
+            data = data.to_dict()
+        elif not isinstance(data, dict):
+            data = dict(data)
+
+        if "per_page" not in data:
+            data["per_page"] = app.config.get("SAMPLES_ROW_LIMIT", 1000)
+        return data

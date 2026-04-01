@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { useMemo } from 'react';
+=======
+import { memo, useMemo } from 'react';
+>>>>>>> 6.0.0
 import { styled, useTruncation } from '@superset-ui/core';
 import { Link } from 'react-router-dom';
 import CrossLinksTooltip from './CrossLinksTooltip';
@@ -53,8 +57,8 @@ const StyledCrossLinks = styled.div`
 
       .count {
         cursor: pointer;
-        color: ${theme.colors.grayscale.base};
-        font-weight: ${theme.typography.weights.bold};
+        color: ${theme.colorTextSecondary};
+        font-weight: ${theme.fontWeightStrong};
       }
     }
   `}
@@ -111,4 +115,8 @@ function CrossLinks({
   );
 }
 
+<<<<<<< HEAD
 export default React.memo(CrossLinks);
+=======
+export default memo(CrossLinks);
+>>>>>>> 6.0.0

@@ -17,8 +17,8 @@
  * under the License.
  */
 
-import React from 'react';
-import { t } from '@superset-ui/core';
+import { Component } from 'react';
+import { t, safeHtmlSpan } from '@superset-ui/core';
 import PropTypes from 'prop-types';
 import { PivotData, flatKey } from './utilities';
 import { Styles } from './Styles';
@@ -34,14 +34,26 @@ const parseLabel = value => {
   return String(value);
 };
 
+function displayCell(value, allowRenderHtml) {
+  if (allowRenderHtml && typeof value === 'string') {
+    return safeHtmlSpan(value);
+  }
+  return parseLabel(value);
+}
 function displayHeaderCell(
   needToggle,
   ArrowIcon,
   onArrowClick,
   value,
   namesMapping,
+  allowRenderHtml,
 ) {
   const name = namesMapping[value] || value;
+  const parsedLabel = parseLabel(name);
+  const labelContent =
+    allowRenderHtml && typeof parsedLabel === 'string'
+      ? safeHtmlSpan(parsedLabel)
+      : parsedLabel;
   return needToggle ? (
     <span className="toggle-wrapper">
       <span
@@ -52,14 +64,14 @@ function displayHeaderCell(
       >
         {ArrowIcon}
       </span>
-      <span className="toggle-val">{parseLabel(name)}</span>
+      <span className="toggle-val">{labelContent}</span>
     </span>
   ) : (
-    parseLabel(name)
+    labelContent
   );
 }
 
-export class TableRenderer extends React.Component {
+export class TableRenderer extends Component {
   constructor(props) {
     super(props);
 
@@ -179,6 +191,7 @@ export class TableRenderer extends React.Component {
       colTotalCallbacks,
       grandTotalCallback,
       namesMapping,
+      allowRenderHtml: props.allowRenderHtml,
     };
   }
 
@@ -351,6 +364,7 @@ export class TableRenderer extends React.Component {
       maxColVisible,
       pivotData,
       namesMapping,
+      allowRenderHtml,
     } = pivotSettings;
     const {
       highlightHeaderCellsOnHover,
@@ -388,6 +402,7 @@ export class TableRenderer extends React.Component {
           arrowClickHandle,
           attrName,
           namesMapping,
+          allowRenderHtml,
         )}
       </th>
     );
@@ -435,6 +450,7 @@ export class TableRenderer extends React.Component {
             key={`colKey-${flatColKey}`}
             colSpan={colSpan}
             rowSpan={rowSpan}
+            role="columnheader button"
             onClick={this.clickHeaderHandler(
               pivotData,
               colKey,
@@ -452,6 +468,7 @@ export class TableRenderer extends React.Component {
               onArrowClick,
               headerCellFormattedValue,
               namesMapping,
+              allowRenderHtml,
             )}
           </th>,
         );
@@ -463,6 +480,7 @@ export class TableRenderer extends React.Component {
             key={`colKeyBuffer-${flatKey(colKey)}`}
             colSpan={colSpan}
             rowSpan={rowSpan}
+            role="columnheader button"
             onClick={this.clickHeaderHandler(
               pivotData,
               colKey,
@@ -486,6 +504,7 @@ export class TableRenderer extends React.Component {
           key="total"
           className="pvtTotalLabel"
           rowSpan={colAttrs.length + Math.min(rowAttrs.length, 1)}
+          role="columnheader button"
           onClick={this.clickHeaderHandler(
             pivotData,
             [],
@@ -520,6 +539,7 @@ export class TableRenderer extends React.Component {
       maxRowVisible,
       pivotData,
       namesMapping,
+      allowRenderHtml,
     } = pivotSettings;
     return (
       <tr key="rowHdr">
@@ -543,6 +563,7 @@ export class TableRenderer extends React.Component {
                 arrowClickHandle,
                 r,
                 namesMapping,
+                allowRenderHtml,
               )}
             </th>
           );
@@ -550,6 +571,7 @@ export class TableRenderer extends React.Component {
         <th
           className="pvtTotalLabel"
           key="padding"
+          role="columnheader button"
           onClick={this.clickHeaderHandler(
             pivotData,
             [],
@@ -586,6 +608,7 @@ export class TableRenderer extends React.Component {
       cellCallbacks,
       rowTotalCallbacks,
       namesMapping,
+      allowRenderHtml,
     } = pivotSettings;
 
     const {
@@ -637,6 +660,7 @@ export class TableRenderer extends React.Component {
             className={valueCellClassName}
             rowSpan={rowSpan}
             colSpan={colSpan}
+            role="columnheader button"
             onClick={this.clickHeaderHandler(
               pivotData,
               rowKey,
@@ -654,6 +678,7 @@ export class TableRenderer extends React.Component {
               onArrowClick,
               headerCellFormattedValue,
               namesMapping,
+              allowRenderHtml,
             )}
           </th>
         );
@@ -668,6 +693,7 @@ export class TableRenderer extends React.Component {
           key="rowKeyBuffer"
           colSpan={rowAttrs.length - rowKey.length + colIncrSpan}
           rowSpan={1}
+          role="columnheader button"
           onClick={this.clickHeaderHandler(
             pivotData,
             rowKey,
@@ -722,7 +748,7 @@ export class TableRenderer extends React.Component {
           onContextMenu={e => this.props.onContextMenu(e, colKey, rowKey)}
           style={style}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), allowRenderHtml)}
         </td>
       );
     });
@@ -739,7 +765,7 @@ export class TableRenderer extends React.Component {
           onClick={rowTotalCallbacks[flatRowKey]}
           onContextMenu={e => this.props.onContextMenu(e, undefined, rowKey)}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), allowRenderHtml)}
         </td>
       );
     }
@@ -772,6 +798,7 @@ export class TableRenderer extends React.Component {
         key="label"
         className="pvtTotalLabel pvtRowTotalLabel"
         colSpan={rowAttrs.length + Math.min(colAttrs.length, 1)}
+        role="columnheader button"
         onClick={this.clickHeaderHandler(
           pivotData,
           [],
@@ -802,7 +829,7 @@ export class TableRenderer extends React.Component {
           onContextMenu={e => this.props.onContextMenu(e, colKey, undefined)}
           style={{ padding: '5px' }}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), this.props.allowRenderHtml)}
         </td>
       );
     });
@@ -819,7 +846,7 @@ export class TableRenderer extends React.Component {
           onClick={grandTotalCallback}
           onContextMenu={e => this.props.onContextMenu(e, undefined, undefined)}
         >
-          {agg.format(aggValue)}
+          {displayCell(agg.format(aggValue), this.props.allowRenderHtml)}
         </td>
       );
     }
@@ -864,6 +891,7 @@ export class TableRenderer extends React.Component {
       colTotals,
       rowSubtotalDisplay,
       colSubtotalDisplay,
+      allowRenderHtml,
     } = this.cachedBasePivotSettings;
 
     // Need to account for exclusions to compute the effective row
@@ -888,6 +916,7 @@ export class TableRenderer extends React.Component {
       maxColVisible: Math.max(...visibleColKeys.map(k => k.length)),
       rowAttrSpans: this.calcAttrSpans(visibleRowKeys, rowAttrs.length),
       colAttrSpans: this.calcAttrSpans(visibleColKeys, colAttrs.length),
+      allowRenderHtml,
       ...this.cachedBasePivotSettings,
     };
 

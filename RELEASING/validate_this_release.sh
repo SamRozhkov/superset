@@ -38,7 +38,11 @@ get_pip_command() {
 PYTHON=$(get_python_command)
 PIP=$(get_pip_command)
 
+<<<<<<< HEAD
 # Get the release directory's path. If you unzip an Apache release and just run the npm script to validate the release, this will be a file name like `apache-superset-x.x.xrcx-source.tar.gz`
+=======
+# Get the release directory's path. If you unzip an Apache release and just run the npm script to validate the release, this will be a file name like `apache_superset-x.x.xrcx-source.tar.gz`
+>>>>>>> 6.0.0
 RELEASE_ZIP_PATH="../../$(basename "$(dirname "$(pwd)")")-source.tar.gz"
 
 # Install dependencies from requirements.txt if the file exists

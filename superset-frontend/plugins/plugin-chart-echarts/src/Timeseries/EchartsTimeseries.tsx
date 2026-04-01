@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DTTM_ALIAS,
   BinaryQueryObjectFilterClause,
@@ -27,9 +27,9 @@ import {
   LegendState,
   ensureIsArray,
 } from '@superset-ui/core';
-import { ViewRootGroup } from 'echarts/types/src/util/types';
-import GlobalModel from 'echarts/types/src/model/Global';
-import ComponentModel from 'echarts/types/src/model/Component';
+import type { ViewRootGroup } from 'echarts/types/src/util/types';
+import type GlobalModel from 'echarts/types/src/model/Global';
+import type ComponentModel from 'echarts/types/src/model/Component';
 import { EchartsHandler, EventHandlers } from '../types';
 import Echart from '../components/Echart';
 import { TimeseriesChartTransformedProps } from './types';
@@ -57,6 +57,7 @@ export default function EchartsTimeseries({
   refs,
   emitCrossFilters,
   coltypeMapping,
+  onLegendScroll,
 }: TimeseriesChartTransformedProps) {
   const { stack } = formData;
   const echartRef = useRef<EchartsHandler | null>(null);
@@ -66,9 +67,35 @@ export default function EchartsTimeseries({
   const extraControlRef = useRef<HTMLDivElement>(null);
   const [extraControlHeight, setExtraControlHeight] = useState(0);
   useEffect(() => {
-    const updatedHeight = extraControlRef.current?.offsetHeight || 0;
-    setExtraControlHeight(updatedHeight);
+    const element = extraControlRef.current;
+    if (!element) {
+      setExtraControlHeight(0);
+      return undefined;
+    }
+
+    const updateHeight = () => {
+      setExtraControlHeight(element.offsetHeight || 0);
+    };
+
+    updateHeight();
+
+    if (typeof ResizeObserver === 'function') {
+      const resizeObserver = new ResizeObserver(() => {
+        updateHeight();
+      });
+      resizeObserver.observe(element);
+      return () => {
+        resizeObserver.disconnect();
+      };
+    }
+
+    window.addEventListener('resize', updateHeight);
+    return () => {
+      window.removeEventListener('resize', updateHeight);
+    };
   }, [formData.showExtraControls]);
+
+  const hasDimensions = ensureIsArray(groupby).length > 0;
 
   const getModelInfo = (target: ViewRootGroup, globalModel: GlobalModel) => {
     let el = target;
@@ -139,6 +166,9 @@ export default function EchartsTimeseries({
 
   const eventHandlers: EventHandlers = {
     click: props => {
+      if (!hasDimensions) {
+        return;
+      }
       if (clickTimer.current) {
         clearTimeout(clickTimer.current);
       }
@@ -153,6 +183,9 @@ export default function EchartsTimeseries({
     },
     mouseover: params => {
       onFocusedSeries(params.seriesName);
+    },
+    legendscroll: payload => {
+      onLegendScroll?.(payload.scrollDataIndex);
     },
     legendselectchanged: payload => {
       onLegendStateChanged?.(payload.selected);
@@ -200,12 +233,22 @@ export default function EchartsTimeseries({
           }),
         );
         groupBy.forEach((dimension, i) => {
+<<<<<<< HEAD
           const val = labelMap[seriesName][i];
+=======
+          const dimensionValues = labelMap[seriesName] ?? [];
+
+          // Skip the metric values at the beginning and get the actual dimension value
+          // If we have multiple metrics, they come first, then the dimension values
+          const metricsCount = dimensionValues.length - groupBy.length;
+          const val = dimensionValues[metricsCount + i];
+
+>>>>>>> 6.0.0
           drillByFilters.push({
             col: dimension,
             op: '==',
             val,
-            formattedVal: formatSeriesName(values[i], {
+            formattedVal: formatSeriesName(val, {
               timeFormatter: getTimeFormatter(formData.dateFormat),
               numberFormatter: getNumberFormatter(formData.numberFormat),
               coltype: coltypeMapping?.[getColumnLabel(dimension)],
@@ -215,8 +258,10 @@ export default function EchartsTimeseries({
 
         onContextMenu(pointerEvent.clientX, pointerEvent.clientY, {
           drillToDetail: drillToDetailFilters,
-          crossFilter: getCrossFilterDataMask(seriesName),
           drillBy: { filters: drillByFilters, groupbyFieldName: 'groupby' },
+          crossFilter: hasDimensions
+            ? getCrossFilterDataMask(seriesName)
+            : undefined,
         });
       }
     },

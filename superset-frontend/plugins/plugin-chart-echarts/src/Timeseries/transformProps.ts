@@ -25,6 +25,7 @@ import {
   CategoricalColorNamespace,
   CurrencyFormatter,
   ensureIsArray,
+  tooltipHtml,
   GenericDataType,
   getCustomFormatter,
   getMetricLabel,
@@ -38,6 +39,7 @@ import {
   isTimeseriesAnnotationLayer,
   t,
   TimeseriesChartDataResponseResult,
+  NumberFormats,
 } from '@superset-ui/core';
 import {
   extractExtraMetrics,
@@ -45,8 +47,17 @@ import {
   isDerivedSeries,
   getTimeOffset,
 } from '@superset-ui/chart-controls';
+<<<<<<< HEAD
 import { EChartsCoreOption, SeriesOption } from 'echarts';
 import { LineStyleOption } from 'echarts/types/src/util/types';
+=======
+import type { EChartsCoreOption } from 'echarts/core';
+import type {
+  LineStyleOption,
+  CallbackDataParams,
+} from 'echarts/types/src/util/types';
+import type { SeriesOption } from 'echarts';
+>>>>>>> 6.0.0
 import {
   EchartsTimeseriesChartProps,
   EchartsTimeseriesFormData,
@@ -62,6 +73,7 @@ import {
   extractDataTotalValues,
   extractSeries,
   extractShowValueIndexes,
+  extractTooltipKeys,
   getAxisType,
   getColtypesMapping,
   getLegendProps,
@@ -77,6 +89,7 @@ import {
   extractForecastValuesFromTooltipParams,
   formatForecastTooltipSeries,
   rebaseForecastDatum,
+  reorderForecastSeries,
 } from '../utils/forecast';
 import { convertInteger } from '../utils/convertInteger';
 import { defaultGrid, defaultYAxis } from '../defaults';
@@ -90,6 +103,7 @@ import {
   transformTimeseriesAnnotation,
 } from './transformers';
 import {
+  OpacityEnum,
   StackControlsValue,
   TIMEGRAIN_TO_TIMESTAMP,
   TIMESERIES_CONSTANTS,
@@ -117,6 +131,7 @@ export default function transformProps(
     theme,
     inContextMenu,
     emitCrossFilters,
+    legendIndex,
   } = chartProps;
 
   let focusedSeries: string | null = null;
@@ -162,17 +177,21 @@ export default function transformProps(
     sortSeriesAscending,
     timeGrainSqla,
     timeCompare,
+    timeShiftColor,
     stack,
     tooltipTimeFormat,
     tooltipSortByMetric,
+    showTooltipTotal,
+    showTooltipPercentage,
     truncateXAxis,
     truncateYAxis,
     xAxis: xAxisOrig,
     xAxisBounds,
     xAxisForceCategorical,
     xAxisLabelRotation,
-    xAxisSortSeries,
-    xAxisSortSeriesAscending,
+    xAxisLabelInterval,
+    xAxisSort,
+    xAxisSortAsc,
     xAxisTimeFormat,
     xAxisTitle,
     xAxisTitleMargin,
@@ -183,10 +202,20 @@ export default function transformProps(
     yAxisTitleMargin,
     yAxisTitlePosition,
     zoomable,
+    stackDimension,
   }: EchartsTimeseriesFormData = { ...DEFAULT_FORM_DATA, ...formData };
+<<<<<<< HEAD
   const refs: Refs = {};
   const groupBy = ensureIsArray(groupby);
   const labelMap = Object.entries(label_map).reduce((acc, entry) => {
+=======
+
+  const refs: Refs = {};
+  const groupBy = ensureIsArray(groupby);
+  const labelMap: { [key: string]: string[] } = Object.entries(
+    label_map,
+  ).reduce((acc, entry) => {
+>>>>>>> 6.0.0
     if (
       entry[1].length > groupBy.length &&
       Array.isArray(timeCompare) &&
@@ -196,7 +225,6 @@ export default function transformProps(
     }
     return { ...acc, [entry[0]]: entry[1] };
   }, {});
-
   const colorScale = CategoricalColorNamespace.getScale(colorScheme as string);
   const rebasedData = rebaseForecastDatum(data, verboseMap);
   let xAxisLabel = getXAxisLabel(chartProps.rawFormData) as string;
@@ -221,6 +249,11 @@ export default function transformProps(
   );
 
   const isMultiSeries = groupBy.length || metrics?.length > 1;
+<<<<<<< HEAD
+=======
+  const xAxisDataType = dataTypes?.[xAxisLabel] ?? dataTypes?.[xAxisOrig];
+  const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
+>>>>>>> 6.0.0
 
   const [rawSeries, sortedTotalValues, minPositiveValue] = extractSeries(
     rebasedData,
@@ -233,10 +266,9 @@ export default function transformProps(
       isHorizontal,
       sortSeriesType,
       sortSeriesAscending,
-      xAxisSortSeries: isMultiSeries ? xAxisSortSeries : undefined,
-      xAxisSortSeriesAscending: isMultiSeries
-        ? xAxisSortSeriesAscending
-        : undefined,
+      xAxisSortSeries: isMultiSeries ? xAxisSort : undefined,
+      xAxisSortSeriesAscending: isMultiSeries ? xAxisSortAsc : undefined,
+      xAxisType,
     },
   );
   const showValueIndexes = extractShowValueIndexes(rawSeries, {
@@ -246,16 +278,15 @@ export default function transformProps(
     legendState,
   });
   const seriesContexts = extractForecastSeriesContexts(
-    Object.values(rawSeries).map(series => series.name as string),
+    rawSeries.map(series => series.name as string),
   );
   const isAreaExpand = stack === StackControlsValue.Expand;
-  const xAxisDataType = dataTypes?.[xAxisLabel] ?? dataTypes?.[xAxisOrig];
-
-  const xAxisType = getAxisType(stack, xAxisForceCategorical, xAxisDataType);
   const series: SeriesOption[] = [];
 
   const forcePercentFormatter = Boolean(contributionMode || isAreaExpand);
-  const percentFormatter = getPercentFormatter(yAxisFormat);
+  const percentFormatter = forcePercentFormatter
+    ? getPercentFormatter(yAxisFormat)
+    : getPercentFormatter(NumberFormats.PERCENT_2_POINT);
   const defaultFormatter = currencyFormat?.symbol
     ? new CurrencyFormatter({ d3Format: yAxisFormat, currency: currencyFormat })
     : getNumberFormatter(yAxisFormat);
@@ -270,12 +301,17 @@ export default function transformProps(
   const array = ensureIsArray(chartProps.rawFormData?.time_compare);
   const inverted = invert(verboseMap);
 
+<<<<<<< HEAD
   const offsetLineWidths = {};
+=======
+  let patternIncrement = 0;
+>>>>>>> 6.0.0
 
   rawSeries.forEach(entry => {
     const derivedSeries = isDerivedSeries(entry, chartProps.rawFormData);
     const lineStyle: LineStyleOption = {};
     if (derivedSeries) {
+<<<<<<< HEAD
       const offset = getTimeOffset(
         entry,
         ensureIsArray(chartProps.rawFormData?.time_compare),
@@ -285,11 +321,34 @@ export default function transformProps(
       }
       lineStyle.type = 'dashed';
       lineStyle.width = offsetLineWidths[offset];
+=======
+      patternIncrement += 1;
+      // use a combination of dash and dot for the line style
+      lineStyle.type = [(patternIncrement % 5) + 1, (patternIncrement % 3) + 1];
+      lineStyle.opacity = OpacityEnum.DerivedSeries;
+>>>>>>> 6.0.0
     }
 
     const entryName = String(entry.name || '');
     const seriesName = inverted[entryName] || entryName;
-    const colorScaleKey = getOriginalSeries(seriesName, array);
+
+    let colorScaleKey = getOriginalSeries(seriesName, array);
+
+    // If this series name exactly matches a time compare value, it's a time-shifted series
+    // and we need to find the corresponding original series for color matching
+    if (array && array.includes(seriesName)) {
+      // Find the original series (first non-time-compare series)
+      const originalSeries = rawSeries.find(s => {
+        const sName = inverted[String(s.name || '')] || String(s.name || '');
+        return !array.includes(sName);
+      });
+      if (originalSeries) {
+        const originalSeriesName =
+          inverted[String(originalSeries.name || '')] ||
+          String(originalSeries.name || '');
+        colorScaleKey = getOriginalSeries(originalSeriesName, array);
+      }
+    }
 
     const transformedSeries = transformSeries(
       entry,
@@ -308,11 +367,11 @@ export default function transformProps(
         stack,
         formatter: forcePercentFormatter
           ? percentFormatter
-          : getCustomFormatter(
+          : (getCustomFormatter(
               customFormatters,
               metrics,
               labelMap?.[seriesName]?.[0],
-            ) ?? defaultFormatter,
+            ) ?? defaultFormatter),
         showValue,
         onlyTotal,
         totalStackedValues: sortedTotalValues,
@@ -322,6 +381,9 @@ export default function transformProps(
         sliceId,
         isHorizontal,
         lineStyle,
+        timeCompare: array,
+        timeShiftColor,
+        theme,
       },
     );
     if (transformedSeries) {
@@ -370,6 +432,7 @@ export default function transformProps(
             xAxisType,
             colorScale,
             sliceId,
+            orientation,
           ),
         );
       else if (isIntervalAnnotationLayer(layer)) {
@@ -381,6 +444,7 @@ export default function transformProps(
             colorScale,
             theme,
             sliceId,
+            orientation,
           ),
         );
       } else if (isEventAnnotationLayer(layer)) {
@@ -392,6 +456,7 @@ export default function transformProps(
             colorScale,
             theme,
             sliceId,
+            orientation,
           ),
         );
       } else if (isTimeseriesAnnotationLayer(layer)) {
@@ -403,10 +468,28 @@ export default function transformProps(
             annotationData,
             colorScale,
             sliceId,
+            orientation,
           ),
         );
       }
     });
+
+  if (
+    stack === StackControlsValue.Stack &&
+    stackDimension &&
+    chartProps.rawFormData.groupby
+  ) {
+    const idxSelectedDimension =
+      formData.metrics.length > 1
+        ? 1
+        : 0 + chartProps.rawFormData.groupby.indexOf(stackDimension);
+    for (const s of series) {
+      if (s.id) {
+        const columnsArr = labelMap[s.id];
+        (s as any).stack = columnsArr[idxSelectedDimension];
+      }
+    }
+  }
 
   // axis bounds need to be parsed to replace incompatible values with undefined
   const [xAxisMin, xAxisMax] = (xAxisBounds || []).map(parseAxisBound);
@@ -438,6 +521,7 @@ export default function transformProps(
     setControlValue = () => {},
     onContextMenu,
     onLegendStateChanged,
+    onLegendScroll,
   } = hooks;
 
   const addYAxisLabelOffset = !!yAxisTitle;
@@ -462,7 +546,7 @@ export default function transformProps(
         ForecastSeriesEnum.Observation,
     )
     .map(entry => entry.name || '')
-    .concat(extractAnnotationLabels(annotationLayers, annotationData));
+    .concat(extractAnnotationLabels(annotationLayers));
 
   let xAxis: any = {
     type: xAxisType,
@@ -473,11 +557,14 @@ export default function transformProps(
       hideOverlap: true,
       formatter: xAxisFormatter,
       rotate: xAxisLabelRotation,
+      interval: xAxisLabelInterval,
     },
     minorTick: { show: minorTicks },
     minInterval:
       xAxisType === AxisType.Time && timeGrainSqla
-        ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+        ? TIMEGRAIN_TO_TIMESTAMP[
+            timeGrainSqla as keyof typeof TIMEGRAIN_TO_TIMESTAMP
+          ]
         : 0,
     ...getMinAndMaxFromBounds(
       xAxisType,
@@ -532,16 +619,26 @@ export default function transformProps(
         const xValue: number = richTooltip
           ? params[0].value[xIndex]
           : params.value[xIndex];
-        const forecastValue: any[] = richTooltip ? params : [params];
-
-        if (richTooltip && tooltipSortByMetric) {
-          forecastValue.sort((a, b) => b.data[yIndex] - a.data[yIndex]);
-        }
-
-        const rows: string[] = [];
+        const forecastValue: CallbackDataParams[] = richTooltip
+          ? params
+          : [params];
+        const sortedKeys = extractTooltipKeys(
+          forecastValue,
+          yIndex,
+          richTooltip,
+          tooltipSortByMetric,
+        );
+        const filteredForecastValue = forecastValue.filter(
+          (item: CallbackDataParams) =>
+            !annotationLayers.some(
+              (annotation: AnnotationLayer) =>
+                item.seriesName === annotation.name,
+            ),
+        );
         const forecastValues: Record<string, ForecastValue> =
           extractForecastValuesFromTooltipParams(forecastValue, isHorizontal);
 
+<<<<<<< HEAD
         Object.keys(forecastValues).forEach(key => {
           const value = forecastValues[key];
           if (value.observation === 0 && stack) {
@@ -558,16 +655,79 @@ export default function transformProps(
               ? percentFormatter
               : getCustomFormatter(customFormatters, metrics, formatterKey) ??
                 defaultFormatter,
+=======
+        const filteredForecastValues: Record<string, ForecastValue> =
+          extractForecastValuesFromTooltipParams(
+            filteredForecastValue,
+            isHorizontal,
+          );
+
+        const isForecast = Object.values(forecastValues).some(
+          value =>
+            value.forecastTrend || value.forecastLower || value.forecastUpper,
+        );
+
+        const formatter = forcePercentFormatter
+          ? percentFormatter
+          : (getCustomFormatter(customFormatters, metrics) ?? defaultFormatter);
+
+        const rows: string[][] = [];
+        const total = Object.values(filteredForecastValues).reduce(
+          (acc, value) =>
+            value.observation !== undefined ? acc + value.observation : acc,
+          0,
+        );
+        const allowTotal = Boolean(isMultiSeries) && richTooltip && !isForecast;
+        const showPercentage =
+          allowTotal && !forcePercentFormatter && showTooltipPercentage;
+        const keys = Object.keys(forecastValues);
+        let focusedRow;
+        sortedKeys
+          .filter(key => keys.includes(key))
+          .forEach(key => {
+            const value = forecastValues[key];
+            if (value.observation === 0 && stack) {
+              return;
+            }
+            const row = formatForecastTooltipSeries({
+              ...value,
+              seriesName: key,
+              formatter,
+            });
+
+            const annotationRow = annotationLayers.some(
+              item => item.name === key,
+            );
+
+            if (
+              showPercentage &&
+              value.observation !== undefined &&
+              !annotationRow
+            ) {
+              row.push(
+                percentFormatter.format(value.observation / (total || 1)),
+              );
+            }
+            rows.push(row);
+            if (key === focusedSeries) {
+              focusedRow = rows.length - 1;
+            }
+>>>>>>> 6.0.0
           });
-          const contentStyle =
-            key === focusedSeries ? 'font-weight: 700' : 'opacity: 0.7';
-          rows.push(`<span style="${contentStyle}">${content}</span>`);
-        });
         if (stack) {
           rows.reverse();
+          if (focusedRow !== undefined) {
+            focusedRow = rows.length - focusedRow - 1;
+          }
         }
-        rows.unshift(`${tooltipFormatter(xValue)}`);
-        return rows.join('<br />');
+        if (allowTotal && showTooltipTotal) {
+          const totalRow = ['Total', formatter.format(total)];
+          if (showPercentage) {
+            totalRow.push(percentFormatter.format(1));
+          }
+          rows.push(totalRow);
+        }
+        return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
       },
     },
     legend: {
@@ -578,10 +738,12 @@ export default function transformProps(
         theme,
         zoomable,
         legendState,
+        padding,
       ),
+      scrollDataIndex: legendIndex || 0,
       data: legendData as string[],
     },
-    series: dedupSeries(series),
+    series: dedupSeries(reorderForecastSeries(series) as SeriesOption[]),
     toolbox: {
       show: zoomable,
       top: TIMESERIES_CONSTANTS.toolboxTop,
@@ -604,6 +766,21 @@ export default function transformProps(
             end: TIMESERIES_CONSTANTS.dataZoomEnd,
             bottom: TIMESERIES_CONSTANTS.zoomBottom,
             yAxisIndex: isHorizontal ? 0 : undefined,
+<<<<<<< HEAD
+=======
+          },
+          {
+            type: 'inside',
+            yAxisIndex: 0,
+            zoomOnMouseWheel: false,
+            moveOnMouseWheel: true,
+          },
+          {
+            type: 'inside',
+            xAxisIndex: 0,
+            zoomOnMouseWheel: false,
+            moveOnMouseWheel: true,
+>>>>>>> 6.0.0
           },
         ]
       : [],
@@ -612,7 +789,6 @@ export default function transformProps(
   const onFocusedSeries = (seriesName: string | null) => {
     focusedSeries = seriesName;
   };
-
   return {
     echartOptions,
     emitCrossFilters,
@@ -635,5 +811,6 @@ export default function transformProps(
     },
     refs,
     coltypeMapping: dataTypes,
+    onLegendScroll,
   };
 }

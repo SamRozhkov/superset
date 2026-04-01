@@ -19,7 +19,6 @@ import logging
 from abc import ABC
 from typing import Any, cast, Optional
 
-import simplejson as json
 from flask import request
 from flask_babel import lazy_gettext as _
 from sqlalchemy.exc import SQLAlchemyError
@@ -38,7 +37,11 @@ from superset.exceptions import SupersetException
 from superset.explore.exceptions import WrongEndpointError
 from superset.explore.permalink.exceptions import ExplorePermalinkGetFailedError
 from superset.extensions import security_manager
+<<<<<<< HEAD
 from superset.utils import core as utils
+=======
+from superset.utils import core as utils, json
+>>>>>>> 6.0.0
 from superset.views.utils import (
     get_datasource_info,
     get_form_data,
@@ -60,7 +63,7 @@ class GetExploreCommand(BaseCommand, ABC):
         self._slice_id = params.slice_id
 
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
-    def run(self) -> Optional[dict[str, Any]]:
+    def run(self) -> Optional[dict[str, Any]]:  # noqa: C901
         initial_form_data = {}
         if self._permalink_key is not None:
             command = GetExplorePermalinkCommand(self._permalink_key)
@@ -87,9 +90,9 @@ class GetExploreCommand(BaseCommand, ABC):
                         "Form data not found in cache, reverting to chart metadata."
                     )
             elif self._datasource_id:
-                initial_form_data[
-                    "datasource"
-                ] = f"{self._datasource_id}__{self._datasource_type}"
+                initial_form_data["datasource"] = (
+                    f"{self._datasource_id}__{self._datasource_type}"
+                )
                 if self._form_data_key:
                     message = _(
                         "Form data not found in cache, reverting to dataset metadata."
@@ -121,7 +124,11 @@ class GetExploreCommand(BaseCommand, ABC):
 
         if datasource:
             datasource_name = datasource.name
+<<<<<<< HEAD
             security_manager.can_access_datasource(datasource)
+=======
+            security_manager.raise_for_access(datasource=datasource)
+>>>>>>> 6.0.0
 
         viz_type = form_data.get("viz_type")
         if not viz_type and datasource and datasource.default_endpoint:

@@ -16,6 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
+=======
+import { VizType } from '@superset-ui/core';
+>>>>>>> 6.0.0
 import { displayTimeRelatedControls } from '../../src';
 
 const mockData = {
@@ -35,7 +39,11 @@ const mockData = {
   exportState: {},
   form_data: {
     datasource: '22__table',
+<<<<<<< HEAD
     viz_type: 'table',
+=======
+    viz_type: VizType.Table,
+>>>>>>> 6.0.0
   },
 };
 

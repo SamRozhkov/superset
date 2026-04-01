@@ -16,8 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { isValidElement } from 'react';
+import { render, screen } from '@superset-ui/core/spec';
 import '@testing-library/jest-dom';
 import { GenericDataType } from '@superset-ui/core';
 
@@ -35,9 +35,7 @@ describe('ColumnOption', () => {
   }
 
   it('is a valid element', () => {
-    expect(React.isValidElement(<ColumnTypeLabel {...defaultProps} />)).toBe(
-      true,
-    );
+    expect(isValidElement(<ColumnTypeLabel {...defaultProps} />)).toBe(true);
   });
   it('string type shows ABC icon', () => {
     renderColumnTypeLabel({ type: GenericDataType.String });

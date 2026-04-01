@@ -16,7 +16,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, ReactNode } from 'react';
+
 import { useSelector } from 'react-redux';
 import { AdhocColumn, t, isAdhocColumn } from '@superset-ui/core';
 import { ColumnMeta, isColumnMeta } from '@superset-ui/chart-controls';
@@ -34,8 +35,9 @@ interface ColumnSelectPopoverTriggerProps {
   visible?: boolean;
   togglePopover?: (visible: boolean) => void;
   closePopover?: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   isTemporal?: boolean;
+  disabledTabs?: Set<string>;
 }
 
 const defaultPopoverLabel = t('My column');
@@ -48,6 +50,7 @@ const ColumnSelectPopoverTrigger = ({
   isControlledComponent,
   children,
   isTemporal,
+  disabledTabs,
   ...props
 }: ColumnSelectPopoverTriggerProps) => {
   // @ts-ignore
@@ -64,10 +67,6 @@ const ColumnSelectPopoverTrigger = ({
   } else if (editedColumn && isAdhocColumn(editedColumn)) {
     initialPopoverLabel = editedColumn.label || defaultPopoverLabel;
   }
-
-  useEffect(() => {
-    setPopoverLabel(initialPopoverLabel);
-  }, [initialPopoverLabel, popoverVisible]);
 
   const togglePopover = useCallback((visible: boolean) => {
     setPopoverVisible(visible);
@@ -94,6 +93,13 @@ const ColumnSelectPopoverTrigger = ({
     setIsTitleEditDisabled(tab !== editableTitleTab);
   }, []);
 
+  useEffect(() => {
+    setPopoverLabel(initialPopoverLabel);
+    if (!visible) {
+      setHasCustomLabel(false);
+    }
+  }, [initialPopoverLabel, visible]);
+
   const overlayContent = useMemo(
     () => (
       <ExplorePopoverContent>
@@ -108,6 +114,7 @@ const ColumnSelectPopoverTrigger = ({
           setLabel={setPopoverLabel}
           getCurrentTab={getCurrentTab}
           isTemporal={isTemporal}
+          disabledTabs={disabledTabs}
         />
       </ExplorePopoverContent>
     ),
@@ -120,6 +127,7 @@ const ColumnSelectPopoverTrigger = ({
       isTemporal,
       onColumnEdit,
       popoverLabel,
+      disabledTabs,
     ],
   );
 
@@ -160,9 +168,9 @@ const ColumnSelectPopoverTrigger = ({
       <ControlPopover
         trigger="click"
         content={overlayContent}
-        defaultVisible={visible}
-        visible={visible}
-        onVisibleChange={handleTogglePopover}
+        defaultOpen={visible}
+        open={visible}
+        onOpenChange={handleTogglePopover}
         title={popoverTitle}
         destroyTooltipOnHide
       >

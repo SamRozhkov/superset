@@ -16,9 +16,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
 import { render, waitFor } from 'spec/helpers/testing-library';
 import ListView from './ListView';
+=======
+import { render, waitFor } from 'spec/helpers/testing-library';
+import { ListView } from './ListView';
+>>>>>>> 6.0.0
 
 const mockedProps = {
   title: 'Data Table',
@@ -27,18 +32,34 @@ const mockedProps = {
       accessor: 'id',
       Header: 'ID',
       sortable: true,
+<<<<<<< HEAD
+=======
+      id: 'id',
+>>>>>>> 6.0.0
     },
     {
       accessor: 'age',
       Header: 'Age',
+<<<<<<< HEAD
+=======
+      id: 'age',
+>>>>>>> 6.0.0
     },
     {
       accessor: 'name',
       Header: 'Name',
+<<<<<<< HEAD
+=======
+      id: 'name',
+>>>>>>> 6.0.0
     },
     {
       accessor: 'time',
       Header: 'Time',
+<<<<<<< HEAD
+=======
+      id: 'time',
+>>>>>>> 6.0.0
     },
   ],
   data: [
@@ -62,7 +83,11 @@ test('redirects to first page when page index is invalid', async () => {
   });
   await waitFor(() => {
     expect(window.location.search).toEqual('?pageIndex=0');
+<<<<<<< HEAD
     expect(fetchData).toBeCalledTimes(2);
+=======
+    expect(fetchData).toHaveBeenCalledTimes(2);
+>>>>>>> 6.0.0
     expect(fetchData).toHaveBeenCalledWith(
       expect.objectContaining({ pageIndex: 9 }),
     );

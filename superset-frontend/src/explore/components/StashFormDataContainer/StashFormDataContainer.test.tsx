@@ -16,7 +16,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
+=======
+>>>>>>> 6.0.0
 import { defaultState } from 'src/explore/store';
 import { render, waitFor } from 'spec/helpers/testing-library';
 import { useSelector } from 'react-redux';

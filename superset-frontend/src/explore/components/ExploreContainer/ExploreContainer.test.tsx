@@ -16,7 +16,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React from 'react';
+=======
+import { useContext } from 'react';
+>>>>>>> 6.0.0
 import { fireEvent, render } from 'spec/helpers/testing-library';
 import { OptionControlLabel } from 'src/explore/components/controls/OptionControls';
 
@@ -26,7 +30,11 @@ import DatasourcePanelDragOption from '../DatasourcePanel/DatasourcePanelDragOpt
 import { DndItemType } from '../DndItemType';
 
 const MockChildren = () => {
+<<<<<<< HEAD
   const dragging = React.useContext(DraggingContext);
+=======
+  const dragging = useContext(DraggingContext);
+>>>>>>> 6.0.0
   return (
     <div data-test="mock-children" className={dragging ? 'dragging' : ''}>
       {dragging ? 'dragging' : 'not dragging'}
@@ -35,7 +43,11 @@ const MockChildren = () => {
 };
 
 const MockChildren2 = () => {
+<<<<<<< HEAD
   const [zones, dispatch] = React.useContext(DropzoneContext);
+=======
+  const [zones, dispatch] = useContext(DropzoneContext);
+>>>>>>> 6.0.0
   return (
     <>
       <div data-test="mock-children">{Object.keys(zones).join(':')}</div>
@@ -76,7 +88,11 @@ test('should only propagate dragging state when dragging the panel option', () =
   const { container, getByText } = render(
     <ExploreContainer>
       <DatasourcePanelDragOption
+<<<<<<< HEAD
         value={{ metric_name: 'panel option' }}
+=======
+        value={{ metric_name: 'panel option', uuid: '1' }}
+>>>>>>> 6.0.0
         type={DndItemType.Metric}
       />
       <OptionControlLabel

@@ -18,15 +18,13 @@ import logging
 from typing import Any, cast, Optional
 from urllib import parse
 
-import simplejson as json
-import sqlparse
-from flask import request, Response
+from flask import current_app as app, request, Response
 from flask_appbuilder import permission_name
 from flask_appbuilder.api import expose, protect, rison, safe
 from flask_appbuilder.models.sqla.interface import SQLAInterface
 from marshmallow import ValidationError
 
-from superset import app, is_feature_enabled
+from superset import is_feature_enabled
 from superset.commands.sql_lab.estimate import QueryEstimationCommand
 from superset.commands.sql_lab.execute import CommandResult, ExecuteSqlCommand
 from superset.commands.sql_lab.export import SqlResultExportCommand
@@ -37,6 +35,7 @@ from superset.daos.query import QueryDAO
 from superset.extensions import event_logger
 from superset.jinja_context import get_template_processor
 from superset.models.sql_lab import Query
+from superset.sql.parse import SQLScript
 from superset.sql_lab import get_sql_results
 from superset.sqllab.command_status import SqlJsonExecutionStatus
 from superset.sqllab.exceptions import (
@@ -62,11 +61,10 @@ from superset.sqllab.sqllab_execution_context import SqlJsonExecutionContext
 from superset.sqllab.utils import bootstrap_sqllab_data
 from superset.sqllab.validators import CanAccessQueryValidatorImpl
 from superset.superset_typing import FlaskResponse
-from superset.utils import core as utils
+from superset.utils import core as utils, json
 from superset.views.base import CsvResponse, generate_download_headers, json_success
 from superset.views.base_api import BaseSupersetApi, requires_json, statsd_metrics
 
-config = app.config
 logger = logging.getLogger(__name__)
 
 
@@ -90,6 +88,7 @@ class SqlLabRestApi(BaseSupersetApi):
     openapi_spec_component_schemas = (
         EstimateQueryCostSchema,
         ExecutePayloadSchema,
+        FormatQueryPayloadSchema,
         QueryExecutionResponseSchema,
         SQLLabBootstrapSchema,
     )
@@ -134,7 +133,7 @@ class SqlLabRestApi(BaseSupersetApi):
         return json_success(
             json.dumps(
                 {"result": result},
-                default=utils.json_iso_dttm_ser,
+                default=json.json_iso_dttm_ser,
                 ignore_nan=True,
             ),
             200,
@@ -194,7 +193,7 @@ class SqlLabRestApi(BaseSupersetApi):
     @protect()
     @permission_name("read")
     @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}" f".format",
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.format",
         log_to_statsd=False,
     )
     def format_sql(self) -> FlaskResponse:
@@ -230,7 +229,7 @@ class SqlLabRestApi(BaseSupersetApi):
         """
         try:
             model = self.format_model_schema.load(request.json)
-            result = sqlparse.format(model["sql"], reindent=True, keyword_case="upper")
+            result = SQLScript(model["sql"], model.get("engine")).format()
             return self.response(200, result=result)
         except ValidationError as error:
             return self.response_400(message=error.messages)
@@ -239,8 +238,7 @@ class SqlLabRestApi(BaseSupersetApi):
     @protect()
     @statsd_metrics
     @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}"
-        f".export_csv",
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.export_csv",
         log_to_statsd=False,
     )
     def export_csv(self, client_id: str) -> CsvResponse:
@@ -285,6 +283,7 @@ class SqlLabRestApi(BaseSupersetApi):
             "client_id": client_id,
             "row_count": row_count,
             "database": query.database.name,
+            "catalog": query.catalog,
             "schema": query.schema,
             "sql": query.sql,
             "exported_format": "csv",
@@ -300,8 +299,7 @@ class SqlLabRestApi(BaseSupersetApi):
     @statsd_metrics
     @rison(sql_lab_get_results_schema)
     @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}"
-        f".get_results",
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.get_results",
         log_to_statsd=False,
     )
     def get_results(self, **kwargs: Any) -> FlaskResponse:
@@ -345,7 +343,11 @@ class SqlLabRestApi(BaseSupersetApi):
         # unserializeable types at times
         payload = json.dumps(
             result,
+<<<<<<< HEAD
             default=utils.pessimistic_json_iso_dttm_ser,
+=======
+            default=json.pessimistic_json_iso_dttm_ser,
+>>>>>>> 6.0.0
             ignore_nan=True,
         )
         return json_success(payload, 200)
@@ -355,8 +357,7 @@ class SqlLabRestApi(BaseSupersetApi):
     @statsd_metrics
     @requires_json
     @event_logger.log_this_with_context(
-        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}"
-        f".get_results",
+        action=lambda self, *args, **kwargs: f"{self.__class__.__name__}.get_results",
         log_to_statsd=False,
     )
     def execute_sql_query(self) -> FlaskResponse:
@@ -433,7 +434,7 @@ class SqlLabRestApi(BaseSupersetApi):
         )
         execution_context_convertor = ExecutionContextConvertor()
         execution_context_convertor.set_max_row_in_display(
-            int(config.get("DISPLAY_MAX_ROW"))
+            int(app.config.get("DISPLAY_MAX_ROW"))
         )
         return ExecuteSqlCommand(
             execution_context,
@@ -443,7 +444,7 @@ class SqlLabRestApi(BaseSupersetApi):
             SqlQueryRenderImpl(get_template_processor),
             sql_json_executor,
             execution_context_convertor,
-            config["SQLLAB_CTAS_NO_LIMIT"],
+            app.config["SQLLAB_CTAS_NO_LIMIT"],
             log_params,
         )
 
@@ -458,7 +459,7 @@ class SqlLabRestApi(BaseSupersetApi):
             sql_json_executor = SynchronousSqlJsonExecutor(
                 query_dao,
                 get_sql_results,
-                config.get("SQLLAB_TIMEOUT"),
+                app.config.get("SQLLAB_TIMEOUT"),
                 is_feature_enabled("SQLLAB_BACKEND_PERSISTENCE"),
             )
         return sql_json_executor

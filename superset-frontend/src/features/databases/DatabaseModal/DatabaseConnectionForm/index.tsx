@@ -16,6 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+<<<<<<< HEAD
 import React, { FormEvent } from 'react';
 import {
   SupersetTheme,
@@ -116,6 +117,13 @@ interface DatabaseConnectionFormProps {
   clearValidationErrors: () => void;
   getPlaceholder?: (field: string) => string | undefined;
 }
+=======
+import { SupersetTheme } from '@superset-ui/core';
+import { Form } from '@superset-ui/core/components';
+import { FormFieldOrder, FORM_FIELD_MAP } from './constants';
+import { formScrollableStyles, validatedFormStyles } from '../styles';
+import { DatabaseConnectionFormProps } from '../../types';
+>>>>>>> 6.0.0
 
 const DatabaseConnectionForm = ({
   dbModel,
@@ -127,6 +135,7 @@ const DatabaseConnectionForm = ({
   onAddTableCatalog,
   onChange,
   onExtraInputChange,
+  onEncryptedExtraInputChange,
   onParametersChange,
   onParametersUploadFileChange,
   onQueryChange,
@@ -134,8 +143,22 @@ const DatabaseConnectionForm = ({
   sslForced,
   validationErrors,
   clearValidationErrors,
+<<<<<<< HEAD
 }: DatabaseConnectionFormProps) => {
   const parameters = dbModel?.parameters;
+=======
+  isValidating,
+}: DatabaseConnectionFormProps) => {
+  const parameters = dbModel?.parameters as {
+    properties: {
+      [key: string]: {
+        default?: any;
+        description?: string;
+      };
+    };
+    required?: string[];
+  };
+>>>>>>> 6.0.0
 
   return (
     <Form>
@@ -152,6 +175,10 @@ const DatabaseConnectionForm = ({
               Object.keys(parameters.properties).includes(key) ||
               key === 'database_name',
           ).map(field =>
+<<<<<<< HEAD
+=======
+            // @ts-ignore TODO: fix ComponentClass for SSHTunnelSwitchComponent not having call signature.
+>>>>>>> 6.0.0
             FORM_FIELD_MAP[field]({
               required: parameters.required?.includes(field),
               changeMethods: {
@@ -162,6 +189,10 @@ const DatabaseConnectionForm = ({
                 onAddTableCatalog,
                 onRemoveTableCatalog,
                 onExtraInputChange,
+<<<<<<< HEAD
+=======
+                onEncryptedExtraInputChange,
+>>>>>>> 6.0.0
               },
               validationErrors,
               getValidation,
@@ -169,9 +200,18 @@ const DatabaseConnectionForm = ({
               db,
               key: field,
               field,
+<<<<<<< HEAD
               isEditMode,
               sslForced,
               editNewDb,
+=======
+              default_value: parameters.properties[field]?.default,
+              description: parameters.properties[field]?.description,
+              isEditMode,
+              sslForced,
+              editNewDb,
+              isValidating,
+>>>>>>> 6.0.0
               placeholder: getPlaceholder ? getPlaceholder(field) : undefined,
             }),
           )}

@@ -16,14 +16,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useState,
+  memo,
+  ChangeEvent,
+  MouseEvent,
+} from 'react';
+
+import AutoSizer from 'react-virtualized-auto-sizer';
 import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { pick } from 'lodash';
-import ButtonGroup from 'src/components/ButtonGroup';
-import Alert from 'src/components/Alert';
-import Button from 'src/components/Button';
-import shortid from 'shortid';
+import {
+  Alert,
+  Button,
+  ButtonGroup,
+  Tooltip,
+  Card,
+  Modal,
+  Input,
+  Label,
+  Loading,
+} from '@superset-ui/core/components';
+import {
+  CopyToClipboard,
+  FilterableTable,
+  ErrorMessageWithStackTrace,
+} from 'src/components';
+import { nanoid } from 'nanoid';
 import {
   QueryState,
   styled,
@@ -34,8 +56,8 @@ import {
   css,
   getNumberFormatter,
   getExtensionsRegistry,
+  ErrorTypeEnum,
 } from '@superset-ui/core';
-import ErrorMessageWithStackTrace from 'src/components/ErrorMessage/ErrorMessageWithStackTrace';
 import {
   ISaveableDatasource,
   ISimpleColumn,
@@ -44,15 +66,10 @@ import {
 import { EXPLORE_CHART_DEFAULT, SqlLabRootState } from 'src/SqlLab/types';
 import { mountExploreUrl } from 'src/explore/exploreUtils';
 import { postFormData } from 'src/explore/exploreUtils/formData';
-import ProgressBar from 'src/components/ProgressBar';
-import Loading from 'src/components/Loading';
-import Card from 'src/components/Card';
-import Label from 'src/components/Label';
-import { Tooltip } from 'src/components/Tooltip';
-import FilterableTable from 'src/components/FilterableTable';
-import CopyToClipboard from 'src/components/CopyToClipboard';
+import ProgressBar from '@superset-ui/core/components/ProgressBar';
 import { addDangerToast } from 'src/components/MessageToasts/actions';
 import { prepareCopyToClipboardTabularData } from 'src/utils/common';
+import { getItem, LocalStorageKeys } from 'src/utils/localStorageHelpers';
 import {
   addQueryEditor,
   clearQueryResults,
@@ -68,7 +85,13 @@ import {
   LOG_ACTIONS_SQLLAB_CREATE_CHART,
   LOG_ACTIONS_SQLLAB_DOWNLOAD_CSV,
 } from 'src/logger/LogUtils';
+<<<<<<< HEAD
 import Icons from 'src/components/Icons';
+=======
+import { Icons } from '@superset-ui/core/components/Icons';
+import { findPermission } from 'src/utils/findPermission';
+import { ensureAppRoot } from 'src/utils/pathUtils';
+>>>>>>> 6.0.0
 import ExploreCtasResultsButton from '../ExploreCtasResultsButton';
 import ExploreResultsButton from '../ExploreResultsButton';
 import HighlightedSql from '../HighlightedSql';
@@ -98,24 +121,25 @@ export interface ResultSetProps {
 const ResultContainer = styled.div`
   display: flex;
   flex-direction: column;
-  row-gap: ${({ theme }) => theme.gridUnit * 2}px;
+  row-gap: ${({ theme }) => theme.sizeUnit * 2}px;
+  height: 100%;
 `;
 
 const ResultlessStyles = styled.div`
   position: relative;
-  min-height: ${({ theme }) => theme.gridUnit * 25}px;
+  min-height: ${({ theme }) => theme.sizeUnit * 25}px;
   [role='alert'] {
-    margin-top: ${({ theme }) => theme.gridUnit * 2}px;
+    margin-top: ${({ theme }) => theme.sizeUnit * 2}px;
   }
   .sql-result-track-job {
-    margin-top: ${({ theme }) => theme.gridUnit * 2}px;
+    margin-top: ${({ theme }) => theme.sizeUnit * 2}px;
   }
 `;
 
 // Making text render line breaks/tabs as is as monospace,
 // but wrapping text too so text doesn't overflow
 const MonospaceDiv = styled.div`
-  font-family: ${({ theme }) => theme.typography.families.monospace};
+  font-family: ${({ theme }) => theme.fontFamilyCode};
   white-space: pre;
   word-break: break-word;
   overflow-x: auto;
@@ -123,19 +147,29 @@ const MonospaceDiv = styled.div`
 `;
 
 const ReturnedRows = styled.div`
-  font-size: ${({ theme }) => theme.typography.sizes.s}px;
+  font-size: ${({ theme }) => theme.fontSizeSM}px;
   line-height: 1;
 `;
 
 const ResultSetControls = styled.div`
   display: flex;
   justify-content: space-between;
+  padding-left: ${({ theme }) => theme.sizeUnit * 4}px;
 `;
 
 const ResultSetButtons = styled.div`
   display: grid;
   grid-auto-flow: column;
-  padding-right: ${({ theme }) => 2 * theme.gridUnit}px;
+  padding-right: ${({ theme }) => 2 * theme.sizeUnit}px;
+`;
+
+const copyButtonStyles = css`
+  &:hover {
+    text-decoration: unset;
+  }
+  span > :first-of-type {
+    margin: 0px;
+  }
 `;
 
 const ROWS_CHIP_WIDTH = 100;
@@ -168,6 +202,10 @@ const ResultSet = ({
         'dbId',
         'tab',
         'sql',
+<<<<<<< HEAD
+=======
+        'executedSql',
+>>>>>>> 6.0.0
         'sqlEditorId',
         'templateParams',
         'schema',
@@ -195,7 +233,6 @@ const ResultSet = ({
   const [searchText, setSearchText] = useState('');
   const [cachedData, setCachedData] = useState<Record<string, unknown>[]>([]);
   const [showSaveDatasetModal, setShowSaveDatasetModal] = useState(false);
-  const [alertIsOpen, setAlertIsOpen] = useState(false);
 
   const history = useHistory();
   const dispatch = useDispatch();
@@ -215,8 +252,8 @@ const ResultSet = ({
     reRunQueryIfSessionTimeoutErrorOnMount();
   }, [reRunQueryIfSessionTimeoutErrorOnMount]);
 
-  const fetchResults = (q: typeof query) => {
-    dispatch(fetchQueryResults(q, displayLimit));
+  const fetchResults = (q: typeof query, timeout?: number) => {
+    dispatch(fetchQueryResults(q, displayLimit, timeout));
   };
 
   const prevQuery = usePrevious(query);
@@ -230,17 +267,9 @@ const ResultSet = ({
     }
   }, [query, cache]);
 
-  const calculateAlertRefHeight = (alertElement: HTMLElement | null) => {
-    if (alertElement) {
-      setAlertIsOpen(true);
-    } else {
-      setAlertIsOpen(false);
-    }
-  };
-
   const popSelectStar = (tempSchema: string | null, tempTable: string) => {
     const qe = {
-      id: shortid.generate(),
+      id: nanoid(11),
       name: tempTable,
       autorun: false,
       dbId: query.dbId,
@@ -249,11 +278,11 @@ const ResultSet = ({
     dispatch(addQueryEditor(qe));
   };
 
-  const changeSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const changeSearch = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchText(event.target.value);
   };
 
-  const createExploreResultsOnClick = async (clickEvent: React.MouseEvent) => {
+  const createExploreResultsOnClick = async (clickEvent: MouseEvent) => {
     const { results } = query;
 
     const openInNewWindow = clickEvent.metaKey;
@@ -280,10 +309,13 @@ const ResultSet = ({
   };
 
   const getExportCsvUrl = (clientId: string) =>
-    `/api/v1/sqllab/export/${clientId}/`;
+    ensureAppRoot(`/api/v1/sqllab/export/${clientId}/`);
 
   const renderControls = () => {
     if (search || visualize || csv) {
+      const { results, queryLimit, limitingFactor, rows } = query;
+      const limit = queryLimit || results.query.limit;
+      const rowsCount = Math.min(rows || 0, results?.data?.length || 0);
       let { data } = query.results;
       if (cache && query.cached) {
         data = cachedData;
@@ -299,6 +331,12 @@ const ResultSet = ({
         templateParams: query?.templateParams,
         schema: query?.schema,
       };
+
+      const canExportData = findPermission(
+        'can_export_csv',
+        'SQLLab',
+        user?.roles,
+      );
 
       return (
         <ResultSetControls>
@@ -319,6 +357,7 @@ const ResultSet = ({
                 onClick={createExploreResultsOnClick}
               />
             )}
+<<<<<<< HEAD
             {csv && (
               <Button
                 buttonSize="small"
@@ -342,10 +381,58 @@ const ResultSet = ({
                 logAction(LOG_ACTIONS_SQLLAB_COPY_RESULT_TO_CLIPBOARD, {})
               }
             />
+=======
+            {csv && canExportData && (
+              <Button
+                css={copyButtonStyles}
+                buttonSize="small"
+                buttonStyle="secondary"
+                href={getExportCsvUrl(query.id)}
+                data-test="export-csv-button"
+                onClick={() => {
+                  logAction(LOG_ACTIONS_SQLLAB_DOWNLOAD_CSV, {});
+                  if (
+                    limitingFactor === LimitingFactor.Dropdown &&
+                    limit === rowsCount
+                  ) {
+                    Modal.warning({
+                      title: t('Download is on the way'),
+                      content: t(
+                        'Downloading %(rows)s rows based on the LIMIT configuration. If you want the entire result set, you need to adjust the LIMIT.',
+                        { rows: rowsCount.toLocaleString() },
+                      ),
+                    });
+                  }
+                }}
+              >
+                <Icons.DownloadOutlined iconSize="m" /> {t('Download to CSV')}
+              </Button>
+            )}
+
+            {canExportData && (
+              <CopyToClipboard
+                text={prepareCopyToClipboardTabularData(data, columns)}
+                wrapped={false}
+                copyNode={
+                  <Button
+                    css={copyButtonStyles}
+                    buttonSize="small"
+                    buttonStyle="secondary"
+                    data-test="copy-to-clipboard-button"
+                  >
+                    <Icons.CopyOutlined iconSize="s" /> {t('Copy to Clipboard')}
+                  </Button>
+                }
+                hideTooltip
+                onCopyEnd={() =>
+                  logAction(LOG_ACTIONS_SQLLAB_COPY_RESULT_TO_CLIPBOARD, {})
+                }
+              />
+            )}
+>>>>>>> 6.0.0
           </ResultSetButtons>
           {search && (
-            <input
-              type="text"
+            <Input
               onChange={changeSearch}
               value={searchText}
               className="form-control input-sm"
@@ -413,12 +500,11 @@ const ResultSet = ({
       return (
         <>
           {!limitReached && shouldUseDefaultDropdownAlert && (
-            <div ref={calculateAlertRefHeight}>
+            <div>
               <Alert
+                closable
                 type="warning"
-                message={t('%(rows)d rows returned', { rows })}
-                onClose={() => setAlertIsOpen(false)}
-                description={t(
+                message={t(
                   'The number of rows displayed is limited to %(rows)d by the dropdown.',
                   { rows },
                 )}
@@ -426,12 +512,11 @@ const ResultSet = ({
             </div>
           )}
           {limitReached && (
-            <div ref={calculateAlertRefHeight}>
+            <div>
               <Alert
+                closable
                 type="warning"
-                onClose={() => setAlertIsOpen(false)}
-                message={t('%(rows)d rows returned', { rows: rowsCount })}
-                description={
+                message={
                   isAdmin
                     ? displayMaxRowsReachedMessage.withAdmin
                     : displayMaxRowsReachedMessage.withoutAdmin
@@ -456,14 +541,14 @@ const ResultSet = ({
             >
               <Label
                 css={css`
-                  line-height: ${theme.typography.sizes.l}px;
+                  line-height: ${theme.fontSizeLG}px;
                 `}
               >
                 {limitMessage && (
                   <Icons.ExclamationCircleOutlined
                     css={css`
-                      font-size: ${theme.typography.sizes.m}px;
-                      margin-right: ${theme.gridUnit}px;
+                      font-size: ${theme.fontSize}px;
+                      margin-right: ${theme.sizeUnit}px;
                     `}
                   />
                 )}
@@ -476,7 +561,6 @@ const ResultSet = ({
     );
   };
 
-  const limitReached = query?.results?.displayLimitReached;
   let sql;
   let exploreDBId = query.dbId;
   if (database?.explore_database_id) {
@@ -507,6 +591,7 @@ const ResultSet = ({
     sql = (
       <HighlightedSql
         sql={query.sql}
+        rawSql={query.executedSql}
         {...(showSqlInline && { maxLines: 1, maxWidth: 60 })}
       />
     );
@@ -517,17 +602,34 @@ const ResultSet = ({
   }
 
   if (query.state === QueryState.Failed) {
+    const errors = [...(query.extra?.errors || []), ...(query.errors || [])];
+
     return (
       <ResultlessStyles>
-        <ErrorMessageWithStackTrace
-          title={t('Database error')}
-          error={query?.extra?.errors?.[0] || query?.errors?.[0]}
-          subtitle={<MonospaceDiv>{query.errorMessage}</MonospaceDiv>}
-          copyText={query.errorMessage || undefined}
-          link={query.link}
-          source="sqllab"
-        />
-        {trackingUrl}
+        {errors.map((error, index) => (
+          <ErrorMessageWithStackTrace
+            key={index}
+            title={t('Database error')}
+            error={error}
+            subtitle={<MonospaceDiv>{error.message}</MonospaceDiv>}
+            copyText={error.message || undefined}
+            link={query.link}
+            source="sqllab"
+          />
+        ))}
+        {errors.some(
+          error => error?.error_type === ErrorTypeEnum.FRONTEND_TIMEOUT_ERROR,
+        ) ? (
+          <Button
+            className="sql-result-track-job"
+            buttonSize="small"
+            onClick={() => fetchResults(query, 0)}
+          >
+            {t('Retry fetching results')}
+          </Button>
+        ) : (
+          trackingUrl
+        )}
       </ResultlessStyles>
     );
   }
@@ -553,7 +655,7 @@ const ResultSet = ({
               <ButtonGroup>
                 <Button
                   buttonSize="small"
-                  css={{ marginRight: theme.gridUnit }}
+                  css={{ marginRight: theme.sizeUnit }}
                   onClick={() => popSelectStar(tempSchema, tempTable)}
                 >
                   {t('Query in a new tab')}
@@ -573,17 +675,6 @@ const ResultSet = ({
 
   if (query.state === QueryState.Success && query.results) {
     const { results } = query;
-    // Accounts for offset needed for height of ResultSetRowsReturned component if !limitReached
-    const rowMessageHeight = !limitReached ? 32 : 0;
-    // Accounts for offset needed for height of Alert if this.state.alertIsOpen
-    const alertContainerHeight = 70;
-    // We need to calculate the height of this.renderRowsReturned()
-    // if we want results panel to be proper height because the
-    // FilterTable component needs an explicit height to render
-    // the Table component
-    const rowsHeight = alertIsOpen
-      ? height - alertContainerHeight
-      : height - rowMessageHeight;
     let data;
     if (cache && query.cached) {
       data = cachedData;
@@ -594,6 +685,10 @@ const ResultSet = ({
       const expandedColumns = results.expanded_columns
         ? results.expanded_columns.map(col => col.column_name)
         : [];
+      const allowHTML = getItem(
+        LocalStorageKeys.SqllabIsRenderHtmlEnabled,
+        true,
+      );
       return (
         <ResultContainer>
           {renderControls()}
@@ -603,6 +698,8 @@ const ResultSet = ({
                 css={css`
                   display: flex;
                   justify-content: space-between;
+                  padding-left: ${theme.sizeUnit * 4}px;
+                  align-items: center;
                   gap: ${GAP}px;
                 `}
               >
@@ -634,14 +731,28 @@ const ResultSet = ({
               {sql}
             </>
           )}
-          <ResultTable
-            data={data}
-            queryId={query.id}
-            orderedColumnKeys={results.columns.map(col => col.column_name)}
-            height={rowsHeight}
-            filterText={searchText}
-            expandedColumns={expandedColumns}
-          />
+          <div
+            css={css`
+              flex: 1 1 auto;
+              padding-left: ${theme.sizeUnit * 4}px;
+            `}
+          >
+            <AutoSizer disableWidth>
+              {({ height }) => (
+                <ResultTable
+                  data={data}
+                  queryId={query.id}
+                  orderedColumnKeys={results.columns.map(
+                    col => col.column_name,
+                  )}
+                  height={height}
+                  filterText={searchText}
+                  expandedColumns={expandedColumns}
+                  allowHTML={allowHTML}
+                />
+              )}
+            </AutoSizer>
+          </div>
         </ResultContainer>
       );
     }
@@ -704,4 +815,4 @@ const ResultSet = ({
   );
 };
 
-export default React.memo(ResultSet);
+export default memo(ResultSet);

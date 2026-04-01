@@ -17,6 +17,7 @@
  * under the License.
  */
 import { t } from '@superset-ui/core';
+import { nanoid } from 'nanoid';
 import type { BootstrapData } from 'src/types/bootstrapTypes';
 import type { InitialState } from 'src/hooks/apiResources/sqlLab';
 import {
@@ -55,6 +56,7 @@ export default function getInitialState({
   let queryEditors: Record<string, QueryEditor> = {};
   const defaultQueryEditor = {
     version: LatestQueryEditorVersion,
+    immutableId: nanoid(11),
     loaded: true,
     name: t('Untitled query'),
     sql: '',
@@ -78,6 +80,7 @@ export default function getInitialState({
       queryEditor = {
         version: activeTab.extra_json?.version ?? QueryEditorVersion.V1,
         id: id.toString(),
+        immutableId: activeTab.extra_json?.immutableId ?? nanoid(11),
         loaded: true,
         name: activeTab.label,
         sql: activeTab.sql || '',
@@ -89,6 +92,7 @@ export default function getInitialState({
         autorun: Boolean(activeTab.autorun),
         templateParams: activeTab.template_params || undefined,
         dbId: activeTab.database_id,
+        catalog: activeTab.catalog,
         schema: activeTab.schema,
         queryLimit: activeTab.query_limit,
         hideLeftBar: activeTab.hide_left_bar,
@@ -99,6 +103,7 @@ export default function getInitialState({
       queryEditor = {
         ...defaultQueryEditor,
         id: id.toString(),
+        immutableId: nanoid(11),
         loaded: false,
         name: label,
         dbId: undefined,
@@ -110,6 +115,7 @@ export default function getInitialState({
     };
   });
   const tabHistory = activeTab ? [activeTab.id.toString()] : [];
+  let lastUpdatedActiveTab = activeTab ? activeTab.id.toString() : '';
   let tables = {} as Record<string, Table>;
   let editorTabLastUpdatedAt = Date.now();
   if (activeTab) {
@@ -120,11 +126,12 @@ export default function getInitialState({
       .forEach(tableSchema => {
         const { dataPreviewQueryId, ...persistData } = tableSchema.description;
         const table = {
-          dbId: tableSchema.database_id,
+          dbId: tableSchema.database_id ?? 0,
           queryEditorId: tableSchema.tab_state_id.toString(),
+          catalog: tableSchema.catalog,
           schema: tableSchema.schema,
           name: tableSchema.table,
-          expanded: tableSchema.expanded,
+          expanded: Boolean(tableSchema.expanded),
           id: tableSchema.id,
           dataPreviewQueryId,
           persistData,
@@ -143,6 +150,12 @@ export default function getInitialState({
       [activeTab.latest_query.id]: activeTab.latest_query,
     }),
   };
+<<<<<<< HEAD
+=======
+
+  const destroyedQueryEditors: SqlLabRootState['sqlLab']['destroyedQueryEditors'] =
+    {};
+>>>>>>> 6.0.0
 
   /**
    * If the `SQLLAB_BACKEND_PERSISTENCE` feature flag is off, or if the user
@@ -157,7 +170,10 @@ export default function getInitialState({
     if (localStorageData && sqlLabCacheData?.sqlLab) {
       const { sqlLab } = sqlLabCacheData;
 
-      if (sqlLab.queryEditors.length === 0) {
+      if (
+        sqlLab.queryEditors.length === 0 &&
+        Object.keys(sqlLab.destroyedQueryEditors ?? {}).length === 0
+      ) {
         // migration was successful
         localStorage.removeItem('redux');
       } else {
@@ -165,8 +181,9 @@ export default function getInitialState({
         // add query editors and tables to state with a special flag so they can
         // be migrated if the `SQLLAB_BACKEND_PERSISTENCE` feature flag is on
         sqlLab.queryEditors.forEach(qe => {
-          const hasConflictFromBackend = Boolean(queryEditors[qe.id]);
-          const unsavedUpdatedAt = queryEditors[qe.id]?.updatedAt;
+          const sqlEditorId = qe.tabViewId ?? qe.id;
+          const hasConflictFromBackend = Boolean(queryEditors[sqlEditorId]);
+          const unsavedUpdatedAt = queryEditors[sqlEditorId]?.updatedAt;
           const hasUnsavedUpdateSinceLastSave =
             qe.updatedAt &&
             (!unsavedUpdatedAt || qe.updatedAt > unsavedUpdatedAt);
@@ -174,13 +191,13 @@ export default function getInitialState({
             !hasConflictFromBackend || hasUnsavedUpdateSinceLastSave ? qe : {};
           queryEditors = {
             ...queryEditors,
-            [qe.id]: {
-              ...queryEditors[qe.id],
+            [sqlEditorId]: {
+              ...queryEditors[sqlEditorId],
               ...cachedQueryEditor,
               name:
                 cachedQueryEditor.title ||
                 cachedQueryEditor.name ||
-                queryEditors[qe.id]?.name,
+                queryEditors[sqlEditorId]?.name,
               ...(cachedQueryEditor.id &&
                 unsavedQueryEditor.id === qe.id &&
                 unsavedQueryEditor),
@@ -214,8 +231,21 @@ export default function getInitialState({
           });
         }
         if (sqlLab.tabHistory) {
-          tabHistory.push(...sqlLab.tabHistory);
+          tabHistory.push(
+            ...sqlLab.tabHistory.filter(
+              tabId => !sqlLab.destroyedQueryEditors?.[tabId],
+            ),
+          );
         }
+        if (sqlLab.destroyedQueryEditors) {
+          Object.entries(sqlLab.destroyedQueryEditors).forEach(([id, ts]) => {
+            destroyedQueryEditors[id] = ts;
+            if (queryEditors[id]) {
+              delete queryEditors[id];
+            }
+          });
+        }
+        lastUpdatedActiveTab = tabHistory.slice(tabHistory.length - 1)[0] || '';
       }
     }
   } catch (error) {
@@ -249,6 +279,8 @@ export default function getInitialState({
       editorTabLastUpdatedAt,
       queryCostEstimates: {},
       unsavedQueryEditor,
+      lastUpdatedActiveTab,
+      destroyedQueryEditors,
     },
     localStorageUsageInKilobytes: 0,
     common,

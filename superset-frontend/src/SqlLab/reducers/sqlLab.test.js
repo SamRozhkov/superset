@@ -239,6 +239,51 @@ describe('sqlLabReducer', () => {
         interceptedAction.northPercent,
       );
     });
+    it('should migrate query editor by new query editor id', () => {
+      const { length } = newState.queryEditors;
+      const index = newState.queryEditors.findIndex(({ id }) => id === qe.id);
+      const newQueryEditor = {
+        ...qe,
+        tabViewId: 'updatedNewId',
+        schema: 'updatedSchema',
+        inLocalStorage: false,
+      };
+      const action = {
+        type: actions.MIGRATE_QUERY_EDITOR,
+        oldQueryEditor: qe,
+        newQueryEditor,
+      };
+      newState = sqlLabReducer(newState, action);
+      expect(newState.queryEditors[index].id).toEqual(qe.id);
+      expect(newState.queryEditors[index].tabViewId).toEqual('updatedNewId');
+      expect(newState.queryEditors[index]).toEqual(newQueryEditor);
+      const removeAction = {
+        type: actions.REMOVE_QUERY_EDITOR,
+        queryEditor: newQueryEditor,
+      };
+      newState = sqlLabReducer(newState, removeAction);
+      expect(newState.queryEditors).toHaveLength(length - 1);
+      expect(Object.keys(newState.destroyedQueryEditors)).toContain(
+        newQueryEditor.tabViewId,
+      );
+    });
+    it('should clear the destroyed query editors', () => {
+      const expectedQEId = '1233289';
+      const action = {
+        type: actions.CLEAR_DESTROYED_QUERY_EDITOR,
+        queryEditorId: expectedQEId,
+      };
+      newState = sqlLabReducer(
+        {
+          ...newState,
+          destroyedQueryEditors: {
+            [expectedQEId]: Date.now(),
+          },
+        },
+        action,
+      );
+      expect(newState.destroyedQueryEditors).toEqual({});
+    });
   });
   describe('Tables', () => {
     let newState;
@@ -322,6 +367,93 @@ describe('sqlLabReducer', () => {
       newState = sqlLabReducer(newState, action);
       expect(newState.tables).toHaveLength(0);
     });
+    test('should set activeSouthPaneTab when adding expanded table', () => {
+      const expandedTable = {
+        ...table,
+        id: 'expanded_table_id',
+        name: 'expanded_table',
+        expanded: true,
+      };
+      const action = {
+        type: actions.MERGE_TABLE,
+        table: expandedTable,
+      };
+      newState = sqlLabReducer(initialState, action);
+      expect(newState.tables).toHaveLength(1);
+      expect(newState.activeSouthPaneTab).toBe(expandedTable.id);
+    });
+    test('should not set activeSouthPaneTab when adding collapsed table', () => {
+      const collapsedTable = {
+        ...table,
+        id: 'collapsed_table_id',
+        name: 'collapsed_table',
+        expanded: false,
+      };
+      const action = {
+        type: actions.MERGE_TABLE,
+        table: collapsedTable,
+      };
+      newState = sqlLabReducer(initialState, action);
+      expect(newState.tables).toHaveLength(1);
+      expect(newState.activeSouthPaneTab).toBe(initialState.activeSouthPaneTab);
+    });
+    test('should set activeSouthPaneTab when merging existing table with expanded=true', () => {
+      // First add a table with expanded=false
+      const collapsedTable = {
+        ...table,
+        id: 'existing_table_id',
+        name: 'existing_table',
+        expanded: false,
+      };
+      const addAction = {
+        type: actions.MERGE_TABLE,
+        table: collapsedTable,
+      };
+      newState = sqlLabReducer(initialState, addAction);
+      const previousActiveSouthPaneTab = newState.activeSouthPaneTab;
+
+      // Now merge the same table with expanded=true
+      const expandedTable = {
+        ...collapsedTable,
+        expanded: true,
+      };
+      const mergeAction = {
+        type: actions.MERGE_TABLE,
+        table: expandedTable,
+      };
+      newState = sqlLabReducer(newState, mergeAction);
+      expect(newState.tables).toHaveLength(1);
+      expect(newState.activeSouthPaneTab).toBe(expandedTable.id);
+      expect(newState.activeSouthPaneTab).not.toBe(previousActiveSouthPaneTab);
+    });
+    test('should not set activeSouthPaneTab when merging existing table with expanded=false', () => {
+      // First add a table with expanded=true
+      const expandedTable = {
+        ...table,
+        id: 'existing_table_id_2',
+        name: 'existing_table_2',
+        expanded: true,
+      };
+      const addAction = {
+        type: actions.MERGE_TABLE,
+        table: expandedTable,
+      };
+      newState = sqlLabReducer(initialState, addAction);
+      expect(newState.activeSouthPaneTab).toBe(expandedTable.id);
+
+      // Now merge the same table with expanded=false
+      const collapsedTable = {
+        ...expandedTable,
+        expanded: false,
+      };
+      const mergeAction = {
+        type: actions.MERGE_TABLE,
+        table: collapsedTable,
+      };
+      newState = sqlLabReducer(newState, mergeAction);
+      expect(newState.tables).toHaveLength(1);
+      expect(newState.activeSouthPaneTab).toBe(expandedTable.id);
+    });
   });
   describe('Run Query', () => {
     const DENORMALIZED_CHANGED_ON = '2023-06-26T07:53:05.439';
@@ -403,6 +535,35 @@ describe('sqlLabReducer', () => {
       expect(newState.queries.abcd.startDttm).toBe(Number(startDttmInStr));
       expect(newState.queries.abcd.endDttm).toBe(Number(endDttmInStr));
       expect(newState.queriesLastUpdate).toBe(CHANGED_ON_TIMESTAMP);
+    });
+    it('should skip refreshing queries when polling contains existing results', () => {
+      const completedQuery = {
+        ...query,
+        extra: {
+          columns: [],
+          progress: null,
+        },
+      };
+      newState = sqlLabReducer(
+        {
+          ...newState,
+          queries: { abcd: query, def: completedQuery },
+        },
+        actions.refreshQueries({
+          abcd: {
+            ...query,
+          },
+          def: {
+            ...completedQuery,
+            extra: {
+              columns: [],
+              progress: null,
+            },
+          },
+        }),
+      );
+      expect(newState.queries.abcd).toBe(query);
+      expect(newState.queries.def).toBe(completedQuery);
     });
     it('should refresh queries when polling returns empty', () => {
       newState = sqlLabReducer(newState, actions.refreshQueries({}));
